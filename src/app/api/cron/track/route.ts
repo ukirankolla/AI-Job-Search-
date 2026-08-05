@@ -1,4 +1,5 @@
 import { runTracker } from "@/lib/agents/workers";
+import { filterNewTrackerTasks } from "@/lib/agents/tracker";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TrackerTask } from "@/lib/types";
 
@@ -61,15 +62,18 @@ export async function GET(request: Request) {
       tasks = [];
     }
 
-    const existing = await admin
+    const { data: existing } = await admin
       .from("notifications")
-      .select("id")
+      .select("title")
       .eq("user_id", userId)
-      .eq("type", "tracker_run")
-      .maybeSingle();
+      .eq("type", "tracker_run");
 
-    for (const task of tasks) {
-      if (existing?.data?.id) continue;
+    const fresh = filterNewTrackerTasks(
+      tasks,
+      (existing ?? []).map((n) => n.title as string),
+    );
+
+    for (const task of fresh) {
       const { error: insertError } = await admin
         .from("notifications")
         .insert({

@@ -90,19 +90,25 @@ export default async function ApplicationDetailPage({
 
       <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="mb-3 font-semibold text-slate-900">Agents</h2>
-        <div className="flex flex-wrap gap-3">
-          <AgentRunner jobId={app.job_id ?? ""} applicationId={id} runType="analyze" label="Re-analyze" />
-          <AgentRunner jobId={app.job_id ?? ""} applicationId={id} runType="apply" label="Tailor docs + prep" />
-          <AgentRunner jobId={app.job_id ?? ""} applicationId={id} runType="prep" label="Prep only" />
-        </div>
         {app.job_id ? (
-          <Link
-            href={`/jobs/${app.job_id}`}
-            className="mt-3 inline-block text-sm text-slate-500 underline hover:text-slate-900"
-          >
-            View job posting →
-          </Link>
-        ) : null}
+          <>
+            <div className="flex flex-wrap gap-3">
+              <AgentRunner jobId={app.job_id} applicationId={id} runType="analyze" label="Re-analyze" />
+              <AgentRunner jobId={app.job_id} applicationId={id} runType="apply" label="Tailor docs + prep" />
+              <AgentRunner jobId={app.job_id} applicationId={id} runType="prep" label="Prep only" />
+            </div>
+            <Link
+              href={`/jobs/${app.job_id}`}
+              className="mt-3 inline-block text-sm text-slate-500 underline hover:text-slate-900"
+            >
+              View job posting →
+            </Link>
+          </>
+        ) : (
+          <p className="text-sm text-slate-500">
+            This application has no linked job posting, so agents can&apos;t run on it.
+          </p>
+        )}
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">

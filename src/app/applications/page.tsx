@@ -67,7 +67,22 @@ export default async function ApplicationsPage() {
                       </p>
                       <div className="mt-2 flex items-center justify-between">
                         <StatusBadge status={a.status} />
-                        <StatusSelect applicationId={a.id} />
+                        <div className="flex items-center gap-2">
+                          {a.match_score !== null && a.match_score !== undefined && (
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
+                                a.match_score >= 70
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : a.match_score >= 40
+                                    ? "bg-amber-100 text-amber-700"
+                                    : "bg-rose-100 text-rose-700"
+                              }`}
+                            >
+                              {a.match_score}
+                            </span>
+                          )}
+                          <StatusSelect applicationId={a.id} />
+                        </div>
                       </div>
                     </li>
                   );
