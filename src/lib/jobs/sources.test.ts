@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   getJobSource,
   isPostedWithinHours,
-  mapAdzunaJobs,
-  mapUsaJobsJobs,
+  mapGreenhouseJobs,
+  mapLeverJobs,
   mockJobs,
 } from "@/lib/jobs/sources";
 
@@ -28,47 +28,44 @@ describe("isPostedWithinHours", () => {
   });
 });
 
-describe("mapAdzunaJobs", () => {
-  it("maps fresh Adzuna results into job postings", () => {
-    const jobs = mapAdzunaJobs(
+describe("mapGreenhouseJobs", () => {
+  it("maps fresh Greenhouse board jobs into postings with direct apply URLs", () => {
+    const jobs = mapGreenhouseJobs(
       {
-        results: [
+        jobs: [
           {
-            id: "abc123",
+            id: 12345,
             title: "Frontend Engineer",
-            created: "2026-08-05T10:00:00Z",
-            company: { display_name: "Acme" },
-            location: { display_name: "Austin, TX" },
-            description: "React + TypeScript",
-            redirect_url: "https://adzuna.com/jobs/abc123",
-            salary_min: 110000,
-            salary_max: 140000,
+            updated_at: "2026-08-05T10:00:00Z",
+            location: { name: "Austin, TX" },
+            absolute_url: "https://boards.greenhouse.io/acme/jobs/12345",
+            content: "<p>React + <strong>TypeScript</strong></p>",
           },
         ],
       },
       8,
       now,
+      "Acme",
     );
 
     expect(jobs).toHaveLength(1);
     expect(jobs[0]).toMatchObject({
-      source: "adzuna",
-      external_id: "abc123",
+      source: "greenhouse",
+      external_id: "12345",
       title: "Frontend Engineer",
       company: "Acme",
       location: "Austin, TX",
-      url: "https://adzuna.com/jobs/abc123",
-      salary_min: 110000,
-      salary_max: 140000,
+      url: "https://boards.greenhouse.io/acme/jobs/12345",
+      description: "React + TypeScript",
     });
   });
 
   it("drops jobs older than the window and incomplete rows", () => {
-    const jobs = mapAdzunaJobs(
+    const jobs = mapGreenhouseJobs(
       {
-        results: [
-          { id: "old", title: "Old Role", created: "2026-07-01T00:00:00Z" },
-          { title: "No Id", created: "2026-08-05T10:00:00Z" },
+        jobs: [
+          { id: 1, title: "Old Role", updated_at: "2026-07-01T00:00:00Z" },
+          { title: "No Id", updated_at: "2026-08-05T10:00:00Z" },
         ],
       },
       8,
@@ -78,67 +75,46 @@ describe("mapAdzunaJobs", () => {
   });
 });
 
-describe("mapUsaJobsJobs", () => {
-  it("maps fresh USAJobs results with apply URI and salary", () => {
-    const jobs = mapUsaJobsJobs(
-      {
-        SearchResult: {
-          SearchResultItems: [
-            {
-              MatchedObjectId: "70000001",
-              MatchedObjectDescriptor: {
-                PositionTitle: "IT Specialist",
-                PositionStartDate: "2026-08-05T08:00:00Z",
-                OrganizationName: "USDA",
-                PositionLocation: [{ LocationName: "Washington DC" }],
-                JobSummary: "Support federal IT systems.",
-                ApplyURI: [{ url: "https://www.usajobs.gov/GetJob/ViewDetails/70000001" }],
-                PositionRemuneration: [
-                  { MinimumRange: 72000, MaximumRange: 98000 },
-                ],
-              },
-            },
-          ],
+describe("mapLeverJobs", () => {
+  it("maps fresh Lever postings with commitment and salary", () => {
+    const jobs = mapLeverJobs(
+      [
+        {
+          id: "lever-1",
+          text: "Machine Learning Engineer",
+          categories: { commitment: "Full-time", location: "Remote (US)" },
+          hostedUrl: "https://jobs.lever.co/acme/lever-1",
+          descriptionPlain: "Build LLM-powered products.",
+          createdAt: now.getTime() - 2 * 60 * 60 * 1000,
+          salaryRange: { min: 150000, max: 190000 },
         },
-      },
+      ],
       8,
       now,
+      "Acme",
     );
 
     expect(jobs).toHaveLength(1);
     expect(jobs[0]).toMatchObject({
-      source: "usajobs",
-      external_id: "70000001",
-      title: "IT Specialist",
-      company: "USDA",
-      location: "Washington DC",
-      url: "https://www.usajobs.gov/GetJob/ViewDetails/70000001",
-      salary_min: 72000,
-      salary_max: 98000,
+      source: "lever",
+      external_id: "lever-1",
+      title: "Machine Learning Engineer",
+      company: "Acme",
+      location: "Remote (US)",
+      url: "https://jobs.lever.co/acme/lever-1",
+      salary_min: 150000,
+      salary_max: 190000,
+      employment_type: "full_time",
     });
   });
 
-  it("skips items without a title or that are too old", () => {
-    const jobs = mapUsaJobsJobs(
-      {
-        SearchResult: {
-          SearchResultItems: [
-            {
-              MatchedObjectId: "1",
-              MatchedObjectDescriptor: {
-                PositionTitle: "Old Job",
-                PositionStartDate: "2026-01-01T00:00:00Z",
-              },
-            },
-            {
-              MatchedObjectId: "2",
-              MatchedObjectDescriptor: {
-                PositionStartDate: "2026-08-05T08:00:00Z",
-              },
-            },
-          ],
-        },
-      },
+  it("skips non-array payloads, old postings, and rows without a title", () => {
+    expect(mapLeverJobs({ not: "an array" }, 8, now)).toHaveLength(0);
+    const jobs = mapLeverJobs(
+      [
+        { id: "old", text: "Old Job", createdAt: now.getTime() - 40 * 60 * 60 * 1000 },
+        { id: "no-title" },
+      ],
       8,
       now,
     );
@@ -164,7 +140,7 @@ describe("getJobSource", () => {
   });
 
   it("resolves configured sources", () => {
-    expect(getJobSource("adzuna").name).toBe("adzuna");
-    expect(getJobSource("usajobs").name).toBe("usajobs");
+    expect(getJobSource("greenhouse").name).toBe("greenhouse");
+    expect(getJobSource("lever").name).toBe("lever");
   });
 });

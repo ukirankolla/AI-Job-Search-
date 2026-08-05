@@ -2,7 +2,7 @@ import type { JobPosting } from "@/lib/types";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-export type JobSourceName = "adzuna" | "usajobs" | "mock";
+export type JobSourceName = "greenhouse" | "lever" | "mock";
 
 export interface JobSource {
   name: JobSourceName;
@@ -25,123 +25,49 @@ export function isPostedWithinHours(
 }
 
 // ---------------------------------------------------------------------------
-// Adzuna (US market)
+// Greenhouse (public company job boards — apply links go to the company portal)
 // ---------------------------------------------------------------------------
 
-interface AdzunaResult {
-  id?: string;
+interface GreenhouseJob {
+  id?: number;
   title?: string;
-  created?: string;
-  company?: { display_name?: string };
-  location?: { display_name?: string };
-  description?: string;
-  redirect_url?: string;
-  salary_min?: number | null;
-  salary_max?: number | null;
-  contract_type?: string;
+  location?: { name?: string };
+  absolute_url?: string;
+  content?: string;
+  updated_at?: string;
 }
 
-export function mapAdzunaJobs(
-  raw: { results?: AdzunaResult[] },
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+export function mapGreenhouseJobs(
+  raw: { jobs?: GreenhouseJob[] },
   hours: number,
   now = new Date(),
+  company = "",
 ): JobPosting[] {
   const out: JobPosting[] = [];
-  for (const r of raw.results ?? []) {
-    if (!r.id || !r.title || !isPostedWithinHours(r.created, hours, now)) {
+  for (const job of raw.jobs ?? []) {
+    if (!job.id || !job.title || !isPostedWithinHours(job.updated_at, hours, now)) {
       continue;
     }
     out.push({
-      source: "adzuna",
-      external_id: r.id,
-      title: r.title,
-      company: r.company?.display_name ?? "",
-      location: r.location?.display_name ?? "",
-      description: r.description ?? "",
-      url: r.redirect_url ?? "",
-      salary_min: r.salary_min ?? null,
-      salary_max: r.salary_max ?? null,
-      posted_at: r.created ?? null,
-      employment_type: r.contract_type === "permanent" ? "full_time" : null,
-      sponsorship: null,
-    });
-  }
-  return out;
-}
-
-export function adzunaSource(): JobSource {
-  return {
-    name: "adzuna",
-    async fetchRecentJobs(hours, opts) {
-      const appId = process.env.ADZUNA_APP_ID;
-      const appKey = process.env.ADZUNA_APP_KEY;
-      if (!appId || !appKey) return [];
-      const params = new URLSearchParams({
-        app_id: appId,
-        app_key: appKey,
-        results_per_page: "50",
-        sort_by: "date",
-        "content-type": "application/json",
-      });
-      const res = await fetch(
-        `https://api.adzuna.com/v1/api/jobs/us/search/1?${params}`,
-        { signal: opts?.signal },
-      );
-      if (!res.ok) {
-        throw new Error(`Adzuna request failed: ${res.status}`);
-      }
-      return mapAdzunaJobs(await res.json(), hours);
-    },
-  };
-}
-
-// ---------------------------------------------------------------------------
-// USAJobs (usajobs.gov)
-// ---------------------------------------------------------------------------
-
-interface UsaJobsItem {
-  MatchedObjectId?: string;
-  MatchedObjectDescriptor?: {
-    PositionTitle?: string;
-    PositionStartDate?: string;
-    OrganizationName?: string;
-    PositionLocation?: Array<{ LocationName?: string }>;
-    JobSummary?: string;
-    ApplyURI?: Array<{ url?: string }>;
-    PositionRemuneration?: Array<{
-      MinimumRange?: number;
-      MaximumRange?: number;
-    }>;
-  };
-}
-
-export function mapUsaJobsJobs(
-  raw: { SearchResult?: { SearchResultItems?: UsaJobsItem[] } },
-  hours: number,
-  now = new Date(),
-): JobPosting[] {
-  const out: JobPosting[] = [];
-  for (const item of raw.SearchResult?.SearchResultItems ?? []) {
-    const d = item.MatchedObjectDescriptor;
-    if (!d?.PositionTitle || !isPostedWithinHours(d.PositionStartDate, hours, now)) {
-      continue;
-    }
-    const location = (d.PositionLocation ?? [])
-      .map((l) => l.LocationName)
-      .filter((x): x is string => Boolean(x))
-      .join(", ");
-    const pay = d.PositionRemuneration?.[0];
-    out.push({
-      source: "usajobs",
-      external_id: item.MatchedObjectId,
-      title: d.PositionTitle,
-      company: d.OrganizationName ?? "",
-      location,
-      description: d.JobSummary ?? "",
-      url: d.ApplyURI?.[0]?.url ?? "",
-      salary_min: pay?.MinimumRange ?? null,
-      salary_max: pay?.MaximumRange ?? null,
-      posted_at: d.PositionStartDate ?? null,
+      source: "greenhouse",
+      external_id: String(job.id),
+      title: job.title,
+      company,
+      location: job.location?.name ?? "",
+      description: stripHtml(job.content ?? ""),
+      url: job.absolute_url ?? "",
+      salary_min: null,
+      salary_max: null,
+      posted_at: job.updated_at ?? null,
       employment_type: null,
       sponsorship: null,
     });
@@ -149,29 +75,92 @@ export function mapUsaJobsJobs(
   return out;
 }
 
-export function usajobsSource(): JobSource {
+export function greenhouseSource(): JobSource {
   return {
-    name: "usajobs",
+    name: "greenhouse",
     async fetchRecentJobs(hours, opts) {
-      const email = process.env.USAJOBS_EMAIL;
-      const key = process.env.USAJOBS_KEY;
-      if (!email || !key) return [];
+      const board = process.env.GREENHOUSE_BOARD;
+      if (!board) return [];
       const res = await fetch(
-        "https://data.usajobs.gov/api/search?ResultsPerPage=50&SortField=PositionOpenDate&SortDirection=Desc",
-        {
-          headers: {
-            Host: "data.usajobs.gov",
-            "User-Agent": email,
-            "Authorization-Key": key,
-            "Content-Type": "application/json",
-          },
-          signal: opts?.signal,
-        },
+        `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(board)}/jobs`,
+        { signal: opts?.signal, next: { revalidate: 0 } },
       );
       if (!res.ok) {
-        throw new Error(`USAJobs request failed: ${res.status}`);
+        throw new Error(`Greenhouse request failed: ${res.status}`);
       }
-      return mapUsaJobsJobs(await res.json(), hours);
+      return mapGreenhouseJobs(await res.json(), hours, undefined, board);
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Lever (public company job boards — apply links go to the company portal)
+// ---------------------------------------------------------------------------
+
+interface LeverPosting {
+  id?: string;
+  text?: string;
+  categories?: { commitment?: string; location?: string };
+  hostedUrl?: string;
+  descriptionPlain?: string;
+  createdAt?: number;
+  salaryRange?: { min?: number | null; max?: number | null };
+}
+
+function commitmentToEmploymentType(type: string | undefined): string | null {
+  const v = (type ?? "").toLowerCase();
+  if (v.includes("intern")) return "internship";
+  if (v.includes("contract") || v.includes("temp")) return "c2c";
+  if (v.includes("full")) return "full_time";
+  return null;
+}
+
+export function mapLeverJobs(
+  raw: unknown,
+  hours: number,
+  now = new Date(),
+  company = "",
+): JobPosting[] {
+  if (!Array.isArray(raw)) return [];
+  const out: JobPosting[] = [];
+  for (const p of raw as LeverPosting[]) {
+    if (!p.id || !p.text) continue;
+    const postedIso = p.createdAt
+      ? new Date(p.createdAt).toISOString()
+      : null;
+    if (!isPostedWithinHours(postedIso, hours, now)) continue;
+    out.push({
+      source: "lever",
+      external_id: p.id,
+      title: p.text,
+      company,
+      location: p.categories?.location ?? "",
+      description: p.descriptionPlain ?? "",
+      url: p.hostedUrl ?? "",
+      salary_min: p.salaryRange?.min ?? null,
+      salary_max: p.salaryRange?.max ?? null,
+      posted_at: postedIso,
+      employment_type: commitmentToEmploymentType(p.categories?.commitment),
+      sponsorship: null,
+    });
+  }
+  return out;
+}
+
+export function leverSource(): JobSource {
+  return {
+    name: "lever",
+    async fetchRecentJobs(hours, opts) {
+      const company = process.env.LEVER_COMPANY;
+      if (!company) return [];
+      const res = await fetch(
+        `https://api.lever.co/v0/postings/${encodeURIComponent(company)}?mode=json`,
+        { signal: opts?.signal, next: { revalidate: 0 } },
+      );
+      if (!res.ok) {
+        throw new Error(`Lever request failed: ${res.status}`);
+      }
+      return mapLeverJobs(await res.json(), hours, undefined, company);
     },
   };
 }
@@ -286,10 +275,10 @@ export function mockSource(): JobSource {
 export function getJobSource(source?: string): JobSource {
   const name = (source ?? process.env.JOB_SOURCE ?? "mock").toLowerCase();
   switch (name) {
-    case "adzuna":
-      return adzunaSource();
-    case "usajobs":
-      return usajobsSource();
+    case "greenhouse":
+      return greenhouseSource();
+    case "lever":
+      return leverSource();
     default:
       return mockSource();
   }

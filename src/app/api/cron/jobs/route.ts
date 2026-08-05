@@ -26,7 +26,7 @@ export async function GET(request: Request) {
       source: "mock",
       inserted: 0,
       skipped: 0,
-      note: "JOB_SOURCE is mock — set adzuna or usajobs with keys to fetch live jobs.",
+      note: "JOB_SOURCE is mock — set GREENHOUSE_BOARD or LEVER_COMPANY to fetch live jobs.",
     });
   }
 

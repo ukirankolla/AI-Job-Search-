@@ -16,7 +16,10 @@ Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
 - **Prep** — generates role-specific interview questions with model answers.
 - **Tracker** — turns pipeline events into follow-up tasks and reminders.
 - **Automated job discovery** — pulls fresh postings (default: last 8 hours)
-  from Adzuna or USAJobs, or a deterministic mock source when no keys are set.
+  from company career portals only: a company's public **Greenhouse** or
+  **Lever** job board, or a deterministic mock source when none is set. Apply
+  links always point at the company's own career site or LinkedIn — never a
+  third-party job board.
 - **Match % for every job** — every posting in the feed is scored against your
   resume (0–100), matched or not, with matched/missing skills.
 - **4 / 8 / 12-hour filters** — narrow the feed to postings from the last few
@@ -118,9 +121,9 @@ All variables are documented in [`.env.example`](.env.example). The essentials:
 | `OPENAI_API_KEY` | no | Enables real AI; omit for mock mode |
 | `AI_MODEL` | no | Default `gpt-4o-mini` |
 | `EMBEDDING_MODEL` | no | Default `text-embedding-3-small` |
-| `JOB_SOURCE` | no | `adzuna`, `usajobs`, or `mock` (default `mock`) |
-| `ADZUNA_APP_ID` / `ADZUNA_APP_KEY` | no | Adzuna API credentials (US) |
-| `USAJOBS_EMAIL` / `USAJOBS_KEY` | no | USAJobs API credentials |
+| `JOB_SOURCE` | no | `greenhouse`, `lever`, or `mock` (default `mock`) |
+| `GREENHOUSE_BOARD` | no | A company's public Greenhouse board token, e.g. `stripe` |
+| `LEVER_COMPANY` | no | A company's public Lever company slug, e.g. `vercel` |
 | `CRON_SECRET` | yes | Guards `GET /api/cron/track` and `GET /api/cron/jobs` |
 | `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000` |
 
