@@ -27,7 +27,7 @@ export async function indexProfile(profileId: string, resumeText: string) {
     metadata: c.metadata,
   }));
 
-  const { data, error } = await admin.from("profile_chunks").insert(rows);
+  const { error } = await admin.from("profile_chunks").insert(rows);
 
   if (error) {
     throw new Error(`Failed to store embeddings: ${error.message}`);
