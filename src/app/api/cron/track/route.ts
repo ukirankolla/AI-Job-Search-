@@ -1,5 +1,6 @@
 import { runTracker } from "@/lib/agents/workers";
 import { filterNewTrackerTasks } from "@/lib/agents/tracker";
+import { isCronRequestAuthorized } from "@/lib/cron";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TrackerTask } from "@/lib/types";
 
@@ -7,8 +8,12 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const secret = request.headers.get("x-cron-secret");
-  if (secret !== process.env.CRON_SECRET) {
+  if (
+    !isCronRequestAuthorized(process.env.CRON_SECRET, {
+      "x-cron-secret": request.headers.get("x-cron-secret"),
+      authorization: request.headers.get("authorization"),
+    })
+  ) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
