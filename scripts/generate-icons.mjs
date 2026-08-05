@@ -1,22 +1,31 @@
-// Generates the Noventra PWA icons as PNGs with zero dependencies.
+// Generates the Noventra icons as PNGs with zero dependencies.
 // Run: node scripts/generate-icons.mjs  (or npm run icons)
 //
-// Outputs into public/icons/:
+// Outputs into public/icons/ (PWA):
 //   icon-32.png               browser favicon
 //   icon-192.png              install icon (Chrome/Android)
 //   icon-512.png              install icon
 //   icon-512-maskable.png     maskable install icon (full-bleed background)
 //   apple-touch-icon.png      iOS home-screen icon
 //
-// Design: slate-900 (#0f172a) rounded square with a white "N".
+// Outputs into mobile/assets/ (native app):
+//   icon.png                    1024x1024 store/app icon (opaque, full square)
+//   android-icon-foreground.png  432x432 adaptive foreground (transparent)
+//   android-icon-monochrome.png  432x432 adaptive monochrome (transparent)
+//   splash-icon.png              512x512 splash logo (transparent)
+//
+// Design: slate-900 (#0f172a) square with a white "N".
 import { deflateSync } from "node:zlib";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
+const WEB_OUT = join(ROOT, "public", "icons");
+const MOBILE_OUT = join(ROOT, "mobile", "assets");
+
 const BG = [15, 23, 42]; // slate-900
 const FG = [255, 255, 255]; // white
-const OUT = join(dirname(fileURLToPath(import.meta.url)), "..", "public", "icons");
 
 const CRC_TABLE = (() => {
   const t = new Uint32Array(256);
@@ -133,29 +142,50 @@ class Canvas {
   }
 }
 
-function makeIcon(size, { rounded = true, radiusRatio = 0.22, margin = 0.3, thickness = 0.14 } = {}) {
+function makeIcon(
+  size,
+  { rounded = true, radiusRatio = 0.22, margin = 0.3, thickness = 0.14, background = true } = {},
+) {
   const c = new Canvas(size);
-  if (rounded) {
-    c.roundedRect(0, 0, size - 1, size - 1, size * radiusRatio, BG);
-  } else {
-    c.roundedRect(0, 0, size - 1, size - 1, 0, BG);
+  if (background) {
+    c.roundedRect(0, 0, size - 1, size - 1, rounded ? size * radiusRatio : 0, BG);
   }
   c.drawN(margin, thickness);
   return c.pixels;
 }
 
-mkdirSync(OUT, { recursive: true });
+mkdirSync(WEB_OUT, { recursive: true });
+mkdirSync(MOBILE_OUT, { recursive: true });
 
-const targets = [
-  ["icon-32.png", 32, {}],
-  ["icon-192.png", 192, {}],
-  ["icon-512.png", 512, {}],
-  ["icon-512-maskable.png", 512, { rounded: false, margin: 0.32, thickness: 0.13 }],
-  ["apple-touch-icon.png", 180, { rounded: false, margin: 0.28, thickness: 0.14 }],
+const webTargets = [
+  ["public/icons/icon-32.png", 32, {}],
+  ["public/icons/icon-192.png", 192, {}],
+  ["public/icons/icon-512.png", 512, {}],
+  ["public/icons/icon-512-maskable.png", 512, { rounded: false, margin: 0.32, thickness: 0.13 }],
+  ["public/icons/apple-touch-icon.png", 180, { rounded: false, margin: 0.28, thickness: 0.14 }],
 ];
 
-for (const [name, size, opts] of targets) {
-  const pixels = makeIcon(size, opts);
-  writeFileSync(join(OUT, name), encodePng(size, pixels));
-  console.log(`wrote public/icons/${name} (${size}x${size})`);
+const mobileTargets = [
+  ["mobile/assets/icon.png", 1024, { rounded: false, margin: 0.3, thickness: 0.14 }],
+  [
+    "mobile/assets/android-icon-foreground.png",
+    432,
+    { rounded: false, margin: 0.34, thickness: 0.13, background: false },
+  ],
+  [
+    "mobile/assets/android-icon-monochrome.png",
+    432,
+    { rounded: false, margin: 0.34, thickness: 0.13, background: false },
+  ],
+  [
+    "mobile/assets/splash-icon.png",
+    512,
+    { rounded: false, margin: 0.3, thickness: 0.13, background: false },
+  ],
+];
+
+for (const [rel, size, opts] of [...webTargets, ...mobileTargets]) {
+  const out = join(ROOT, rel);
+  writeFileSync(out, encodePng(size, makeIcon(size, opts)));
+  console.log(`wrote ${rel} (${size}x${size})`);
 }

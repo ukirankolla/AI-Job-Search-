@@ -105,6 +105,11 @@ Sign up → Onboarding (contact details)
   (`npm run icons` → `public/icons/`), and a service worker (`public/sw.js`)
   make Noventra installable: Android/Chrome users get an **Install** prompt,
   iOS users **Add to Home Screen**. Static assets are cached for offline use.
+- **Native mobile app** — an Expo (React Native) app in `mobile/` wraps the web
+  app in a WebView so the same product can ship to the Apple App Store and
+  Google Play. External links open in the system browser; in-app back/forward/
+  reload controls keep the browsing experience native-feeling. See
+  `mobile/README.md` for build and store-submission instructions.
 
 ---
 
@@ -329,7 +334,7 @@ the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | Vitest |
 | `npm run db:migrate` | `supabase db push` |
-| `npm run icons` | Regenerate PWA icons into `public/icons/` |
+| `npm run icons` | Regenerate PWA icons (`public/icons/`) and native app assets (`mobile/assets/`) |
 
 ---
 
@@ -372,8 +377,10 @@ triggers. Set `CRON_SECRET` (and all other vars) in your environment.
   one of the 15 weekly resume-rewrite credits.
 - **No bot submissions** — the "Auto-apply" option opens the official page
   rather than submitting forms programmatically, by design.
-- **PWA, not a native app** — Noventra is installable from the browser
-  (Chrome **Install** / iOS **Add to Home Screen**) and ships a service worker
-  that caches static assets, but it is **not** published on the Apple App
-  Store or Google Play. The app is server-rendered and auth-dependent, so
+- **Not yet published to stores** — the Expo app in `mobile/` is built and
+  validated but has not been submitted to the Apple App Store or Google Play.
+  Submission requires paid developer accounts (Apple $99/year, Google $25
+  one-time) and a deployed public URL for the WebView to load — see
+  `mobile/README.md`. Until then, use the installable PWA (Chrome **Install** /
+  iOS **Add to Home Screen**). The app is server-rendered and auth-dependent, so
   full offline use of live data is not supported.
