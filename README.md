@@ -85,7 +85,7 @@ npm run db:migrate
 Or via the Dashboard: open *SQL Editor*, then run the files in
 `supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`,
 `0003_job_delete.sql`, `0004_job_matches.sql`, `0005_job_attributes.sql`,
-`0006_onboarding.sql`).
+`0006_onboarding.sql`, `0007_subscriptions.sql`).
 
 ### 4. Configure environment variables
 
@@ -128,7 +128,22 @@ All variables are documented in [`.env.example`](.env.example). The essentials:
 | `WORKABLE_ACCOUNT` | no | A company's public Workable account slug, e.g. `huggingface` |
 | `ASHBY_JOB_BOARD` | no | A company's public Ashby job board slug, e.g. `linear` |
 | `CRON_SECRET` | yes | Guards `GET /api/cron/track` and `GET /api/cron/jobs` |
+| `ADMIN_EMAILS` | no | Comma-separated emails exempt from usage limits; can grant premium from `/upgrade` |
 | `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000` |
+
+## Plans & usage limits
+
+Free accounts get **15 resume rewrites** and **15 in-app applies** per rolling
+7-day window. Premium ($15/month) and admin accounts are unlimited.
+
+- Limits are enforced server-side: the apply route (`POST /api/agents/run` with
+  `runType: "apply"`) and the in-app apply flow return a `402` / blocked state
+  once a quota is exhausted.
+- Usage is tracked in the `usage_events` table (`kind`: `resume_rewrite` |
+  `apply`) and exposed on the job detail page and `/upgrade`.
+- Billing isn't wired up yet — premium is activated **manually**: admins grant
+  it from `/upgrade` by email (updates `profiles.subscription_tier`). Stripe
+  can be added later without changing the quota model.
 
 ## Mock mode
 
@@ -185,6 +200,7 @@ src/
     jobs/            job feed + add-job form
     applications/    pipeline board + application detail
     profile/         profile form + resume upload
+    upgrade/         plan + usage meter + admin premium grant
   components/        LoginForm, AgentRunner, StatusBadge, etc.
   lib/
     agents/          LangGraph workflow + workers
@@ -193,6 +209,7 @@ src/
     supabase/        clients
     services/        agent orchestration + persistence
     auth.ts          session helpers
+    subscription.ts  quota + tier helpers
   proxy.ts           auth route protection (Next.js proxy)
 supabase/
   migrations/        SQL schema + pgvector match function

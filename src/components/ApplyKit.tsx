@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AgentRunner } from "@/components/AgentRunner";
+import { ApplyButton } from "@/components/ApplyButton";
+import type { SubscriptionTier, UsageSnapshot } from "@/lib/subscription";
 
 interface Props {
   jobId: string;
@@ -9,6 +12,10 @@ interface Props {
   applicationId?: string | null;
   matchScore?: number | null;
   hasResume: boolean;
+  tier?: SubscriptionTier;
+  admin?: boolean;
+  usage?: UsageSnapshot;
+  limit?: number;
 }
 
 export function ApplyKit({
@@ -17,6 +24,10 @@ export function ApplyKit({
   applicationId,
   matchScore,
   hasResume,
+  tier = "free",
+  admin = false,
+  usage,
+  limit,
 }: Props) {
   const [resume, setResume] = useState<string | null>(null);
   const [autoApply, setAutoApply] = useState(false);
@@ -28,6 +39,8 @@ export function ApplyKit({
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   };
+
+  const unlimited = tier === "premium" || admin;
 
   if (!hasResume) {
     return (
@@ -55,7 +68,7 @@ export function ApplyKit({
         )}
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         <AgentRunner
           jobId={jobId}
           applicationId={applicationId ?? undefined}
@@ -66,6 +79,12 @@ export function ApplyKit({
             if (tailor?.resume) setResume(tailor.resume);
           }}
         />
+        {!unlimited && usage && limit && (
+          <span className="text-xs text-slate-400">
+            {limit - usage.resume_rewrite} resume rewrite
+            {limit - usage.resume_rewrite === 1 ? "" : "s"} left this week
+          </span>
+        )}
       </div>
 
       {resume && (
@@ -107,17 +126,21 @@ export function ApplyKit({
               fastest, safest path that works everywhere.)
             </p>
           )}
-          <a
-            href={jobUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
-          >
-            {autoApply ? "Auto-apply now ↗" : "Apply now ↗"}
-          </a>
+          {jobUrl && (
+            <ApplyButton jobId={jobId} url={jobUrl} autoApply={autoApply} />
+          )}
           <p className="mt-2 text-xs text-slate-400">
             Opens the original posting on the company or job-board career site.
           </p>
+          {!unlimited && usage && limit && (
+            <p className="mt-1 text-xs text-slate-400">
+              {limit - usage.apply} in-app apply
+              {limit - usage.apply === 1 ? "" : "s"} left this week ·{" "}
+              <Link href="/upgrade" className="underline">
+                Go premium for unlimited
+              </Link>
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { getUsageSummary } from "@/lib/subscription";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
@@ -48,6 +49,7 @@ export default async function JobDetailPage({
 
   const matchScore = jobMatch?.score ?? app?.match_score ?? null;
   const hasResume = Boolean(profile?.resume_text?.trim());
+  const plan = await getUsageSummary(user.id, user.email);
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
@@ -106,6 +108,10 @@ export default async function JobDetailPage({
           applicationId={app?.id}
           matchScore={matchScore}
           hasResume={hasResume}
+          tier={plan.tier}
+          admin={plan.admin}
+          usage={plan.usage}
+          limit={plan.limit}
         />
 
         <div className="rounded-xl border border-slate-200 bg-white p-6">

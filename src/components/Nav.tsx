@@ -6,6 +6,7 @@ const links = [
   { href: "/jobs", label: "Jobs" },
   { href: "/applications", label: "Pipeline" },
   { href: "/profile", label: "Profile" },
+  { href: "/upgrade", label: "Upgrade" },
 ];
 
 export async function Nav() {

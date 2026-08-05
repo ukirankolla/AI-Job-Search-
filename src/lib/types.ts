@@ -21,6 +21,7 @@ export interface Profile {
   github_url?: string;
   website_url?: string;
   onboarding_completed?: boolean;
+  subscription_tier?: "free" | "premium";
   created_at: string;
   updated_at: string;
 }

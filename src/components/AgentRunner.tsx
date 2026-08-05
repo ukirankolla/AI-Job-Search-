@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { parseSseBuffer, parseSseEvent } from "@/lib/sse";
 import type { AgentStep, AgentName } from "@/lib/types";
 
@@ -37,6 +38,7 @@ export function AgentRunner({
     "idle",
   );
   const [error, setError] = useState<string | null>(null);
+  const [limitReached, setLimitReached] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const start = useCallback(async () => {
@@ -45,6 +47,7 @@ export function AgentRunner({
     setStatus("running");
     setSteps([]);
     setError(null);
+    setLimitReached(false);
     const controller = new AbortController();
     abortRef.current = controller;
 
@@ -59,6 +62,7 @@ export function AgentRunner({
       if (!res.ok || !res.body) {
         const body = await res.json().catch(() => ({}));
         setError(body.error ?? "Failed to start agents.");
+        setLimitReached(Boolean(body.limitReached));
         setStatus("error");
         setRunning(false);
         return;
@@ -179,7 +183,23 @@ export function AgentRunner({
             </p>
           )}
           {status === "error" && (
-            <p className="pt-1 font-medium text-rose-600">{error}</p>
+            <div className="pt-1">
+              {limitReached ? (
+                <>
+                  <p className="font-medium text-rose-600">
+                    You’ve used your free weekly limit for this week.
+                  </p>
+                  <Link
+                    href="/upgrade"
+                    className="mt-2 inline-flex rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-500"
+                  >
+                    Upgrade to premium →
+                  </Link>
+                </>
+              ) : (
+                <p className="font-medium text-rose-600">{error}</p>
+              )}
+            </div>
           )}
         </div>
       )}

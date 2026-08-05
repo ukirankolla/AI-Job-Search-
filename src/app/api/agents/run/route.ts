@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { buildGraph } from "@/lib/agents/graph";
 import { loadAgentInput } from "@/lib/services/agentService";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { assertQuota, isAdmin, recordUsage } from "@/lib/subscription";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,6 +47,24 @@ export async function POST(request: Request) {
     if (error || !owned) {
       return Response.json({ error: "Application not found" }, { status: 403 });
     }
+  }
+
+  if (normalizedRunType === "apply" && !isAdmin(user.email)) {
+    const quota = await assertQuota(userId, "resume_rewrite");
+    if (!quota.allowed) {
+      return Response.json(
+        {
+          error: "limit_reached",
+          limitReached: true,
+          kind: "resume_rewrite",
+          usage: quota.usage,
+          tier: quota.tier,
+          limit: quota.limit,
+        },
+        { status: 402 },
+      );
+    }
+    await recordUsage(userId, "resume_rewrite");
   }
 
   return streamRun(userId, jobId, applicationId, normalizedRunType);
