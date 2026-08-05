@@ -11,7 +11,7 @@ vi.mock("@/lib/llm/provider", async (importOriginal) => {
   };
 });
 
-import { runMatcher, runTailor, runTracker } from "@/lib/agents/workers";
+import { runMatcher, runTailor, runTracker, parseResume } from "@/lib/agents/workers";
 
 const input: AgentInput = {
   profile: {
@@ -173,5 +173,51 @@ describe("runTracker", () => {
 
     mockComplete.mockResolvedValue({ content: JSON.stringify({ title: "x" }) });
     expect(await runTracker("context")).toEqual([]);
+  });
+});
+
+describe("parseResume", () => {
+  beforeEach(() => {
+    mockComplete.mockReset();
+  });
+
+  it("parses the extracted profile fields", async () => {
+    mockComplete.mockResolvedValue({
+      content: JSON.stringify({
+        full_name: "Jane Smith",
+        title: "Senior Full-Stack Engineer",
+        summary: "Ships web products end to end.",
+        skills: ["TypeScript", "React"],
+      }),
+    });
+
+    const result = await parseResume("Jane Smith\nSenior Engineer\n...");
+    expect(result).toEqual({
+      full_name: "Jane Smith",
+      title: "Senior Full-Stack Engineer",
+      summary: "Ships web products end to end.",
+      skills: ["TypeScript", "React"],
+    });
+  });
+
+  it("falls back to empty values when output is invalid", async () => {
+    mockComplete.mockResolvedValue({ content: "not json" });
+
+    expect(await parseResume("resume text")).toEqual({
+      full_name: "",
+      title: "",
+      summary: "",
+      skills: [],
+    });
+  });
+
+  it("coerces malformed skills into an empty array", async () => {
+    mockComplete.mockResolvedValue({
+      content: JSON.stringify({ full_name: "Jane Smith", skills: "React" }),
+    });
+
+    const result = await parseResume("resume text");
+    expect(result.full_name).toBe("Jane Smith");
+    expect(result.skills).toEqual([]);
   });
 });
