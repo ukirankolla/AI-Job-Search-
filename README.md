@@ -1,4 +1,4 @@
-# JobOrbit
+# Noventra
 
 A resume-first job-search copilot. Upload your resume once, and a team of
 collaborating AI agents matches fresh job postings to your skills, shows a

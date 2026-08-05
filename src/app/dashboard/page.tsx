@@ -5,7 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { NotificationsList } from "@/components/NotificationsList";
 import type { Notification } from "@/lib/types";
 
-export const metadata = { title: "Dashboard | JobOrbit" };
+export const metadata = { title: "Dashboard | Noventra" };
 
 export default async function DashboardPage() {
   const user = await requireUser();

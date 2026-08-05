@@ -6,7 +6,7 @@ import { JobFeedImporter } from "@/components/JobFeedImporter";
 import { SampleJobsButton } from "@/components/SampleJobsButton";
 import { JobFeed } from "@/components/JobFeed";
 
-export const metadata = { title: "Jobs | JobOrbit" };
+export const metadata = { title: "Jobs | Noventra" };
 
 export default async function JobsPage() {
   const user = await requireUser();

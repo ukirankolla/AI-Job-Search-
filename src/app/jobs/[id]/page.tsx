@@ -7,7 +7,7 @@ import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
 import { ApplyKit } from "@/components/ApplyKit";
 
-export const metadata = { title: "Job | JobOrbit" };
+export const metadata = { title: "Job | Noventra" };
 
 export default async function JobDetailPage({
   params,

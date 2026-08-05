@@ -2,9 +2,9 @@ import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 
 export const metadata = {
-  title: "JobOrbit — Upload Your Resume, We Do the Rest",
+  title: "Noventra — Upload Your Resume, We Do the Rest",
   description:
-    "Upload your resume once. JobOrbit's AI agents match fresh job postings, rewrite your ATS-friendly resume and cover letter, and prep you for interviews.",
+    "Upload your resume once. Noventra's AI agents match fresh job postings, rewrite your ATS-friendly resume and cover letter, and prep you for interviews.",
 };
 
 const agents = [

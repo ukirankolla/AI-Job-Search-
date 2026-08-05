@@ -7,7 +7,7 @@ import { StatusSelect } from "@/components/StatusSelect";
 import { DeleteApplicationButton } from "@/components/DeleteApplicationButton";
 import type { InterviewPrep } from "@/lib/types";
 
-export const metadata = { title: "Application | JobOrbit" };
+export const metadata = { title: "Application | Noventra" };
 
 export default async function ApplicationDetailPage({
   params,

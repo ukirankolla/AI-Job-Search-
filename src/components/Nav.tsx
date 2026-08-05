@@ -16,9 +16,9 @@ export async function Nav() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <span className="grid h-7 w-7 place-items-center rounded-md bg-slate-900 text-sm text-white">
-            J
+            N
           </span>
-          <span>JobOrbit</span>
+          <span>Noventra</span>
         </Link>
 
         {user && (

@@ -1,6 +1,6 @@
 import { LoginForm } from "@/components/LoginForm";
 
-export const metadata = { title: "Sign in | JobOrbit" };
+export const metadata = { title: "Sign in | Noventra" };
 
 export default async function LoginPage({
   searchParams,
