@@ -1,5 +1,9 @@
 import { runTracker } from "@/lib/agents/workers";
 import { filterNewTrackerTasks } from "@/lib/agents/tracker";
+import {
+  buildDeadlineReminders,
+  type DeadlineApp,
+} from "@/lib/agents/reminders";
 import { isCronRequestAuthorized } from "@/lib/cron";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { TrackerTask } from "@/lib/types";
@@ -34,10 +38,7 @@ export async function GET(request: Request) {
     return Response.json({ error: error.message }, { status: 500 });
   }
 
-  const byUser = new Map<
-    string,
-    Array<Record<string, unknown>>
-  >();
+  const byUser = new Map<string, Array<Record<string, unknown>>>();
   for (const app of applications ?? []) {
     const key = app.user_id as string;
     const list = byUser.get(key) ?? [];
@@ -45,7 +46,16 @@ export async function GET(request: Request) {
     byUser.set(key, list);
   }
 
+  const { data: reminderRows } = await admin
+    .from("notifications")
+    .select("payload")
+    .eq("type", "deadline_reminder");
+  const reminded = (reminderRows ?? [])
+    .map((n) => (n.payload as { application_id?: string } | null)?.application_id)
+    .filter((id): id is string => Boolean(id));
+
   let notifications = 0;
+  let reminders = 0;
   for (const [userId, apps] of byUser) {
     const context = apps
       .map((a) => {
@@ -90,7 +100,22 @@ export async function GET(request: Request) {
         });
       if (!insertError) notifications++;
     }
+
+    for (const draft of buildDeadlineReminders(
+      apps as unknown as DeadlineApp[],
+      reminded,
+      new Date(),
+    )) {
+      const { error: insertError } = await admin.from("notifications").insert({
+        user_id: userId,
+        type: "deadline_reminder",
+        title: draft.title,
+        body: draft.body,
+        payload: draft.payload,
+      });
+      if (!insertError) reminders++;
+    }
   }
 
-  return Response.json({ users: byUser.size, notifications });
+  return Response.json({ users: byUser.size, notifications, reminders });
 }

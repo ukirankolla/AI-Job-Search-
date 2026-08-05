@@ -93,17 +93,17 @@ async function prepNode(state: State): Promise<Partial<State>> {
 export function buildGraph(runType: RunType) {
   const graph = new StateGraph(GraphState)
     .addNode("matcher", matcherNode)
-    .addNode("tailor", tailorNode)
-    .addNode("prep", prepNode)
     .addEdge(START, "matcher");
 
   if (runType === "apply" || runType === "prep") {
     graph
+      .addNode("runTailor", tailorNode)
+      .addNode("runPrep", prepNode)
       .addConditionalEdges("matcher", (state: State) =>
-        state.error ? END : "tailor",
+        state.error ? END : "runTailor",
       )
-      .addEdge("tailor", "prep")
-      .addEdge("prep", END);
+      .addEdge("runTailor", "runPrep")
+      .addEdge("runPrep", END);
   } else {
     graph.addEdge("matcher", END);
   }
