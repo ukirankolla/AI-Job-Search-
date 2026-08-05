@@ -38,6 +38,8 @@ export interface JobPosting {
   salary_min?: number | null;
   salary_max?: number | null;
   posted_at?: string | null;
+  employment_type?: string | null;
+  sponsorship?: string | null;
 }
 
 export interface Application {

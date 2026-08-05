@@ -1,5 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { classifyApplySource } from "@/lib/jobs/applySource";
 import { JobForm } from "@/components/JobForm";
 import { JobFeedImporter } from "@/components/JobFeedImporter";
 import { SampleJobsButton } from "@/components/SampleJobsButton";
@@ -15,7 +16,7 @@ export default async function JobsPage() {
     await Promise.all([
       supabase
         .from("jobs")
-        .select("id, title, company, location, salary_min, salary_max, posted_at, url, description")
+        .select("id, title, company, location, salary_min, salary_max, posted_at, url, description, employment_type, sponsorship")
         .order("posted_at", { ascending: false })
         .limit(50),
       supabase
@@ -39,6 +40,12 @@ export default async function JobsPage() {
   for (const m of matches ?? []) scores[m.job_id] = m.score;
   const hasResume = Boolean(profile?.resume_text?.trim());
 
+  const feedJobs = (jobs ?? []).map((job) => ({
+    ...job,
+    url: job.url ?? "",
+    applyKind: classifyApplySource(job.url ?? ""),
+  }));
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-2xl font-bold text-slate-900">Job feed</h1>
@@ -50,7 +57,7 @@ export default async function JobsPage() {
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2">
-          <JobFeed jobs={jobs ?? []} savedIds={savedIds} scores={scores} hasResume={hasResume} />
+          <JobFeed jobs={feedJobs} savedIds={savedIds} scores={scores} hasResume={hasResume} />
         </div>
 
         <div className="space-y-4">

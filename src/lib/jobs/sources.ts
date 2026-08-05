@@ -38,6 +38,7 @@ interface AdzunaResult {
   redirect_url?: string;
   salary_min?: number | null;
   salary_max?: number | null;
+  contract_type?: string;
 }
 
 export function mapAdzunaJobs(
@@ -61,6 +62,8 @@ export function mapAdzunaJobs(
       salary_min: r.salary_min ?? null,
       salary_max: r.salary_max ?? null,
       posted_at: r.created ?? null,
+      employment_type: r.contract_type === "permanent" ? "full_time" : null,
+      sponsorship: null,
     });
   }
   return out;
@@ -139,6 +142,8 @@ export function mapUsaJobsJobs(
       salary_min: pay?.MinimumRange ?? null,
       salary_max: pay?.MaximumRange ?? null,
       posted_at: d.PositionStartDate ?? null,
+      employment_type: null,
+      sponsorship: null,
     });
   }
   return out;
@@ -182,6 +187,9 @@ const MOCK_LISTINGS: Array<{
   description: string;
   salary_min: number;
   salary_max: number;
+  url: string;
+  employment_type: string;
+  sponsorship: string;
 }> = [
   {
     title: "Frontend Engineer",
@@ -191,6 +199,9 @@ const MOCK_LISTINGS: Array<{
       "Build React and Next.js web applications. 3+ years of TypeScript experience required.",
     salary_min: 110000,
     salary_max: 140000,
+    url: "https://www.linkedin.com/jobs/view/101",
+    employment_type: "full_time",
+    sponsorship: "yes",
   },
   {
     title: "Senior Full-Stack Developer",
@@ -200,6 +211,9 @@ const MOCK_LISTINGS: Array<{
       "Full-stack development with React, Node.js, and PostgreSQL. CI/CD experience a plus.",
     salary_min: 130000,
     salary_max: 165000,
+    url: "https://careers.northwindlabs.com/jobs/senior-fullstack",
+    employment_type: "c2c",
+    sponsorship: "no",
   },
   {
     title: "Machine Learning Engineer",
@@ -209,6 +223,9 @@ const MOCK_LISTINGS: Array<{
       "Build LLM-powered products. Experience with Python, RAG, and vector databases.",
     salary_min: 150000,
     salary_max: 190000,
+    url: "https://www.linkedin.com/jobs/view/202",
+    employment_type: "w2",
+    sponsorship: "yes",
   },
   {
     title: "DevOps Engineer",
@@ -218,14 +235,28 @@ const MOCK_LISTINGS: Array<{
       "Kubernetes, Terraform, and CI/CD pipelines for a growing SaaS platform.",
     salary_min: 120000,
     salary_max: 150000,
+    url: "https://cloudharbor.workable.com/jobs/7",
+    employment_type: "full_time",
+    sponsorship: "no",
+  },
+  {
+    title: "Software Engineering Intern",
+    company: "Acme Software",
+    location: "Austin, TX",
+    description:
+      "Summer internship building full-stack features. Great mentorship, real production work.",
+    salary_min: 60000,
+    salary_max: 70000,
+    url: "https://www.linkedin.com/jobs/view/303",
+    employment_type: "internship",
+    sponsorship: "yes",
   },
 ];
 
 export function mockJobs(hours: number, now = new Date()): JobPosting[] {
   return MOCK_LISTINGS.map((j, i) => {
-    const postedAt = new Date(
-      now.getTime() - (i + 1) * Math.max(Math.floor(hours / 4), 1) * HOUR_MS,
-    );
+    const step = Math.max(hours, 1) / (MOCK_LISTINGS.length + 1);
+    const postedAt = new Date(now.getTime() - (i + 1) * step * HOUR_MS);
     return {
       source: "mock",
       external_id: `mock-${i}`,
@@ -233,10 +264,12 @@ export function mockJobs(hours: number, now = new Date()): JobPosting[] {
       company: j.company,
       location: j.location,
       description: j.description,
-      url: "https://example.com/apply",
+      url: j.url,
       salary_min: j.salary_min,
       salary_max: j.salary_max,
       posted_at: postedAt.toISOString(),
+      employment_type: j.employment_type,
+      sponsorship: j.sponsorship,
     };
   });
 }

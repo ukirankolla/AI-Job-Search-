@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { filterJobs } from "@/lib/jobFilter";
 import { formatRelativeTime, isRecentlyPosted } from "@/lib/jobTime";
+import type { ApplySourceKind } from "@/lib/jobs/applySource";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 
 export interface JobFeedItem {
@@ -16,6 +17,9 @@ export interface JobFeedItem {
   salary_min?: number | null;
   salary_max?: number | null;
   posted_at?: string | null;
+  employment_type?: string | null;
+  sponsorship?: string | null;
+  applyKind?: ApplySourceKind;
 }
 
 const TIME_OPTIONS = [
@@ -25,10 +29,26 @@ const TIME_OPTIONS = [
   { label: "4h", hours: 4 },
 ];
 
+const TYPE_OPTIONS = [
+  { value: "w2", label: "W2" },
+  { value: "c2c", label: "C2C" },
+  { value: "full_time", label: "Full-time" },
+  { value: "internship", label: "Internship" },
+];
+
+const SPONSORSHIP_OPTIONS = [
+  { value: "yes" as const, label: "Yes" },
+  { value: "no" as const, label: "No" },
+];
+
 function scoreTone(score: number) {
   if (score >= 70) return "bg-emerald-50 text-emerald-700 border-emerald-300";
   if (score >= 40) return "bg-amber-50 text-amber-700 border-amber-300";
   return "bg-rose-50 text-rose-700 border-rose-300";
+}
+
+function isDirect(kind?: ApplySourceKind) {
+  return kind === "linkedin" || kind === "company";
 }
 
 export function JobFeed({
@@ -45,14 +65,29 @@ export function JobFeed({
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [hours, setHours] = useState<number | null>(8);
+  const [types, setTypes] = useState<string[]>([]);
+  const [sponsorship, setSponsorship] = useState<"yes" | "no" | null>(null);
+  const [directOnly, setDirectOnly] = useState(true);
   const [matching, setMatching] = useState(false);
   const saved = useMemo(() => new Set(savedIds), [savedIds]);
+
   const filtered = useMemo(() => {
-    const searched = filterJobs(jobs, query);
-    return hours === null
-      ? searched
-      : searched.filter((j) => isRecentlyPosted(j.posted_at, hours));
-  }, [jobs, query, hours]);
+    return filterJobs(jobs, query).filter((job) => {
+      if (hours !== null && !isRecentlyPosted(job.posted_at, hours)) return false;
+      if (types.length > 0 && !types.includes(job.employment_type ?? "")) {
+        return false;
+      }
+      if (sponsorship !== null && job.sponsorship !== sponsorship) return false;
+      if (directOnly && !isDirect(job.applyKind)) return false;
+      return true;
+    });
+  }, [jobs, query, hours, types, sponsorship, directOnly]);
+
+  const toggleType = (value: string) => {
+    setTypes((prev) =>
+      prev.includes(value) ? prev.filter((t) => t !== value) : [...prev, value],
+    );
+  };
 
   const unmatchable = jobs.some((j) => !scores?.[j.id]);
 
@@ -110,6 +145,65 @@ export function JobFeed({
         </div>
       </div>
 
+      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600">
+        <fieldset className="flex items-center gap-1.5">
+          <legend className="mr-1 font-medium text-slate-500">Type</legend>
+          {TYPE_OPTIONS.map((opt) => (
+            <label
+              key={opt.value}
+              className={`flex cursor-pointer items-center gap-1 rounded-md border px-2 py-1 transition ${
+                types.includes(opt.value)
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-300 bg-white hover:bg-slate-50"
+              }`}
+            >
+              <input
+                type="checkbox"
+                checked={types.includes(opt.value)}
+                onChange={() => toggleType(opt.value)}
+                className="hidden"
+              />
+              {opt.label}
+            </label>
+          ))}
+        </fieldset>
+
+        <fieldset className="flex items-center gap-1.5">
+          <legend className="mr-1 font-medium text-slate-500">
+            Sponsorship
+          </legend>
+          {SPONSORSHIP_OPTIONS.map((opt) => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() =>
+                setSponsorship((prev) => (prev === opt.value ? null : opt.value))
+              }
+              aria-pressed={sponsorship === opt.value}
+              className={`rounded-md border px-2 py-1 transition ${
+                sponsorship === opt.value
+                  ? "border-slate-900 bg-slate-900 text-white"
+                  : "border-slate-300 bg-white hover:bg-slate-50"
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </fieldset>
+
+        <label className="flex cursor-pointer items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={directOnly}
+            onChange={(e) => setDirectOnly(e.target.checked)}
+            className="h-3.5 w-3.5 accent-slate-900"
+          />
+          <span className="font-medium text-slate-500">
+            Company / LinkedIn only
+          </span>
+        </label>
+      </div>
+
       <div className="mt-3 flex flex-wrap items-center gap-3">
         {hasResume && unmatchable && (
           <button
@@ -154,11 +248,33 @@ export function JobFeed({
                       </span>
                     )}
                   </p>
-                  {job.posted_at && (
-                    <p className="mt-0.5 text-xs text-slate-400">
-                      Posted {formatRelativeTime(job.posted_at)}
-                    </p>
-                  )}
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                    {job.posted_at && (
+                      <span>Posted {formatRelativeTime(job.posted_at)}</span>
+                    )}
+                    {job.employment_type && (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 capitalize text-slate-600">
+                        {job.employment_type.replace("_", "-")}
+                      </span>
+                    )}
+                    {job.sponsorship && (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                        {job.sponsorship === "yes"
+                          ? "Sponsorship available"
+                          : "No sponsorship"}
+                      </span>
+                    )}
+                    {job.applyKind === "linkedin" && (
+                      <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-600">
+                        LinkedIn
+                      </span>
+                    )}
+                    {job.applyKind === "company" && (
+                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-600">
+                        Company site
+                      </span>
+                    )}
+                  </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   {score !== undefined && (
@@ -197,9 +313,8 @@ export function JobFeed({
       )}
       {jobs.length > 0 && filtered.length === 0 && (
         <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          {hours === null
-            ? `No jobs match "${query}".`
-            : `No jobs posted in the last ${hours} hours. Try a wider window.`}
+          No jobs match the current filters. Try widening the time window or
+          clearing a filter.
         </p>
       )}
     </div>

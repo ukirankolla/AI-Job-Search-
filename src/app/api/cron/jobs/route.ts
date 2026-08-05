@@ -1,6 +1,7 @@
 import { isCronRequestAuthorized } from "@/lib/cron";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getJobSource } from "@/lib/jobs/sources";
+import { isDirectSource } from "@/lib/jobs/applySource";
 import {
   ingestJobs,
   type IngestClient,
@@ -31,7 +32,7 @@ export async function GET(request: Request) {
 
   let jobs;
   try {
-    jobs = await source.fetchRecentJobs(8);
+    jobs = (await source.fetchRecentJobs(8)).filter((j) => isDirectSource(j.url));
   } catch (err) {
     return Response.json(
       { error: `Job source unavailable: ${(err as Error).message}` },

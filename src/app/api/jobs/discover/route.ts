@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getJobSource } from "@/lib/jobs/sources";
+import { isDirectSource } from "@/lib/jobs/applySource";
 import {
   ingestJobs,
   type IngestClient,
@@ -26,7 +27,9 @@ export async function POST(request: Request) {
 
   let jobs;
   try {
-    jobs = await source.fetchRecentJobs(hours);
+    jobs = (await source.fetchRecentJobs(hours)).filter((j) =>
+      isDirectSource(j.url),
+    );
   } catch (err) {
     return Response.json(
       { error: `Job source unavailable: ${(err as Error).message}` },

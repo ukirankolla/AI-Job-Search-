@@ -47,6 +47,8 @@ export async function ingestJobs(
       salary_min: job.salary_min ?? null,
       salary_max: job.salary_max ?? null,
       posted_at: job.posted_at ?? null,
+      employment_type: job.employment_type ?? null,
+      sponsorship: job.sponsorship ?? null,
     };
 
     if (source !== "manual" && job.external_id) {

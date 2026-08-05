@@ -21,6 +21,8 @@ const jobSchema = z.object({
   salary_min: z.number().int().optional().nullable(),
   salary_max: z.number().int().optional().nullable(),
   posted_at: z.string().optional().nullable(),
+  employment_type: z.string().optional().nullable(),
+  sponsorship: z.string().optional().nullable(),
 });
 
 const bodySchema = z.object({
