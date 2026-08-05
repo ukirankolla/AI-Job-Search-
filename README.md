@@ -355,10 +355,10 @@ the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 ## Deploying
 
 The app runs anywhere Next.js runs. Cron jobs are wired for **Vercel Cron** via
-`vercel.json`:
-
-- `/api/cron/jobs` — hourly job discovery
-- `/api/cron/track` — daily (07:00 UTC) tracker sweep
+`vercel.json`. Both run **once per day** (06:00 UTC job discovery, 07:00 UTC
+tracker sweep) — this matches Vercel's free Hobby plan, which only allows daily
+cron execution. On a paid Pro plan you can change `schedule` back to hourly or
+finer.
 
 Vercel authenticates cron calls with `Authorization: Bearer $CRON_SECRET`; the
 routes also accept an `x-cron-secret` header for manual or self-hosted
