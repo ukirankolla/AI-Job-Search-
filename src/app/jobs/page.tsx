@@ -3,6 +3,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { JobForm } from "@/components/JobForm";
 import { JobFeedImporter } from "@/components/JobFeedImporter";
+import { SampleJobsButton } from "@/components/SampleJobsButton";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 
 export const metadata = { title: "Jobs | AI Job Search" };
@@ -68,7 +69,8 @@ export default async function JobsPage() {
             ))}
             {(jobs ?? []).length === 0 && (
               <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-                No jobs yet. Add one manually or use the ingest endpoint.
+                No jobs yet. Load the sample jobs, add one manually, or bulk-import
+                a feed.
               </p>
             )}
           </ul>
@@ -76,6 +78,7 @@ export default async function JobsPage() {
 
         <div className="space-y-4">
           <JobForm />
+          <SampleJobsButton />
           <JobFeedImporter />
         </div>
       </div>
