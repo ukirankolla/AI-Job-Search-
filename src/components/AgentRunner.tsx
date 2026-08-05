@@ -2,6 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { parseSseBuffer, parseSseEvent } from "@/lib/sse";
 import type { AgentStep, AgentName } from "@/lib/types";
 
 const AGENT_LABELS: Record<AgentName, string> = {
@@ -20,11 +21,6 @@ interface Props {
   runType: AgentRunType;
   label?: string;
   onDone?: (results: Record<string, unknown>) => void;
-}
-
-interface AgentEvent {
-  event: "meta" | "step" | "done" | "error";
-  data: unknown;
 }
 
 export function AgentRunner({
@@ -72,32 +68,33 @@ export function AgentRunner({
       const decoder = new TextDecoder();
       let buffer = "";
 
-      const handleLine = (line: string) => {
-        if (!line || !line.startsWith("data: ")) return;
-        const raw = line.slice(6);
-        let evt: AgentEvent;
+      const handleEvent = (event: string, raw: string) => {
+        let data: unknown;
         try {
-          evt = JSON.parse(raw) as AgentEvent;
+          data = JSON.parse(raw);
         } catch {
           return;
         }
-        switch (evt.event) {
+        switch (event) {
           case "step": {
-            const s = evt.data as AgentStep;
-            setSteps((prev) => [...prev.filter((x) => x.agent !== s.agent || x.status !== "running"), s]);
+            const s = data as AgentStep;
+            setSteps((prev) => [
+              ...prev.filter((x) => x.agent !== s.agent || x.status !== "running"),
+              s,
+            ]);
             break;
           }
           case "done": {
-            const data = evt.data as { results: Record<string, unknown> };
+            const { results } = data as { results: Record<string, unknown> };
             setStatus("done");
             setRunning(false);
-            onDone?.(data.results ?? {});
+            onDone?.(results ?? {});
             router.refresh();
             break;
           }
           case "error": {
-            const data = evt.data as { error: string };
-            setError(data.error);
+            const { error: runError } = data as { error: string };
+            setError(runError);
             setStatus("error");
             setRunning(false);
             break;
@@ -108,15 +105,16 @@ export function AgentRunner({
       for (;;) {
         const { done, value } = await reader.read();
         if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const parts = buffer.split("\n\n");
-        buffer = parts.pop() ?? "";
-        for (const part of parts) {
-          for (const line of part.split("\n")) handleLine(line);
-        }
+        const { events, rest } = parseSseBuffer(
+          decoder.decode(value, { stream: true }),
+          buffer,
+        );
+        buffer = rest;
+        for (const evt of events) handleEvent(evt.event, evt.data);
       }
       if (buffer) {
-        for (const line of buffer.split("\n")) handleLine(line);
+        const evt = parseSseEvent(buffer);
+        if (evt) handleEvent(evt.event, evt.data);
       }
     } catch (err) {
       if ((err as Error).name !== "AbortError") {
