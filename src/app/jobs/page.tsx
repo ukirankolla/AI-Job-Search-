@@ -2,6 +2,7 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { JobForm } from "@/components/JobForm";
+import { JobFeedImporter } from "@/components/JobFeedImporter";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 
 export const metadata = { title: "Jobs | AI Job Search" };
@@ -27,8 +28,8 @@ export default async function JobsPage() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-2xl font-bold text-slate-900">Job feed</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Add jobs manually or ingest a feed via <code className="rounded bg-slate-100 px-1">POST /api/jobs/ingest</code>.
-        Run the agents on any role to score fit, tailor documents, and prep.
+        Add jobs manually or bulk-import a feed. Run the agents on any role to
+        score fit, tailor documents, and prep.
       </p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">
@@ -73,8 +74,9 @@ export default async function JobsPage() {
           </ul>
         </div>
 
-        <div>
+        <div className="space-y-4">
           <JobForm />
+          <JobFeedImporter />
         </div>
       </div>
     </main>
