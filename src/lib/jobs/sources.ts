@@ -2,7 +2,7 @@ import type { JobPosting } from "@/lib/types";
 
 const HOUR_MS = 60 * 60 * 1000;
 
-export type JobSourceName = "greenhouse" | "lever" | "mock";
+export type JobSourceName = "greenhouse" | "lever" | "workable" | "ashby" | "mock";
 
 export interface JobSource {
   name: JobSourceName;
@@ -44,6 +44,17 @@ function stripHtml(html: string): string {
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function employmentTypeFromText(
+  type: string | undefined | null,
+): string | null {
+  const v = (type ?? "").toLowerCase().replace(/[\s_-]/g, "");
+  if (v.includes("intern")) return "internship";
+  if (v.includes("contract") || v.includes("temp")) return "c2c";
+  if (v.includes("full") || v.includes("permanent")) return "full_time";
+  if (v.includes("w2")) return "w2";
+  return null;
 }
 
 export function mapGreenhouseJobs(
@@ -108,11 +119,7 @@ interface LeverPosting {
 }
 
 function commitmentToEmploymentType(type: string | undefined): string | null {
-  const v = (type ?? "").toLowerCase();
-  if (v.includes("intern")) return "internship";
-  if (v.includes("contract") || v.includes("temp")) return "c2c";
-  if (v.includes("full")) return "full_time";
-  return null;
+  return employmentTypeFromText(type);
 }
 
 export function mapLeverJobs(
@@ -161,6 +168,135 @@ export function leverSource(): JobSource {
         throw new Error(`Lever request failed: ${res.status}`);
       }
       return mapLeverJobs(await res.json(), hours, undefined, company);
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Ashby (public company job boards — apply links go to the company portal)
+// ---------------------------------------------------------------------------
+
+interface AshbyJob {
+  title?: string;
+  location?: string;
+  descriptionPlain?: string;
+  publishedAt?: string;
+  employmentType?: string;
+  jobUrl?: string;
+}
+
+export function mapAshbyJobs(
+  raw: { jobs?: AshbyJob[] },
+  hours: number,
+  now = new Date(),
+  company = "",
+): JobPosting[] {
+  const out: JobPosting[] = [];
+  for (const job of raw.jobs ?? []) {
+    if (
+      !job.title ||
+      !job.jobUrl ||
+      !isPostedWithinHours(job.publishedAt, hours, now)
+    ) {
+      continue;
+    }
+    out.push({
+      source: "ashby",
+      external_id: job.jobUrl,
+      title: job.title,
+      company,
+      location: job.location ?? "",
+      description: job.descriptionPlain ?? "",
+      url: job.jobUrl,
+      salary_min: null,
+      salary_max: null,
+      posted_at: job.publishedAt ?? null,
+      employment_type: employmentTypeFromText(job.employmentType),
+      sponsorship: null,
+    });
+  }
+  return out;
+}
+
+export function ashbySource(): JobSource {
+  return {
+    name: "ashby",
+    async fetchRecentJobs(hours, opts) {
+      const board = process.env.ASHBY_JOB_BOARD;
+      if (!board) return [];
+      const res = await fetch(
+        `https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(board)}`,
+        { signal: opts?.signal, next: { revalidate: 0 } },
+      );
+      if (!res.ok) {
+        throw new Error(`Ashby request failed: ${res.status}`);
+      }
+      return mapAshbyJobs(await res.json(), hours, undefined, board);
+    },
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Workable (public company job boards — apply links go to the company portal)
+// ---------------------------------------------------------------------------
+
+interface WorkableJob {
+  title?: string;
+  url?: string;
+  location?: { location_str?: string };
+  description?: string;
+  published_on?: string;
+  created_at?: string;
+  employment_type?: string;
+}
+
+export function mapWorkableJobs(
+  raw: { jobs?: WorkableJob[] },
+  hours: number,
+  now = new Date(),
+  company = "",
+): JobPosting[] {
+  const out: JobPosting[] = [];
+  for (const job of raw.jobs ?? []) {
+    if (
+      !job.title ||
+      !job.url ||
+      !isPostedWithinHours(job.published_on ?? job.created_at, hours, now)
+    ) {
+      continue;
+    }
+    out.push({
+      source: "workable",
+      external_id: job.url,
+      title: job.title,
+      company,
+      location: job.location?.location_str ?? "",
+      description: stripHtml(job.description ?? ""),
+      url: job.url,
+      salary_min: null,
+      salary_max: null,
+      posted_at: job.published_on ?? job.created_at ?? null,
+      employment_type: employmentTypeFromText(job.employment_type),
+      sponsorship: null,
+    });
+  }
+  return out;
+}
+
+export function workableSource(): JobSource {
+  return {
+    name: "workable",
+    async fetchRecentJobs(hours, opts) {
+      const account = process.env.WORKABLE_ACCOUNT;
+      if (!account) return [];
+      const res = await fetch(
+        `https://apply.workable.com/api/v1/widget/accounts/${encodeURIComponent(account)}?details=true`,
+        { signal: opts?.signal, next: { revalidate: 0 } },
+      );
+      if (!res.ok) {
+        throw new Error(`Workable request failed: ${res.status}`);
+      }
+      return mapWorkableJobs(await res.json(), hours, undefined, account);
     },
   };
 }
@@ -279,6 +415,10 @@ export function getJobSource(source?: string): JobSource {
       return greenhouseSource();
     case "lever":
       return leverSource();
+    case "workable":
+      return workableSource();
+    case "ashby":
+      return ashbySource();
     default:
       return mockSource();
   }
