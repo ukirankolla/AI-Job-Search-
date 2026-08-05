@@ -61,6 +61,31 @@ class MockChatProvider implements ChatProvider {
     const jobTitle =
       /title[":\s]*([^\n,]{2,60})/i.exec(user)?.[1]?.trim() || "the role";
 
+    if (system.toLowerCase().includes("resume parser")) {
+      const body = user.replace(/^RESUME:[\s\S]*?\n/, "");
+      const lines = body.split("\n").map((l) => l.trim()).filter(Boolean);
+      const knownSkills = [
+        "TypeScript", "React", "Node.js", "Python", "PostgreSQL", "AWS",
+        "Docker", "Kubernetes", "GraphQL", "Java", "Go",
+      ];
+      const skills = knownSkills.filter((s) =>
+        body.toLowerCase().includes(s.toLowerCase()),
+      );
+      const name =
+        /^([A-Z][a-z]+ )?[A-Z][a-z]+ [A-Z][a-z]+/m.exec(body)?.[0] ??
+        "Jane Smith";
+      const title =
+        lines.find((l) =>
+          /engineer|developer|designer|analyst|manager|architect/i.test(l),
+        ) ?? "Software Engineer";
+      return JSON.stringify({
+        full_name: name,
+        title,
+        summary: "Full-stack software engineer who ships web products end to end.",
+        skills,
+      });
+    }
+
     if (system.includes("matcher")) {
       const skills = ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"];
       const missing = userLower.includes("python")

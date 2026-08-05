@@ -118,6 +118,37 @@ export async function runTracker(
     .slice(0, 10);
 }
 
+export interface ResumeProfile {
+  full_name: string;
+  title: string;
+  summary: string;
+  skills: string[];
+}
+
+export async function parseResume(text: string): Promise<ResumeProfile> {
+  const system = [
+    "You are the RESUME PARSER agent in a job-search multi-agent system.",
+    "You extract a candidate's core profile from raw resume text.",
+    "Do NOT invent facts not present in the resume.",
+    "Respond with STRICT JSON matching this schema:",
+    '{"full_name": string, "title": string, "summary": string, "skills": string[]}',
+  ].join("\n");
+
+  const provider = getChatProvider();
+  const { content } = await provider.complete(
+    system,
+    `RESUME:\n${text.slice(0, 8000)}`,
+  );
+  const parsed = parseJsonObject<Partial<ResumeProfile>>(content);
+
+  return {
+    full_name: typeof parsed?.full_name === "string" ? parsed.full_name : "",
+    title: typeof parsed?.title === "string" ? parsed.title : "",
+    summary: typeof parsed?.summary === "string" ? parsed.summary : "",
+    skills: Array.isArray(parsed?.skills) ? parsed.skills : [],
+  };
+}
+
 function clampScore(score: unknown): number {
   const n = typeof score === "number" ? Math.round(score) : NaN;
   if (Number.isNaN(n)) return 0;

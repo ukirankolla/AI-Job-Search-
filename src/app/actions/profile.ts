@@ -4,6 +4,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { parseResume } from "@/lib/agents/workers";
 
 const profileSchema = z.object({
   full_name: z.string().min(1).max(200),
@@ -101,4 +102,58 @@ export async function uploadResume(
 
   revalidatePath("/profile");
   return { ok: true, message: "Resume uploaded and vectorized." };
+}
+
+export async function parseResumeProfile(
+  _prev: ProfileFormState,
+  formData: FormData,
+): Promise<ProfileFormState> {
+  let userId: string;
+  try {
+    userId = (await requireUser()).id;
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const resumeText = formData.get("resume_text");
+  if (typeof resumeText !== "string" || resumeText.trim().length < 10) {
+    return { ok: false, error: "Paste your resume text first (min 10 chars)." };
+  }
+
+  let parsed;
+  try {
+    parsed = await parseResume(resumeText);
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Failed to parse resume.",
+    };
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (parsed.full_name.trim()) updates.full_name = parsed.full_name.trim();
+  if (parsed.title.trim()) updates.title = parsed.title.trim();
+  if (parsed.summary.trim()) updates.summary = parsed.summary.trim();
+  const skills = parsed.skills.map((s) => s.trim()).filter(Boolean);
+  if (skills.length > 0) updates.skills = skills;
+
+  if (Object.keys(updates).length === 0) {
+    return {
+      ok: false,
+      error: "Could not extract any profile fields from this resume.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update(updates)
+    .eq("id", userId);
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/profile");
+  return {
+    ok: true,
+    message: "Profile extracted from resume. Review the fields and save.",
+  };
 }

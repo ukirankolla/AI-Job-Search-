@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import {
   initialState,
+  parseResumeProfile,
   updateProfile,
   uploadResume,
 } from "@/app/actions/profile";
@@ -17,10 +18,18 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     uploadResume,
     initialState,
   );
+  const [parseState, parseAction, parsePending] = useActionState(
+    parseResumeProfile,
+    initialState,
+  );
 
   return (
     <div className="space-y-8">
-      <form action={formAction} className="space-y-4 rounded-lg border border-slate-200 p-6">
+      <form
+        key={profile.updated_at}
+        action={formAction}
+        className="space-y-4 rounded-lg border border-slate-200 p-6"
+      >
         <h2 className="text-lg font-semibold">Profile</h2>
         <div>
           <label className="text-sm font-medium text-slate-700">Full name</label>
@@ -84,13 +93,21 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           placeholder="John Doe\nFull-Stack Engineer\n...paste your resume here..."
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs"
         />
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={resumePending}
             className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
           >
             {resumePending ? "Indexing…" : "Upload & vectorize"}
+          </button>
+          <button
+            type="submit"
+            formAction={parseAction}
+            disabled={parsePending}
+            className="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-400 disabled:opacity-50"
+          >
+            {parsePending ? "Extracting…" : "Extract profile from resume"}
           </button>
           <span className="text-xs text-slate-400">
             status: {profile.resume_embedding_status}
@@ -101,6 +118,12 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         )}
         {resumeState.error && (
           <p className="text-sm text-rose-600">{resumeState.error}</p>
+        )}
+        {parseState.ok && (
+          <p className="text-sm text-emerald-600">{parseState.message}</p>
+        )}
+        {parseState.error && (
+          <p className="text-sm text-rose-600">{parseState.error}</p>
         )}
       </form>
     </div>

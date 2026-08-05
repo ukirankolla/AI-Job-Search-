@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseJsonObject } from "@/lib/llm/provider";
+import { getChatProvider, parseJsonObject } from "@/lib/llm/provider";
 
 describe("parseJsonObject", () => {
   it("parses plain JSON objects", () => {
@@ -27,5 +27,20 @@ describe("parseJsonObject", () => {
     expect(parseJsonObject("not json")).toBeNull();
     expect(parseJsonObject('{"score":')).toBeNull();
     expect(parseJsonObject("")).toBeNull();
+  });
+});
+
+describe("mock resume parser", () => {
+  it("extracts a profile from resume text", async () => {
+    const provider = getChatProvider();
+    const system = "You are the RESUME PARSER agent.";
+    const user = "RESUME:\nJane Smith\nSenior Full-Stack Engineer\nSkills: TypeScript, React, Node.js";
+
+    const { content } = await provider.complete(system, user);
+    const parsed = JSON.parse(content);
+
+    expect(parsed.full_name).toBe("Jane Smith");
+    expect(parsed.title).toContain("Engineer");
+    expect(parsed.skills).toContain("TypeScript");
   });
 });
