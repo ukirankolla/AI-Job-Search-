@@ -129,7 +129,7 @@ the full UX before wiring up real AI.
 | `npm run start` | Serve a production build |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm test` | Vitest (no tests yet) |
+| `npm test` | Vitest (unit tests for RAG, agents, providers, cron auth) |
 | `npm run db:migrate` | `supabase db push` |
 
 ## API routes
@@ -139,7 +139,16 @@ the full UX before wiring up real AI.
 | `POST /api/profile/vectorize` | Chunk + embed a resume | Session |
 | `POST /api/jobs/ingest` | Bulk-insert jobs (manual/feed/CSV) | Session |
 | `POST /api/agents/run` | Run agents, streams progress (SSE) | Session |
-| `GET /api/cron/track` | Tracker agent sweep | `x-cron-secret` header |
+| `GET /api/cron/track` | Tracker agent sweep | `CRON_SECRET` |
+
+## Deploying
+
+The app runs anywhere Next.js runs; the tracker cron is wired for **Vercel
+Cron** via `vercel.json` (daily at 07:00 UTC). Vercel authenticates cron calls
+with `Authorization: Bearer $CRON_SECRET` — the route also accepts an
+`x-cron-secret` header for manual or self-hosted triggers. Set `CRON_SECRET`
+in your environment (on Vercel you can either set it yourself or let Vercel
+manage it automatically).
 
 ## Project structure
 
