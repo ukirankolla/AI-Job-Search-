@@ -1,36 +1,165 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Job Search
 
-## Getting Started
+A multi-agent job-search copilot. Paste your resume, add job postings, and a
+team of collaborating AI agents matches roles, tailors your documents, and
+preps you for interviews.
 
-First, run the development server:
+Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
+**LangChain / LangGraph**.
+
+## Features
+
+- **Matcher** — scores each job against your profile (0–100) and lists your
+  matched and missing skills.
+- **Tailor** — rewrites your resume and writes a cover letter for a specific role.
+- **Prep** — generates role-specific interview questions with model answers.
+- **Tracker** — turns pipeline events into follow-up tasks and reminders.
+- **RAG resume search** — your resume is split into chunks and embedded, so
+  agents only look at the most relevant sections for each job.
+- **Pipeline board** — drag-free kanban (Saved / Applied / Interviewing /
+  Offer / Rejected) with live status updates.
+- **Magic-link + Google sign-in** with route protection via a Next.js proxy.
+
+## Architecture
+
+```
+Browser ──► Next.js (App Router) ──► Supabase (Postgres + Auth + pgvector)
+                 │
+                 └──► LangGraph agent graph ──► OpenAI (or mock)
+```
+
+- `src/app` — pages, API routes, and server actions.
+- `src/lib/agents` — the LangGraph workflow and each agent's prompt + parsing.
+- `src/lib/rag` — resume chunking, embedding, and vector retrieval.
+- `src/lib/llm` — OpenAI provider with an automatic **mock fallback**.
+- `src/lib/supabase` — browser / server / service-role clients.
+- `supabase/migrations` — schema: profiles, jobs, applications, tailored docs,
+  interview preps, notifications, agent runs, and the pgvector match function.
+
+## Prerequisites
+
+- Node.js 20.9+ (see `package.json` engines)
+- A [Supabase](https://supabase.com) project
+- Optional: an [OpenAI](https://platform.openai.com) API key. Without it the
+  app runs in **mock mode** (see below), so you can develop and demo for free.
+
+## Getting started
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+### 2. Create a Supabase project
+
+1. Create a project at [supabase.com](https://supabase.com).
+2. Enable **pgvector** (it's enabled by default on new projects).
+3. Optional: configure **Auth providers** (Google OAuth, or leave magic-link
+   email enabled) under *Authentication → Providers*.
+
+### 3. Apply the database migrations
+
+Either via the Supabase CLI:
+
+```bash
+npx supabase link --project-ref <your-project-ref>
+npm run db:migrate
+```
+
+Or via the Dashboard: open *SQL Editor*, then run the files in
+`supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`).
+
+### 4. Configure environment variables
+
+```bash
+cp .env.example .env.local
+```
+
+Then fill in the values (see [Configuration](#configuration)).
+
+### 5. Add the auth redirect URL
+
+Under *Authentication → URL Configuration*, add
+`http://localhost:3000/auth/callback` to the **Redirect URLs** list. For
+production, add your deployed URL as well.
+
+### 6. Run the dev server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000). Sign in, fill out your
+profile + resume, add a job, and hit **Run agents**.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+All variables are documented in [`.env.example`](.env.example). The essentials:
 
-## Learn More
+| Variable | Required | Description |
+| --- | --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | yes | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | yes | Public anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | yes | Secret service-role key (server-only) |
+| `OPENAI_API_KEY` | no | Enables real AI; omit for mock mode |
+| `AI_MODEL` | no | Default `gpt-4o-mini` |
+| `EMBEDDING_MODEL` | no | Default `text-embedding-3-small` |
+| `CRON_SECRET` | yes | Guards `GET /api/cron/track` |
+| `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000` |
 
-To learn more about Next.js, take a look at the following resources:
+## Mock mode
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+If `OPENAI_API_KEY` is unset:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Agents return deterministic, realistic sample output (matcher score, resume,
+  questions, tasks).
+- Resume embeddings are generated by a local hash-based vectorizer at the same
+  1536 dimensions as the real model.
 
-## Deploy on Vercel
+Everything else (auth, database, UI, streaming) works normally, so you can build
+the full UX before wiring up real AI.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Scripts
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve a production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest (no tests yet) |
+| `npm run db:migrate` | `supabase db push` |
+
+## API routes
+
+| Route | Purpose | Auth |
+| --- | --- | --- |
+| `POST /api/profile/vectorize` | Chunk + embed a resume | Session |
+| `POST /api/jobs/ingest` | Bulk-insert jobs (manual/feed/CSV) | Session |
+| `POST /api/agents/run` | Run agents, streams progress (SSE) | Session |
+| `GET /api/cron/track` | Tracker agent sweep | `x-cron-secret` header |
+
+## Project structure
+
+```
+src/
+  app/               pages, route handlers, server actions
+    auth/            OAuth callback, sign-out, error page
+    dashboard/       stats + recent applications + alerts
+    jobs/            job feed + add-job form
+    applications/    pipeline board + application detail
+    profile/         profile form + resume upload
+  components/        LoginForm, AgentRunner, StatusBadge, etc.
+  lib/
+    agents/          LangGraph workflow + workers
+    rag/             chunk, embed, retrieve
+    llm/             OpenAI / mock provider
+    supabase/        clients
+    services/        agent orchestration + persistence
+    auth.ts          session helpers
+  proxy.ts           auth route protection (Next.js proxy)
+supabase/
+  migrations/        SQL schema + pgvector match function
+```
