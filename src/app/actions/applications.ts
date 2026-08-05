@@ -96,7 +96,10 @@ export async function updateApplicationStatus(
   return { ok: true, message: "Status updated." };
 }
 
-export async function deleteApplication(formData: FormData): Promise<ActionState> {
+export async function deleteApplication(
+  _prev: ActionState,
+  formData: FormData,
+): Promise<ActionState> {
   let userId: string;
   try {
     userId = (await requireUser()).id;
