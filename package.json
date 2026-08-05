@@ -9,7 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "db:migrate": "supabase db push"
+    "db:migrate": "supabase db push",
+    "icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@langchain/core": "^0.3.0",

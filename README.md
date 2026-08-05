@@ -101,6 +101,10 @@ Sign up → Onboarding (contact details)
 - Magic-link + Google sign-in; Next.js proxy route protection; kanban pipeline
   board (Saved / Applied / Interviewing / Offer / Rejected); notifications
   inbox; SEO'd marketing landing page.
+- **Installable PWA** — a web manifest (`app/manifest.ts`), generated icons
+  (`npm run icons` → `public/icons/`), and a service worker (`public/sw.js`)
+  make Noventra installable: Android/Chrome users get an **Install** prompt,
+  iOS users **Add to Home Screen**. Static assets are cached for offline use.
 
 ---
 
@@ -314,6 +318,19 @@ npm run build        # production build (verifies routes compile)
 Tests cover the job source adapters, apply-URL classification, feed filters,
 the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 
+### Scripts
+
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the dev server (Turbopack) |
+| `npm run build` | Production build |
+| `npm run start` | Serve a production build |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | `tsc --noEmit` |
+| `npm test` | Vitest |
+| `npm run db:migrate` | `supabase db push` |
+| `npm run icons` | Regenerate PWA icons into `public/icons/` |
+
 ---
 
 ## API routes
@@ -355,3 +372,8 @@ triggers. Set `CRON_SECRET` (and all other vars) in your environment.
   one of the 15 weekly resume-rewrite credits.
 - **No bot submissions** — the "Auto-apply" option opens the official page
   rather than submitting forms programmatically, by design.
+- **PWA, not a native app** — Noventra is installable from the browser
+  (Chrome **Install** / iOS **Add to Home Screen**) and ships a service worker
+  that caches static assets, but it is **not** published on the Apple App
+  Store or Google Play. The app is server-rendered and auth-dependent, so
+  full offline use of live data is not supported.
