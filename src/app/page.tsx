@@ -1,11 +1,17 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 
+export const metadata = {
+  title: "AI Job Search — Upload Your Resume, We Do the Rest",
+  description:
+    "Upload your resume once. AI agents match fresh job postings, close your skill gaps, rewrite your resume and cover letter, and prep you for interviews.",
+};
+
 const agents = [
   {
     name: "Matcher",
     emoji: "🎯",
-    desc: "Scores every job against your profile and surfaces skills gaps.",
+    desc: "Scores fresh job postings against your resume and surfaces skill gaps.",
   },
   {
     name: "Tailor",
@@ -35,13 +41,13 @@ export default async function Home() {
           Multi-agent job search, live in your browser
         </div>
         <h1 className="max-w-3xl text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl">
-          Four agents. One job hunt.
-          <span className="block text-slate-400">Zero manual tailoring.</span>
+          Upload your resume once.
+          <span className="block text-slate-400">We do the rest.</span>
         </h1>
         <p className="mt-6 max-w-2xl text-lg text-slate-500">
-          Upload your resume, connect to job feeds, and let a team of
-          collaborating agents match roles, tailor your documents, and prep you
-          for interviews.
+          Our AI agents scan fresh job postings, match them to your skills, close
+          your gaps, rewrite your resume and cover letter, and prep you for
+          interviews — so you just apply.
         </p>
         <div className="mt-8">
           {user ? (

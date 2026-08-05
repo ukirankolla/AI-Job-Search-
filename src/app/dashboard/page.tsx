@@ -11,7 +11,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const supabase = await createClient();
 
-  const [{ data: applications }, { data: notifications }] = await Promise.all([
+  const [
+    { data: applications },
+    { data: notifications },
+    { data: profile },
+  ] = await Promise.all([
     supabase
       .from("applications")
       .select("id, status, match_score, deadline, created_at, job:jobs(title, company)")
@@ -24,10 +28,16 @@ export default async function DashboardPage() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
       .limit(5),
+    supabase
+      .from("profiles")
+      .select("resume_text")
+      .eq("id", user.id)
+      .maybeSingle(),
   ]);
 
   const apps = applications ?? [];
   const notifs = notifications ?? [];
+  const hasResume = Boolean(profile?.resume_text?.trim());
   const countBy = (s: string) => apps.filter((a) => a.status === s).length;
   const scores = apps.map((a) => a.match_score).filter((n): n is number => n !== null);
   const avgScore = scores.length
@@ -54,6 +64,24 @@ export default async function DashboardPage() {
           Browse jobs
         </Link>
       </div>
+
+      {!hasResume && (
+        <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+          <p className="text-lg font-semibold text-emerald-900">
+            Let’s get started — upload your resume once.
+          </p>
+          <p className="mt-1 text-sm text-emerald-700">
+            Your resume powers everything: matching fresh job postings, skill-gap
+            guidance, and tailored resumes and cover letters.
+          </p>
+          <Link
+            href="/profile"
+            className="mt-3 inline-block rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+          >
+            Upload my resume →
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {stats.map((s) => (

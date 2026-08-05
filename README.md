@@ -14,6 +14,11 @@ Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
 - **Tailor** — rewrites your resume and writes a cover letter for a specific role.
 - **Prep** — generates role-specific interview questions with model answers.
 - **Tracker** — turns pipeline events into follow-up tasks and reminders.
+- **Automated job discovery** — pulls fresh postings (default: last 8 hours)
+  from Adzuna or USAJobs, or a deterministic mock source when no keys are set.
+- **One-click apply** — after tailoring, a single button opens the official
+  application page with your documents ready.
+- **Resume-first onboarding** — upload your resume once; it powers everything.
 - **RAG resume search** — your resume is split into chunks and embedded, so
   agents only look at the most relevant sections for each job.
 - **Pipeline board** — drag-free kanban (Saved / Applied / Interviewing /
@@ -68,7 +73,8 @@ npm run db:migrate
 ```
 
 Or via the Dashboard: open *SQL Editor*, then run the files in
-`supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`).
+`supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`,
+`0003_job_delete.sql`).
 
 ### 4. Configure environment variables
 
@@ -105,7 +111,10 @@ All variables are documented in [`.env.example`](.env.example). The essentials:
 | `OPENAI_API_KEY` | no | Enables real AI; omit for mock mode |
 | `AI_MODEL` | no | Default `gpt-4o-mini` |
 | `EMBEDDING_MODEL` | no | Default `text-embedding-3-small` |
-| `CRON_SECRET` | yes | Guards `GET /api/cron/track` |
+| `JOB_SOURCE` | no | `adzuna`, `usajobs`, or `mock` (default `mock`) |
+| `ADZUNA_APP_ID` / `ADZUNA_APP_KEY` | no | Adzuna API credentials (US) |
+| `USAJOBS_EMAIL` / `USAJOBS_KEY` | no | USAJobs API credentials |
+| `CRON_SECRET` | yes | Guards `GET /api/cron/track` and `GET /api/cron/jobs` |
 | `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000` |
 
 ## Mock mode
@@ -138,8 +147,10 @@ the full UX before wiring up real AI.
 | --- | --- | --- |
 | `POST /api/profile/vectorize` | Chunk + embed a resume | Session |
 | `POST /api/jobs/ingest` | Bulk-insert jobs (manual/feed/CSV) | Session |
+| `POST /api/jobs/discover` | Fetch recent jobs from the configured source | Session |
 | `POST /api/agents/run` | Run agents, streams progress (SSE) | Session |
 | `GET /api/cron/track` | Tracker agent sweep | `CRON_SECRET` |
+| `GET /api/cron/jobs` | Hourly job discovery + ingest | `CRON_SECRET` |
 
 ## Deploying
 

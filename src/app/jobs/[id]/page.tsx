@@ -57,9 +57,24 @@ export default async function JobDetailPage({
       <div className="mt-6 space-y-6">
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-2 font-semibold text-slate-900">Agents</h2>
+          <p className="mb-3 text-sm text-slate-500">
+            Run the agents to score your fit, then hit{" "}
+            <span className="font-medium text-slate-700">Apply now</span> to open
+            the official application page with your tailored documents ready.
+          </p>
           <div className="flex flex-wrap gap-3">
             <AgentRunner jobId={id} applicationId={app?.id} runType="analyze" label="Analyze fit" />
             <AgentRunner jobId={id} applicationId={app?.id} runType="apply" label="Tailor + prep" />
+            {job.url ? (
+              <a
+                href={job.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
+              >
+                Apply now ↗
+              </a>
+            ) : null}
             {app ? (
               <Link
                 href={`/applications/${app.id}`}

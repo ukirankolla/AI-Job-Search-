@@ -13,8 +13,8 @@ export default async function JobsPage() {
 
   const { data: jobs } = await supabase
     .from("jobs")
-    .select("id, title, company, location, salary_min, salary_max, posted_at, description")
-    .order("fetched_at", { ascending: false })
+    .select("id, title, company, location, salary_min, salary_max, posted_at, url, description")
+    .order("posted_at", { ascending: false })
     .limit(50);
 
   const { data: savedApps } = await supabase
@@ -28,8 +28,9 @@ export default async function JobsPage() {
     <main className="mx-auto max-w-6xl px-4 py-8">
       <h1 className="text-2xl font-bold text-slate-900">Job feed</h1>
       <p className="mt-1 text-sm text-slate-500">
-        Add jobs manually or bulk-import a feed. Run the agents on any role to
-        score fit, tailor documents, and prep.
+        Fresh postings are discovered automatically. Toggle “Last 8 hours” to
+        see only the newest roles, or add jobs manually. Run the agents on any
+        role to score fit, tailor documents, and prep.
       </p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">
