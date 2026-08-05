@@ -11,6 +11,13 @@ const profileSchema = z.object({
   title: z.string().max(200),
   summary: z.string().max(5000),
   skills: z.string().max(2000),
+  email: z.string().email().max(200),
+  phone: z.string().max(40),
+  country: z.string().max(100),
+  city: z.string().max(100),
+  linkedin_url: z.string().max(300),
+  github_url: z.string().max(300),
+  website_url: z.string().max(300),
 });
 
 export type ProfileFormState = {
@@ -37,6 +44,13 @@ export async function updateProfile(
     title: formData.get("title"),
     summary: formData.get("summary"),
     skills: formData.get("skills"),
+    email: formData.get("email"),
+    phone: formData.get("phone"),
+    country: formData.get("country"),
+    city: formData.get("city"),
+    linkedin_url: formData.get("linkedin_url"),
+    github_url: formData.get("github_url"),
+    website_url: formData.get("website_url"),
   });
   if (!parsed.success) {
     return { ok: false, error: "Please fill in the required fields." };
@@ -55,6 +69,13 @@ export async function updateProfile(
       title: parsed.data.title,
       summary: parsed.data.summary,
       skills,
+      email: parsed.data.email,
+      phone: parsed.data.phone,
+      country: parsed.data.country,
+      city: parsed.data.city,
+      linkedin_url: parsed.data.linkedin_url,
+      github_url: parsed.data.github_url,
+      website_url: parsed.data.website_url,
     })
     .eq("id", userId);
 

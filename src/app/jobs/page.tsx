@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/auth";
+import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { classifyApplySource } from "@/lib/jobs/applySource";
 import { JobForm } from "@/components/JobForm";
@@ -9,7 +9,7 @@ import { JobFeed } from "@/components/JobFeed";
 export const metadata = { title: "Jobs | Noventra" };
 
 export default async function JobsPage() {
-  const user = await requireUser();
+  const user = await requireOnboarded();
   const supabase = await createClient();
 
   const [{ data: jobs }, { data: savedApps }, { data: profile }, { data: matches }] =

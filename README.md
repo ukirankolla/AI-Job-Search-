@@ -84,7 +84,8 @@ npm run db:migrate
 
 Or via the Dashboard: open *SQL Editor*, then run the files in
 `supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`,
-`0003_job_delete.sql`, `0004_job_matches.sql`, `0005_job_attributes.sql`).
+`0003_job_delete.sql`, `0004_job_matches.sql`, `0005_job_attributes.sql`,
+`0006_onboarding.sql`).
 
 ### 4. Configure environment variables
 

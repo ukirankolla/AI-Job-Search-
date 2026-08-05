@@ -13,6 +13,14 @@ export interface Profile {
   skills: string[];
   resume_text: string;
   resume_embedding_status: "none" | "pending" | "done" | "failed";
+  email?: string;
+  phone?: string;
+  country?: string;
+  city?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  website_url?: string;
+  onboarding_completed?: boolean;
   created_at: string;
   updated_at: string;
 }

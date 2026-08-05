@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/auth";
+import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PipelineBoard, type PipelineCard } from "@/components/PipelineBoard";
 import type { ApplicationStatus } from "@/lib/types";
@@ -6,7 +6,7 @@ import type { ApplicationStatus } from "@/lib/types";
 export const metadata = { title: "Pipeline | Noventra" };
 
 export default async function ApplicationsPage() {
-  const user = await requireUser();
+  const user = await requireOnboarded();
   const supabase = await createClient();
 
   const { data: applications } = await supabase

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth";
+import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
@@ -15,7 +15,7 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const user = await requireUser();
+  const user = await requireOnboarded();
   const supabase = await createClient();
 
   const { data: job } = await supabase

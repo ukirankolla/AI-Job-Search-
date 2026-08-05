@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/StatusBadge";
 import { NotificationsList } from "@/components/NotificationsList";
@@ -8,7 +8,7 @@ import type { Notification } from "@/lib/types";
 export const metadata = { title: "Dashboard | Noventra" };
 
 export default async function DashboardPage() {
-  const user = await requireUser();
+  const user = await requireOnboarded();
   const supabase = await createClient();
 
   const [
