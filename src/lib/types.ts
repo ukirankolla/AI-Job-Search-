@@ -13,6 +13,15 @@ export interface Profile {
   skills: string[];
   resume_text: string;
   resume_embedding_status: "none" | "pending" | "done" | "failed";
+  email?: string;
+  phone?: string;
+  country?: string;
+  city?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  website_url?: string;
+  onboarding_completed?: boolean;
+  subscription_tier?: "free" | "premium";
   created_at: string;
   updated_at: string;
 }
@@ -38,6 +47,8 @@ export interface JobPosting {
   salary_min?: number | null;
   salary_max?: number | null;
   posted_at?: string | null;
+  employment_type?: string | null;
+  sponsorship?: string | null;
 }
 
 export interface Application {
@@ -119,6 +130,20 @@ export interface MatchResult {
   missing_skills: string[];
   strengths: string[];
   concerns: string[];
+}
+
+export interface JobMatch {
+  id: string;
+  user_id: string;
+  job_id: string;
+  score: number;
+  summary: string;
+  matched_skills: string[];
+  missing_skills: string[];
+  strengths: string[];
+  concerns: string[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TailorResult {

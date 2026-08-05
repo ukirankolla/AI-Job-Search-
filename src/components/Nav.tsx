@@ -6,6 +6,7 @@ const links = [
   { href: "/jobs", label: "Jobs" },
   { href: "/applications", label: "Pipeline" },
   { href: "/profile", label: "Profile" },
+  { href: "/upgrade", label: "Upgrade" },
 ];
 
 export async function Nav() {
@@ -16,9 +17,9 @@ export async function Nav() {
       <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 font-semibold">
           <span className="grid h-7 w-7 place-items-center rounded-md bg-slate-900 text-sm text-white">
-            A
+            N
           </span>
-          <span>AI Job Search</span>
+          <span>Noventra</span>
         </Link>
 
         {user && (

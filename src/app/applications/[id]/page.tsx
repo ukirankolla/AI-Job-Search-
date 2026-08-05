@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireUser } from "@/lib/auth";
+import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { AgentRunner } from "@/components/AgentRunner";
 import { StatusSelect } from "@/components/StatusSelect";
 import { DeleteApplicationButton } from "@/components/DeleteApplicationButton";
 import type { InterviewPrep } from "@/lib/types";
 
-export const metadata = { title: "Application | AI Job Search" };
+export const metadata = { title: "Application | Noventra" };
 
 export default async function ApplicationDetailPage({
   params,
@@ -15,7 +15,7 @@ export default async function ApplicationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const user = await requireUser();
+  const user = await requireOnboarded();
   const supabase = await createClient();
 
   const { data: app } = await supabase

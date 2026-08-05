@@ -1,8 +1,9 @@
-# AI Job Search
+# Noventra
 
-A multi-agent job-search copilot. Paste your resume, add job postings, and a
-team of collaborating AI agents matches roles, tailors your documents, and
-preps you for interviews.
+A resume-first job-search copilot. Upload your resume once, and a team of
+collaborating AI agents matches fresh job postings to your skills, shows a
+match percentage for every job, rewrites an ATS-friendly resume and cover
+letter, and gets you to the official application page.
 
 Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
 **LangChain / LangGraph**.
@@ -14,6 +15,20 @@ Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
 - **Tailor** — rewrites your resume and writes a cover letter for a specific role.
 - **Prep** — generates role-specific interview questions with model answers.
 - **Tracker** — turns pipeline events into follow-up tasks and reminders.
+- **Automated job discovery** — pulls fresh postings (default: last 8 hours)
+  from company career portals only: a company's public **Greenhouse**, **Lever**,
+  **Workable**, or **Ashby** job board, or a deterministic mock source when none
+  is set. Apply links always point at the company's own career site or LinkedIn
+  — never a third-party job board.
+- **Match % for every job** — every posting in the feed is scored against your
+  resume (0–100), matched or not, with matched/missing skills.
+- **4 / 8 / 12-hour filters** — narrow the feed to postings from the last few
+  hours.
+- **ATS-friendly resume rewrite** — one button rewrites your resume for the
+  exact job, with copy-ready output.
+- **One-click apply** — after tailoring, a single button opens the official
+  application page with your documents ready; an auto-apply option is offered.
+- **Resume-first onboarding** — upload your resume once; it powers everything.
 - **RAG resume search** — your resume is split into chunks and embedded, so
   agents only look at the most relevant sections for each job.
 - **Pipeline board** — drag-free kanban (Saved / Applied / Interviewing /
@@ -68,7 +83,9 @@ npm run db:migrate
 ```
 
 Or via the Dashboard: open *SQL Editor*, then run the files in
-`supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`).
+`supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`,
+`0003_job_delete.sql`, `0004_job_matches.sql`, `0005_job_attributes.sql`,
+`0006_onboarding.sql`, `0007_subscriptions.sql`).
 
 ### 4. Configure environment variables
 
@@ -105,8 +122,28 @@ All variables are documented in [`.env.example`](.env.example). The essentials:
 | `OPENAI_API_KEY` | no | Enables real AI; omit for mock mode |
 | `AI_MODEL` | no | Default `gpt-4o-mini` |
 | `EMBEDDING_MODEL` | no | Default `text-embedding-3-small` |
-| `CRON_SECRET` | yes | Guards `GET /api/cron/track` |
+| `JOB_SOURCE` | no | `greenhouse`, `lever`, `workable`, `ashby`, or `mock` (default `mock`) |
+| `GREENHOUSE_BOARD` | no | A company's public Greenhouse board token, e.g. `stripe` |
+| `LEVER_COMPANY` | no | A company's public Lever company slug, e.g. `vercel` |
+| `WORKABLE_ACCOUNT` | no | A company's public Workable account slug, e.g. `huggingface` |
+| `ASHBY_JOB_BOARD` | no | A company's public Ashby job board slug, e.g. `linear` |
+| `CRON_SECRET` | yes | Guards `GET /api/cron/track` and `GET /api/cron/jobs` |
+| `ADMIN_EMAILS` | no | Comma-separated emails exempt from usage limits; can grant premium from `/upgrade` |
 | `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000` |
+
+## Plans & usage limits
+
+Free accounts get **15 resume rewrites** and **15 in-app applies** per rolling
+7-day window. Premium ($15/month) and admin accounts are unlimited.
+
+- Limits are enforced server-side: the apply route (`POST /api/agents/run` with
+  `runType: "apply"`) and the in-app apply flow return a `402` / blocked state
+  once a quota is exhausted.
+- Usage is tracked in the `usage_events` table (`kind`: `resume_rewrite` |
+  `apply`) and exposed on the job detail page and `/upgrade`.
+- Billing isn't wired up yet — premium is activated **manually**: admins grant
+  it from `/upgrade` by email (updates `profiles.subscription_tier`). Stripe
+  can be added later without changing the quota model.
 
 ## Mock mode
 
@@ -138,8 +175,11 @@ the full UX before wiring up real AI.
 | --- | --- | --- |
 | `POST /api/profile/vectorize` | Chunk + embed a resume | Session |
 | `POST /api/jobs/ingest` | Bulk-insert jobs (manual/feed/CSV) | Session |
+| `POST /api/jobs/discover` | Fetch recent jobs from the configured source | Session |
+| `POST /api/jobs/match` | Score jobs against your resume (stores `job_matches`) | Session |
 | `POST /api/agents/run` | Run agents, streams progress (SSE) | Session |
 | `GET /api/cron/track` | Tracker agent sweep | `CRON_SECRET` |
+| `GET /api/cron/jobs` | Hourly job discovery + ingest | `CRON_SECRET` |
 
 ## Deploying
 
@@ -160,6 +200,7 @@ src/
     jobs/            job feed + add-job form
     applications/    pipeline board + application detail
     profile/         profile form + resume upload
+    upgrade/         plan + usage meter + admin premium grant
   components/        LoginForm, AgentRunner, StatusBadge, etc.
   lib/
     agents/          LangGraph workflow + workers
@@ -168,6 +209,7 @@ src/
     supabase/        clients
     services/        agent orchestration + persistence
     auth.ts          session helpers
+    subscription.ts  quota + tier helpers
   proxy.ts           auth route protection (Next.js proxy)
 supabase/
   migrations/        SQL schema + pgvector match function

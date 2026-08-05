@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const metadata = { title: "Sign in failed | AI Job Search" };
+export const metadata = { title: "Sign in failed | Noventra" };
 
 export default async function AuthCodeErrorPage({
   searchParams,

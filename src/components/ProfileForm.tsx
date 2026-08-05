@@ -69,6 +69,84 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
           />
         </div>
+
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="text-sm font-medium text-slate-700">Email</label>
+            <input
+              name="email"
+              type="email"
+              defaultValue={profile.email}
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">Phone</label>
+            <input
+              name="phone"
+              type="tel"
+              defaultValue={profile.phone}
+              placeholder="+1 555 000 1234"
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">
+              Country
+            </label>
+            <input
+              name="country"
+              defaultValue={profile.country}
+              placeholder="United States"
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">City</label>
+            <input
+              name="city"
+              defaultValue={profile.city}
+              placeholder="Austin, TX"
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">
+              LinkedIn URL
+            </label>
+            <input
+              name="linkedin_url"
+              type="url"
+              defaultValue={profile.linkedin_url}
+              placeholder="https://www.linkedin.com/in/..."
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">
+              GitHub URL
+            </label>
+            <input
+              name="github_url"
+              type="url"
+              defaultValue={profile.github_url}
+              placeholder="https://github.com/..."
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="text-sm font-medium text-slate-700">
+              Website / portfolio
+            </label>
+            <input
+              name="website_url"
+              type="url"
+              defaultValue={profile.website_url}
+              placeholder="https://..."
+              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+        </div>
         <button
           type="submit"
           disabled={pending}

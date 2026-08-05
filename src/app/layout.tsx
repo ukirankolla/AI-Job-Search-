@@ -14,9 +14,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Job Search",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+  title: "Noventra — Upload Your Resume, We Match & Apply",
   description:
-    "Multi-agent job search copilot: match roles, tailor documents, and prep for interviews.",
+    "Noventra scans fresh job postings, matches each one to your resume with a clear match score, rewrites an ATS-friendly resume and cover letter for you, and opens the official application page — so you just apply.",
+  keywords: [
+    "noventra",
+    "ai job search",
+    "ai job matching",
+    "resume matching",
+    "match percentage resume",
+    "ats friendly resume",
+    "auto apply jobs",
+    "tailored cover letter",
+    "interview prep",
+  ],
+  openGraph: {
+    title: "Noventra — Upload Your Resume, We Match & Apply",
+    description:
+      "Upload your resume once. Noventra finds matching jobs, shows your match %, rewrites your ATS-friendly resume, and gets you to the official application.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
