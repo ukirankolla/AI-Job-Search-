@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PipelineBoard, type PipelineCard } from "@/components/PipelineBoard";
 import type { ApplicationStatus } from "@/lib/types";
 
-export const metadata = { title: "Pipeline | AI Job Search" };
+export const metadata = { title: "Pipeline | JobOrbit" };
 
 export default async function ApplicationsPage() {
   const user = await requireUser();

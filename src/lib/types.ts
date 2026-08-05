@@ -121,6 +121,20 @@ export interface MatchResult {
   concerns: string[];
 }
 
+export interface JobMatch {
+  id: string;
+  user_id: string;
+  job_id: string;
+  score: number;
+  summary: string;
+  matched_skills: string[];
+  missing_skills: string[];
+  strengths: string[];
+  concerns: string[];
+  created_at: string;
+  updated_at: string;
+}
+
 export interface TailorResult {
   resume: string;
   cover_letter: string;

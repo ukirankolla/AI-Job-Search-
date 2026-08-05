@@ -2,7 +2,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileForm } from "@/components/ProfileForm";
 
-export const metadata = { title: "Profile | AI Job Search" };
+export const metadata = { title: "Profile | JobOrbit" };
 
 export default async function ProfilePage() {
   const user = await requireUser();

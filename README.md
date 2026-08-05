@@ -1,8 +1,9 @@
-# AI Job Search
+# JobOrbit
 
-A multi-agent job-search copilot. Paste your resume, add job postings, and a
-team of collaborating AI agents matches roles, tailors your documents, and
-preps you for interviews.
+A resume-first job-search copilot. Upload your resume once, and a team of
+collaborating AI agents matches fresh job postings to your skills, shows a
+match percentage for every job, rewrites an ATS-friendly resume and cover
+letter, and gets you to the official application page.
 
 Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
 **LangChain / LangGraph**.
@@ -16,8 +17,14 @@ Built with **Next.js 16**, **Supabase** (Postgres + Auth + pgvector), and
 - **Tracker** — turns pipeline events into follow-up tasks and reminders.
 - **Automated job discovery** — pulls fresh postings (default: last 8 hours)
   from Adzuna or USAJobs, or a deterministic mock source when no keys are set.
+- **Match % for every job** — every posting in the feed is scored against your
+  resume (0–100), matched or not, with matched/missing skills.
+- **4 / 8 / 12-hour filters** — narrow the feed to postings from the last few
+  hours.
+- **ATS-friendly resume rewrite** — one button rewrites your resume for the
+  exact job, with copy-ready output.
 - **One-click apply** — after tailoring, a single button opens the official
-  application page with your documents ready.
+  application page with your documents ready; an auto-apply option is offered.
 - **Resume-first onboarding** — upload your resume once; it powers everything.
 - **RAG resume search** — your resume is split into chunks and embedded, so
   agents only look at the most relevant sections for each job.
@@ -74,7 +81,7 @@ npm run db:migrate
 
 Or via the Dashboard: open *SQL Editor*, then run the files in
 `supabase/migrations/` **in order** (`0001_init.sql`, `0002_vector_match.sql`,
-`0003_job_delete.sql`).
+`0003_job_delete.sql`, `0004_job_matches.sql`).
 
 ### 4. Configure environment variables
 
@@ -148,6 +155,7 @@ the full UX before wiring up real AI.
 | `POST /api/profile/vectorize` | Chunk + embed a resume | Session |
 | `POST /api/jobs/ingest` | Bulk-insert jobs (manual/feed/CSV) | Session |
 | `POST /api/jobs/discover` | Fetch recent jobs from the configured source | Session |
+| `POST /api/jobs/match` | Score jobs against your resume (stores `job_matches`) | Session |
 | `POST /api/agents/run` | Run agents, streams progress (SSE) | Session |
 | `GET /api/cron/track` | Tracker agent sweep | `CRON_SECRET` |
 | `GET /api/cron/jobs` | Hourly job discovery + ingest | `CRON_SECRET` |

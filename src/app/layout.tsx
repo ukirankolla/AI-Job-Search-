@@ -15,21 +15,24 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-  title: "AI Job Search — Auto-Match, Tailor & Apply to Jobs",
+  title: "JobOrbit — Upload Your Resume, We Match & Apply",
   description:
-    "Upload your resume once and let AI agents match fresh job postings, close your skill gaps, rewrite your resume and cover letter, and prep you for interviews. Free job matching, tailored applications in one click.",
+    "JobOrbit scans fresh job postings, matches each one to your resume with a clear match score, rewrites an ATS-friendly resume and cover letter for you, and opens the official application page — so you just apply.",
   keywords: [
+    "joborbit",
     "ai job search",
     "ai job matching",
     "resume matching",
+    "match percentage resume",
+    "ats friendly resume",
     "auto apply jobs",
     "tailored cover letter",
     "interview prep",
   ],
   openGraph: {
-    title: "AI Job Search — Auto-Match, Tailor & Apply to Jobs",
+    title: "JobOrbit — Upload Your Resume, We Match & Apply",
     description:
-      "Upload your resume once. AI finds matching jobs, closes skill gaps, and tailors your application.",
+      "Upload your resume once. JobOrbit finds matching jobs, shows your match %, rewrites your ATS-friendly resume, and gets you to the official application.",
     type: "website",
   },
 };

@@ -5,8 +5,9 @@ import { createClient } from "@/lib/supabase/server";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
+import { ApplyKit } from "@/components/ApplyKit";
 
-export const metadata = { title: "Job | AI Job Search" };
+export const metadata = { title: "Job | JobOrbit" };
 
 export default async function JobDetailPage({
   params,
@@ -32,6 +33,22 @@ export default async function JobDetailPage({
     .eq("user_id", user.id)
     .maybeSingle();
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("resume_text")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const { data: jobMatch } = await supabase
+    .from("job_matches")
+    .select("score")
+    .eq("job_id", id)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  const matchScore = jobMatch?.score ?? app?.match_score ?? null;
+  const hasResume = Boolean(profile?.resume_text?.trim());
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
       <Link href="/jobs" className="text-sm text-slate-500 hover:underline">
@@ -47,9 +64,9 @@ export default async function JobDetailPage({
             {job.salary_min ? ` · $${job.salary_min.toLocaleString()}${job.salary_max ? `–$${job.salary_max.toLocaleString()}` : "+"}` : ""}
           </p>
         </div>
-        {app?.match_score !== null && app?.match_score !== undefined && (
+        {matchScore !== null && (
           <span className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white">
-            Match {app.match_score}/100
+            Match {matchScore}/100
           </span>
         )}
       </div>
@@ -58,23 +75,13 @@ export default async function JobDetailPage({
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-2 font-semibold text-slate-900">Agents</h2>
           <p className="mb-3 text-sm text-slate-500">
-            Run the agents to score your fit, then hit{" "}
-            <span className="font-medium text-slate-700">Apply now</span> to open
-            the official application page with your tailored documents ready.
+            Deep-dive the role: analyze your fit, tailor your documents, and
+            prep for the interview.
           </p>
           <div className="flex flex-wrap gap-3">
             <AgentRunner jobId={id} applicationId={app?.id} runType="analyze" label="Analyze fit" />
             <AgentRunner jobId={id} applicationId={app?.id} runType="apply" label="Tailor + prep" />
-            {job.url ? (
-              <a
-                href={job.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500"
-              >
-                Apply now ↗
-              </a>
-            ) : null}
+            <AgentRunner jobId={id} applicationId={app?.id} runType="prep" label="Prep only" />
             {app ? (
               <Link
                 href={`/applications/${app.id}`}
@@ -92,6 +99,14 @@ export default async function JobDetailPage({
             </div>
           )}
         </div>
+
+        <ApplyKit
+          jobId={id}
+          jobUrl={job.url || undefined}
+          applicationId={app?.id}
+          matchScore={matchScore}
+          hasResume={hasResume}
+        />
 
         <div className="rounded-xl border border-slate-200 bg-white p-6">
           <h2 className="mb-3 font-semibold text-slate-900">Job description</h2>
