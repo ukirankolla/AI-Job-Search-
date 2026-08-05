@@ -2,6 +2,8 @@ import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/StatusBadge";
+import { NotificationsList } from "@/components/NotificationsList";
+import type { Notification } from "@/lib/types";
 
 export const metadata = { title: "Dashboard | AI Job Search" };
 
@@ -103,20 +105,9 @@ export default async function DashboardPage() {
           <h2 className="mb-3 text-lg font-semibold text-slate-900">
             Agent alerts
           </h2>
-          {notifs.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-500">
-              <p>Your tracker agent will nudge you here.</p>
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {notifs.map((n) => (
-                <li key={n.id} className="rounded-lg border border-slate-200 bg-white p-3">
-                  <p className="text-sm font-medium text-slate-900">{n.title}</p>
-                  <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>
-                </li>
-              ))}
-            </ul>
-          )}
+          <NotificationsList
+            notifications={notifs as Notification[]}
+          />
         </section>
       </div>
     </main>
