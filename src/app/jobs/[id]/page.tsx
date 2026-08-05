@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
+import { DeleteJobButton } from "@/components/DeleteJobButton";
 
 export const metadata = { title: "Job | AI Job Search" };
 
@@ -70,6 +71,11 @@ export default async function JobDetailPage({
               <AddToPipelineButton jobId={id} />
             )}
           </div>
+          {job.source === "manual" && (
+            <div className="mt-4 border-t border-slate-100 pt-3">
+              <DeleteJobButton jobId={id} />
+            </div>
+          )}
         </div>
 
         <div className="rounded-xl border border-slate-200 bg-white p-6">
