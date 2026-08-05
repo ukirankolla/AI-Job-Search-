@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { buildGraph } from "@/lib/agents/graph";
 import { loadAgentInput } from "@/lib/services/agentService";
@@ -5,6 +6,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const bodySchema = z.object({
+  jobId: z.string().uuid(),
+  applicationId: z.string().uuid().optional(),
+  runType: z.enum(["analyze", "apply", "prep"]).optional(),
+});
 
 export async function POST(request: Request) {
   let user;
@@ -15,23 +22,33 @@ export async function POST(request: Request) {
   }
   const userId = user.id;
 
-  let body: {
-    jobId?: string;
-    applicationId?: string;
-    runType?: "analyze" | "apply" | "prep";
-  };
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  const body = await request.json().catch(() => null);
+  const parsed = bodySchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { error: "Invalid payload", details: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
-  const runType = body.runType ?? "analyze";
-  if (!body.jobId) {
-    return Response.json({ error: "jobId is required" }, { status: 400 });
+  const { jobId, runType } = parsed.data;
+  const applicationId = parsed.data.applicationId;
+  const normalizedRunType = runType ?? "analyze";
+
+  if (applicationId) {
+    const admin = createAdminClient();
+    const { data: owned, error } = await admin
+      .from("applications")
+      .select("id")
+      .eq("id", applicationId)
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error || !owned) {
+      return Response.json({ error: "Application not found" }, { status: 403 });
+    }
   }
 
-  return streamRun(userId, body.jobId, body.applicationId, runType);
+  return streamRun(userId, jobId, applicationId, normalizedRunType);
 }
 
 async function streamRun(
