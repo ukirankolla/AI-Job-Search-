@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  addManualJob,
-  initialState,
-} from "@/app/actions/applications";
+import { addManualJob } from "@/app/actions/applications";
+import { initialState } from "@/app/actions/form-state";
 
 export function JobForm() {
   const [state, formAction, pending] = useActionState(addManualJob, initialState);

@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  completeOnboarding,
-  initialState,
-} from "@/app/actions/onboarding";
+import { completeOnboarding } from "@/app/actions/onboarding";
+import { initialState } from "@/app/actions/form-state";
 import type { Profile } from "@/lib/types";
 
 const COMMON_COUNTRIES = [

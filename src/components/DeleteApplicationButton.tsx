@@ -3,10 +3,8 @@
 import { useEffect } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  deleteApplication,
-  initialState,
-} from "@/app/actions/applications";
+import { deleteApplication } from "@/app/actions/applications";
+import { initialState } from "@/app/actions/form-state";
 
 export function DeleteApplicationButton({
   applicationId,

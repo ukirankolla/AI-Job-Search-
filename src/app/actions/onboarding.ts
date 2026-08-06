@@ -31,8 +31,6 @@ export type OnboardingFormState = {
   error?: string;
 };
 
-export const initialState: OnboardingFormState = { ok: false, message: "" };
-
 export async function completeOnboarding(
   _prev: OnboardingFormState,
   formData: FormData,

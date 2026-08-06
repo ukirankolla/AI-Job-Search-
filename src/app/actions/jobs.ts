@@ -10,8 +10,6 @@ export type JobActionState = {
   error?: string;
 };
 
-export const initialState: JobActionState = { ok: false, message: "" };
-
 export async function deleteJob(
   _prev: JobActionState,
   formData: FormData,

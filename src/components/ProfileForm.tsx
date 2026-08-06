@@ -1,8 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
+import { initialState } from "@/app/actions/form-state";
 import {
-  initialState,
   parseResumeProfile,
   updateProfile,
   uploadResume,

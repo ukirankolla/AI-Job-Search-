@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import {
-  initialState,
-  updateApplicationStatus,
-} from "@/app/actions/applications";
+import { updateApplicationStatus } from "@/app/actions/applications";
+import { initialState } from "@/app/actions/form-state";
 import type { ApplicationStatus } from "@/lib/types";
 
 const statuses: ApplicationStatus[] = [

@@ -1,16 +1,14 @@
 "use client";
 
 import { useActionState, useState } from "react";
-import {
-  grantPremium,
-  grantPremiumInitial,
-} from "@/app/actions/subscription";
+import { initialState } from "@/app/actions/form-state";
+import { grantPremium } from "@/app/actions/subscription";
 
 export function PremiumGrantForm() {
   const [email, setEmail] = useState("");
   const [state, formAction, pending] = useActionState(
     grantPremium,
-    grantPremiumInitial,
+    initialState,
   );
 
   return (

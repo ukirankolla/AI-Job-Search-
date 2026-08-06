@@ -26,8 +26,6 @@ export type ProfileFormState = {
   error?: string;
 };
 
-export const initialState: ProfileFormState = { ok: false, message: "" };
-
 export async function updateProfile(
   _prev: ProfileFormState,
   formData: FormData,

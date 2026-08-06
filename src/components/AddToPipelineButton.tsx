@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  createApplication,
-  initialState,
-} from "@/app/actions/applications";
+import { createApplication } from "@/app/actions/applications";
+import { initialState } from "@/app/actions/form-state";
 
 export function AddToPipelineButton({ jobId }: { jobId: string }) {
   const [state, formAction, pending] = useActionState(

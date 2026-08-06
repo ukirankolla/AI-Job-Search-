@@ -3,7 +3,8 @@
 import { useEffect } from "react";
 import { useActionState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteJob, initialState } from "@/app/actions/jobs";
+import { deleteJob } from "@/app/actions/jobs";
+import { initialState } from "@/app/actions/form-state";
 
 export function DeleteJobButton({ jobId }: { jobId: string }) {
   const router = useRouter();

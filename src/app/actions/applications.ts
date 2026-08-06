@@ -27,8 +27,6 @@ export type ActionState = {
   applicationId?: string;
 };
 
-export const initialState: ActionState = { ok: false, message: "" };
-
 export async function createApplication(
   _prev: ActionState,
   formData: FormData,

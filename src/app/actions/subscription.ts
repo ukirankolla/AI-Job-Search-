@@ -56,11 +56,6 @@ export type GrantPremiumResult = {
   granted?: string;
 };
 
-export const grantPremiumInitial: GrantPremiumResult = {
-  ok: false,
-  message: "",
-};
-
 export async function grantPremium(
   _prev: GrantPremiumResult,
   formData: FormData,
