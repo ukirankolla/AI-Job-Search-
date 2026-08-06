@@ -1,20 +1,51 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+
+const COOLDOWN_SECONDS = 60;
 
 export function LoginForm({ next = "/dashboard" }: { next?: string }) {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const supabase = createClient();
+
+  useEffect(() => {
+    return () => {
+      if (timer.current) clearInterval(timer.current);
+    };
+  }, []);
+
+  const startCooldown = () => {
+    setCooldown(COOLDOWN_SECONDS);
+    timer.current = setInterval(() => {
+      setCooldown((s) => {
+        if (s <= 1) {
+          if (timer.current) clearInterval(timer.current);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
+  };
+
+  const friendlyError = (message: string) => {
+    if (/rate limit|too many requests/i.test(message)) {
+      return "We've hit our email limit for this hour. Please try again in a bit.";
+    }
+    return message;
+  };
 
   const signInWithEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSent(false);
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -22,8 +53,9 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
       },
     });
     setLoading(false);
+    startCooldown();
     if (error) {
-      setError(error.message);
+      setError(friendlyError(error.message));
       return;
     }
     setSent(true);
@@ -39,8 +71,10 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
       },
     });
     setLoading(false);
-    if (error) setError(error.message);
+    if (error) setError(friendlyError(error.message));
   };
+
+  const sendDisabled = loading || cooldown > 0;
 
   return (
     <div className="mx-auto mt-24 max-w-sm space-y-6 rounded-xl border border-slate-200 bg-white p-8">
@@ -77,10 +111,14 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
         />
         <button
           type="submit"
-          disabled={loading}
+          disabled={sendDisabled}
           className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
         >
-          {loading ? "Sending…" : "Send magic link"}
+          {loading
+            ? "Sending…"
+            : cooldown > 0
+              ? `Try again in ${cooldown}s`
+              : "Send magic link"}
         </button>
       </form>
 
