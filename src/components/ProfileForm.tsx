@@ -6,6 +6,7 @@ import {
   parseResumeProfile,
   updateProfile,
   uploadResume,
+  uploadResumeFile,
 } from "@/app/actions/profile";
 import type { Profile } from "@/lib/types";
 
@@ -20,6 +21,10 @@ export function ProfileForm({ profile }: { profile: Profile }) {
   );
   const [parseState, parseAction, parsePending] = useActionState(
     parseResumeProfile,
+    initialState,
+  );
+  const [fileState, fileAction, filePending] = useActionState(
+    uploadResumeFile,
     initialState,
   );
 
@@ -158,8 +163,49 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         {state.error && <p className="text-sm text-rose-600">{state.error}</p>}
       </form>
 
-      <form action={resumeAction} className="space-y-4 rounded-lg border border-slate-200 p-6">
+      <form
+        key={profile.resume_text}
+        action={resumeAction}
+        className="space-y-4 rounded-lg border border-slate-200 p-6"
+      >
         <h2 className="text-lg font-semibold">Resume</h2>
+        <div className="space-y-2 rounded-md border border-dashed border-slate-300 p-4">
+          <p className="text-sm font-medium text-slate-700">
+            Upload your resume file
+          </p>
+          <p className="text-xs text-slate-500">
+            PDF, Word (.docx), or plain text (.txt). The text is extracted
+            automatically and indexed in the background.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <input
+              type="file"
+              name="resume_file"
+              accept=".pdf,.docx,.txt,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700"
+            />
+            <button
+              type="submit"
+              formAction={fileAction}
+              disabled={filePending}
+              className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+            >
+              {filePending ? "Uploading…" : "Upload resume file"}
+            </button>
+            <span className="text-xs text-slate-400">max 4 MB</span>
+          </div>
+          {fileState.ok && (
+            <p className="text-sm text-emerald-600">{fileState.message}</p>
+          )}
+          {fileState.error && (
+            <p className="text-sm text-rose-600">{fileState.error}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="h-px flex-1 bg-slate-200" />
+          <span className="text-xs text-slate-400">or paste text manually</span>
+          <div className="h-px flex-1 bg-slate-200" />
+        </div>
         <p className="text-sm text-slate-500">
           Paste your resume text. The agents index it into a vector database for
           retrieval-augmented matching.
@@ -168,7 +214,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           name="resume_text"
           defaultValue={profile.resume_text}
           rows={12}
-          placeholder="John Doe\nFull-Stack Engineer\n...paste your resume here..."
+          placeholder={"John Doe\nFull-Stack Engineer\n...paste your resume here..."}
           className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 font-mono text-xs"
         />
         <div className="flex flex-wrap items-center gap-3">

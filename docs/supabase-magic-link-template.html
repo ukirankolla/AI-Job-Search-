@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <body style="margin:0;padding:0;background-color:#f1f5f9;font-family:Arial,Helvetica,sans-serif;">
+    <table width="100%" bgcolor="#f1f5f9" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
+      <table width="480" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:12px;overflow:hidden;">
+        <tr><td bgcolor="#0f172a" style="padding:24px 32px;">
+          <span style="color:#ffffff;font-size:20px;font-weight:bold;">Noventra</span>
+        </td></tr>
+        <tr><td style="padding:32px;">
+          <h1 style="margin:0 0 8px;font-size:22px;color:#0f172a;">Send your sign-in link</h1>
+          <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#475569;">Hi there, we just sent this link to sign in to your Noventra account. It expires shortly and can only be used once.</p>
+          <table cellpadding="0" cellspacing="0"><tr><td>
+            <a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#0f172a;color:#ffffff;text-decoration:none;font-size:14px;font-weight:bold;padding:12px 24px;border-radius:8px;">Sign in to Noventra</a>
+          </td></tr></table>
+          <p style="margin:24px 0 0;font-size:13px;line-height:1.6;color:#64748b;">If the button doesn't work, copy and paste this link into your browser:<br><a href="{{ .ConfirmationURL }}" style="color:#2563eb;word-break:break-all;">{{ .ConfirmationURL }}</a></p>
+          <p style="margin:16px 0 0;font-size:12px;color:#94a3b8;">If you didn't request this, you can safely ignore this email.</p>
+        </td></tr></table>
+      </table>
+    </td></tr></table>
+  </body>
+</html>

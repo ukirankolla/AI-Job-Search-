@@ -123,6 +123,103 @@ export async function uploadResume(
   return { ok: true, message: "Resume uploaded and vectorized." };
 }
 
+const MAX_RESUME_FILE_SIZE = 4 * 1024 * 1024;
+
+async function extractResumeText(file: File): Promise<string> {
+  const name = file.name.toLowerCase();
+  if (name.endsWith(".pdf")) {
+    const { PDFParse } = await import("pdf-parse");
+    const parser = new PDFParse({ data: await file.arrayBuffer() });
+    try {
+      const result = await parser.getText();
+      return result.text ?? "";
+    } finally {
+      await parser.destroy().catch(() => {});
+    }
+  }
+  if (name.endsWith(".docx")) {
+    const mammoth = await import("mammoth");
+    const result = await mammoth.extractRawText({
+      buffer: await file.arrayBuffer(),
+    });
+    return result.value ?? "";
+  }
+  if (name.endsWith(".txt")) {
+    return await file.text();
+  }
+  throw new Error("Unsupported file type. Use PDF, Word (.docx), or .txt.");
+}
+
+export async function uploadResumeFile(
+  _prev: ProfileFormState,
+  formData: FormData,
+): Promise<ProfileFormState> {
+  let userId: string;
+  try {
+    userId = (await requireUser()).id;
+  } catch {
+    return { ok: false, error: "Unauthorized" };
+  }
+
+  const file = formData.get("resume_file");
+  if (!(file instanceof File)) {
+    return { ok: false, error: "Choose a resume file first." };
+  }
+  if (file.size === 0) {
+    return { ok: false, error: "The selected file is empty." };
+  }
+  if (file.size > MAX_RESUME_FILE_SIZE) {
+    return { ok: false, error: "File is too large. Max size is 4 MB." };
+  }
+
+  let resumeText: string;
+  try {
+    resumeText = await extractResumeText(file);
+  } catch (err) {
+    return {
+      ok: false,
+      error:
+        err instanceof Error
+          ? err.message
+          : "Could not read the file. Try a PDF, Word (.docx), or .txt.",
+    };
+  }
+
+  if (resumeText.trim().length < 10) {
+    return {
+      ok: false,
+      error:
+        "No readable text found in the file. It may be a scanned image — try pasting the text instead.",
+    };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("profiles")
+    .update({ resume_text: resumeText, resume_embedding_status: "pending" })
+    .eq("id", userId);
+  if (error) return { ok: false, error: error.message };
+
+  const res = await fetch(
+    new URL("/api/profile/vectorize", process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ resume_text: resumeText }),
+    },
+  );
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    return { ok: false, error: body.error ?? "Failed to index resume." };
+  }
+
+  revalidatePath("/profile");
+  return {
+    ok: true,
+    message: "Resume uploaded, text extracted, and indexed.",
+  };
+}
+
 export async function parseResumeProfile(
   _prev: ProfileFormState,
   formData: FormData,
