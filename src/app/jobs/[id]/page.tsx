@@ -4,7 +4,11 @@ import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getUsageSummary } from "@/lib/subscription";
 import { formatRelativeTime } from "@/lib/jobTime";
-import { fetchLinkedInDescription } from "@/lib/jobs/linkedin";
+import {
+  extractLinkedInApplyUrl,
+  extractLinkedInDescription,
+  fetchLinkedInJobPage,
+} from "@/lib/jobs/linkedin";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
@@ -60,16 +64,31 @@ export default async function JobDetailPage({
   const hasResume = Boolean(profile?.resume_text?.trim());
   const plan = await getUsageSummary(user.id, user.email);
 
+  let applyUrl = job.apply_url?.trim() || job.url || undefined;
   let description = (job.description ?? "").trim();
-  if (!description && job.source === "linkedin" && job.url) {
-    description = await fetchLinkedInDescription(job.url).catch(() => "");
-    if (description) {
-      try {
-        await supabase
-          .from("jobs")
-          .update({ description })
-          .eq("id", job.id);
-      } catch {}
+  if (job.source === "linkedin" && job.url) {
+    const html = await fetchLinkedInJobPage(job.url).catch(() => "");
+    if (html) {
+      if (!description) {
+        description = extractLinkedInDescription(html);
+        if (description) {
+          try {
+            await supabase
+              .from("jobs")
+              .update({ description })
+              .eq("id", job.id);
+          } catch {}
+        }
+      }
+      if (!job.apply_url) {
+        const resolved = extractLinkedInApplyUrl(html);
+        if (resolved) {
+          try {
+            await supabase.from("jobs").update({ apply_url: resolved }).eq("id", job.id);
+            applyUrl = resolved;
+          } catch {}
+        }
+      }
     }
   }
 
@@ -134,7 +153,7 @@ export default async function JobDetailPage({
 
         <ApplyKit
           jobId={id}
-          jobUrl={job.url || undefined}
+          jobUrl={applyUrl}
           applicationId={app?.id}
           matchScore={matchScore}
           hasResume={hasResume}

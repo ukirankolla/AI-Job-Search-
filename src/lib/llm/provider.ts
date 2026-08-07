@@ -49,6 +49,80 @@ class MockEmbeddings extends Embeddings {
   }
 }
 
+const MOCK_SKILL_TERMS = [
+  "TypeScript", "JavaScript", "React", "Node.js", "Next.js", "Python",
+  "Django", "Flask", "Java", "Spring", "C#", "Go", "Rust", "Ruby",
+  "PHP", "SQL", "PostgreSQL", "MySQL", "MongoDB", "Redis", "GraphQL",
+  "REST", "AWS", "Azure", "GCP", "Docker", "Kubernetes", "Terraform",
+  "CI/CD", "Linux", "HTML", "CSS", "Tailwind CSS", "Redux", "Vue.js",
+  "Angular", "Git", "Agile", "Scrum", "Jest", "Cypress", "Playwright",
+  "Machine Learning", "TensorFlow", "PyTorch", "Pandas", "NumPy",
+  "Kafka", "Spark", "Elasticsearch", "Firebase", "Supabase", "Prisma",
+  "Microservices", "Figma", "Product Management", "Analytics", "Tableau",
+  "Power BI", "Excel", "gRPC", "WebSockets",
+];
+
+function mockUniqueSkills(list: string[]): string[] {
+  const seen = new Set<string>();
+  return list.filter((s) => {
+    const key = s.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function mockExtractSkills(text: string): string[] {
+  const lower = text.toLowerCase();
+  return mockUniqueSkills(
+    MOCK_SKILL_TERMS.filter((s) => lower.includes(s.toLowerCase())),
+  );
+}
+
+function mockJobInfo(user: string): {
+  title: string;
+  company: string;
+  description: string;
+} {
+  const jobBlock =
+    /JOB:\s*\n([\s\S]*?)(?=\n\n(?:PROFILE|TAILORED RESUME):)/i.exec(user)?.[1] ??
+    "";
+  return {
+    title: /Title:\s*(.+)/i.exec(jobBlock)?.[1]?.trim() ?? "",
+    company: /Company:\s*(.+)/i.exec(jobBlock)?.[1]?.trim() ?? "",
+    description: /Description:\s*\n?([\s\S]*)/i.exec(jobBlock)?.[1]?.trim() ?? "",
+  };
+}
+
+function mockProfileInfo(user: string): {
+  name: string;
+  headline: string;
+  summary: string;
+  skills: string[];
+  chunks: string[];
+} {
+  const profileBlock =
+    /PROFILE:\s*\n([\s\S]*?)(?=\n\n(?:JOB|TAILORED RESUME):|$)/i.exec(user)?.[1] ??
+    "";
+  const skills = (/Skills:\s*(.+)/i.exec(profileBlock)?.[1] ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const rag = user.split("--- Relevant resume excerpts (RAG) ---")[1] ?? "";
+  const chunks = rag
+    .split(/\[[^\]]+\]\n/)
+    .slice(1)
+    .map((c) => c.trim())
+    .filter(Boolean);
+  return {
+    name: /Name:\s*(.+)/i.exec(profileBlock)?.[1]?.trim() ?? "",
+    headline: /Headline:\s*(.+)/i.exec(profileBlock)?.[1]?.trim() ?? "",
+    summary: /Summary:\s*(.+)/i.exec(profileBlock)?.[1]?.trim() ?? "",
+    skills,
+    chunks,
+  };
+}
+
 class MockChatProvider implements ChatProvider {
   async complete(system: string, user: string): Promise<ChatResult> {
     return {
@@ -57,10 +131,6 @@ class MockChatProvider implements ChatProvider {
   }
 
   private buildMockReply(system: string, user: string): string {
-    const userLower = user.toLowerCase();
-    const jobTitle =
-      /title[":\s]*([^\n,]{2,60})/i.exec(user)?.[1]?.trim() || "the role";
-
     const agent =
       /you are the ([a-z][a-z\s-]*) agent/i.exec(system)?.[1]?.toLowerCase().trim() ??
       "";
@@ -91,43 +161,90 @@ class MockChatProvider implements ChatProvider {
     }
 
     if (agent === "rematch" || agent === "re-matcher") {
+      const { title, description } = mockJobInfo(user);
+      const resumeText =
+        /TAILORED RESUME:\s*\n([\s\S]*)/i.exec(user)?.[1]?.trim() ?? "";
+      const jobSkills = mockExtractSkills(`${title} ${description}`);
+      const matched = jobSkills.filter((s) =>
+        resumeText.toLowerCase().includes(s.toLowerCase()),
+      );
+      const missing = jobSkills.filter((s) => !matched.includes(s));
+      const score =
+        jobSkills.length === 0
+          ? 60
+          : Math.round((100 * matched.length) / jobSkills.length);
       return JSON.stringify({
-        score: 100,
-        summary: `Resume rewritten to match ${jobTitle}; now at 100%.`,
-        matched_skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"],
-        missing_skills: [],
+        score,
+        summary: `Resume rewritten to match ${title || "the role"}; now at ${score}/100.`,
+        matched_skills: matched,
+        missing_skills: missing,
         strengths: ["Resume tailored to this posting"],
-        concerns: [],
+        concerns: missing.length ? [`Still missing: ${missing.join(", ")}`] : [],
       });
     }
 
     if (agent === "matcher") {
-      const skills = ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"];
-      const missing = userLower.includes("python")
-        ? ["Python"]
-        : ["Kubernetes"];
+      const { title, company, description } = mockJobInfo(user);
+      const profile = mockProfileInfo(user);
+      const jobSkills = mockExtractSkills(`${title} ${description}`);
+      const profileText = [...profile.skills, profile.headline, profile.summary]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const matched = jobSkills.filter((s) =>
+        profileText.includes(s.toLowerCase()),
+      );
+      const missing = jobSkills.filter((s) => !matched.includes(s));
+      const score =
+        jobSkills.length === 0
+          ? 60
+          : Math.round((100 * matched.length) / jobSkills.length);
       return JSON.stringify({
-        score: 78,
-        summary: `Candidate background aligns reasonably well with ${jobTitle}.`,
-        matched_skills: skills,
+        score,
+        summary: `Candidate background covers ${matched.length} of ${jobSkills.length} key skills for ${title || "the role"}${company ? ` at ${company}` : ""}.`,
+        matched_skills: matched,
         missing_skills: missing,
-        strengths: ["Full-stack product ownership", "Ship experience"],
-        concerns: ["Missing direct senior title"],
+        strengths: [profile.headline || "Full-stack product ownership"],
+        concerns: missing.length ? [`Missing: ${missing.join(", ")}`] : [],
       });
     }
 
     if (agent === "tailor") {
+      const { title, company } = mockJobInfo(user);
+      const profile = mockProfileInfo(user);
+      const jobSkills = mockExtractSkills(`${title} ${mockJobInfo(user).description}`);
+      const allSkills = mockUniqueSkills([...profile.skills, ...jobSkills]);
+      const expBullets = profile.chunks.slice(0, 3).map((c) => {
+        const first = c.split("\n").map((l) => l.trim()).filter(Boolean)[0];
+        return `- ${first ?? c}`;
+      });
+      const resume = [
+        "### SUMMARY",
+        `${profile.summary || `${profile.headline || "Software professional"} with a strong product background.`} Tailored for the ${title || "role"}${company ? ` at ${company}` : ""}.`,
+        "",
+        "### EXPERIENCE",
+        expBullets.length
+          ? expBullets.join("\n")
+          : "- Built and shipped web products end to end.",
+        "",
+        "### SKILLS",
+        allSkills.join(", "),
+      ].join("\n");
+      const cover_letter = `Dear Hiring Team,\n\nI am excited to apply for the ${title || "role"}${company ? ` at ${company}` : ""}. My background includes ${allSkills.slice(0, 6).join(", ") || "product engineering"} and I have shipped features end to end. I look forward to discussing how I can contribute to your team.\n\nBest regards,\n${profile.name || "[Your Name]"}`;
       return JSON.stringify({
-        resume:
-          "### SUMMARY\nFull-stack engineer delivering end-to-end product features with React, Node.js and PostgreSQL.\n\n### EXPERIENCE\n- Shipped user-facing features for web products.\n\n### SKILLS\nTypeScript, React, Node.js, PostgreSQL, AWS",
-        cover_letter: `Dear Hiring Team,\n\nI am excited to apply for ${jobTitle}. My background in full-stack product development and shipping features end-to-end maps well to this role.\n\nBest regards,\n[Your Name]`,
-        highlights: ["Repositioned experience bullets for " + jobTitle],
+        resume,
+        cover_letter,
+        highlights: [
+          `Resume rewritten for ${title || "the role"}`,
+          "Skills aligned to the posting",
+        ],
       });
     }
 
     if (agent === "prep") {
+      const { title } = mockJobInfo(user);
       return JSON.stringify({
-        summary: `Preparation plan for ${jobTitle}.`,
+        summary: `Preparation plan for ${title || "the role"}.`,
         questions: [
           {
             question: "Walk me through a project you shipped end to end.",

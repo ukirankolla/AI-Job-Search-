@@ -202,6 +202,49 @@ export async function fetchLinkedInDescription(
   url: string,
   opts?: { signal?: AbortSignal },
 ): Promise<string> {
+  const html = await fetchLinkedInJobPage(url, opts);
+  return extractLinkedInDescription(html);
+}
+
+/**
+ * Finds the external "apply" link on a LinkedIn job detail page so the app can
+ * send users straight to the company's own career site instead of the LinkedIn
+ * posting. LinkedIn embeds it both as a `jobs-apply-button` anchor and as
+ * `"applyUrl"` in the page's dehydrated JSON. Easy-Apply targets stay on
+ * linkedin.com and are ignored.
+ */
+export function extractLinkedInApplyUrl(html: string): string {
+  const candidates: string[] = [];
+  const button =
+    /class="[^"]*jobs-apply-button[^"]*"[^>]*href="([^"]+)"/i.exec(html);
+  if (button) candidates.push(button[1].replace(/&amp;/g, "&"));
+  const json = /"applyUrl":"([^"]+)"/i.exec(html);
+  if (json) candidates.push(json[1].replace(/\\\//g, "/"));
+  for (const candidate of candidates) {
+    try {
+      const host = new URL(candidate).hostname.toLowerCase();
+      if (!host.includes("linkedin.com") && /^https?:$/.test(new URL(candidate).protocol)) {
+        return candidate;
+      }
+    } catch {
+      // ignore malformed candidates
+    }
+  }
+  return "";
+}
+
+export async function fetchLinkedInApplyUrl(
+  url: string,
+  opts?: { signal?: AbortSignal },
+): Promise<string> {
+  const html = await fetchLinkedInJobPage(url, opts);
+  return extractLinkedInApplyUrl(html);
+}
+
+export async function fetchLinkedInJobPage(
+  url: string,
+  opts?: { signal?: AbortSignal },
+): Promise<string> {
   const res = await fetch(url, {
     headers: {
       accept: "text/html",
@@ -212,7 +255,7 @@ export async function fetchLinkedInDescription(
     next: { revalidate: 0 },
   });
   if (!res.ok) return "";
-  return extractLinkedInDescription(await res.text());
+  return await res.text();
 }
 
 export async function searchLinkedInJobs(

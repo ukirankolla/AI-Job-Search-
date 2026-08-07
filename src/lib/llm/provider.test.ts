@@ -76,7 +76,7 @@ describe("mock resume parser", () => {
 
 describe("mock agents", () => {
   const user =
-    "JOB:\nTitle: Senior Full-Stack Engineer\nCompany: Acme\n\nDescription: Build web systems with TypeScript.\n\nPROFILE:\nJane Smith\nSkills: TypeScript, React, Node.js";
+    "JOB:\nTitle: Senior Full-Stack Engineer\nCompany: Acme\n\nDescription: Build web systems with TypeScript, React, and Node.js.\n\nPROFILE:\nName: Jane Smith\nHeadline: Full-Stack Engineer\nSummary: Builds web products end to end.\nSkills: TypeScript, React, Node.js";
 
   it("returns parseable JSON for the matcher system prompt", async () => {
     const provider = getChatProvider();
@@ -122,10 +122,24 @@ describe("mock agents", () => {
     const provider = getChatProvider();
     const system =
       "You are the REMATCH agent in a job-search multi-agent system.";
-    const { content } = await provider.complete(system, user);
+    const rematchUser = `${user}\n\nTAILORED RESUME:\nJane Smith\n### SKILLS\nTypeScript, React, Node.js`;
+    const { content } = await provider.complete(system, rematchUser);
     const parsed = JSON.parse(content);
     expect(parsed.score).toBe(100);
     expect(parsed.missing_skills).toEqual([]);
+  });
+
+  it("derives the match score from the actual skills in the posting", async () => {
+    const provider = getChatProvider();
+    const weakUser =
+      "JOB:\nTitle: Python Data Engineer\nCompany: Acme\n\nDescription: Work with Python, Pandas, TensorFlow, and Kafka.\n\nPROFILE:\nName: Jane Smith\nHeadline: Frontend Engineer\nSummary: Builds UIs with React.\nSkills: TypeScript, React";
+    const { content } = await provider.complete(
+      "You are the MATCHER agent in a job-search multi-agent system.",
+      weakUser,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.score).toBeLessThan(50);
+    expect(parsed.missing_skills).toContain("Python");
   });
 });
 

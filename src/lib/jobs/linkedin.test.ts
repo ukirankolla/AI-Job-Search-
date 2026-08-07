@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildLinkedInSearchUrl,
   descriptionToText,
+  extractLinkedInApplyUrl,
   extractLinkedInDescription,
   hoursToTPR,
   parseLinkedInJobs,
@@ -238,5 +239,28 @@ describe("descriptionToText", () => {
       "<p>First</p><p>Second</p><ul><li>A</li><li>B</li></ul>",
     );
     expect(text).toBe("First\n\nSecond\n\n- A\n- B");
+  });
+});
+
+describe("extractLinkedInApplyUrl", () => {
+  it("returns the external apply button link", () => {
+    const html =
+      '<a class="jobs-apply-button jobs-apply-button--outline" href="https://careers.acme.com/jobs/1234">Apply</a>';
+    expect(extractLinkedInApplyUrl(html)).toBe("https://careers.acme.com/jobs/1234");
+  });
+
+  it("returns the applyUrl from the embedded JSON", () => {
+    const html = 'window.METADATA = {"applyUrl":"https:\\/\\/jobs.acme.com\\/posting\\/9"};';
+    expect(extractLinkedInApplyUrl(html)).toBe("https://jobs.acme.com/posting/9");
+  });
+
+  it("ignores Easy-Apply links that stay on LinkedIn", () => {
+    const html =
+      '<a class="jobs-apply-button" href="https://www.linkedin.com/jobs/apply/xyz">Easy Apply</a>';
+    expect(extractLinkedInApplyUrl(html)).toBe("");
+  });
+
+  it("returns empty when no external link is present", () => {
+    expect(extractLinkedInApplyUrl("<html><body></body></html>")).toBe("");
   });
 });
