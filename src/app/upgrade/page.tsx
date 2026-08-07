@@ -21,9 +21,14 @@ export default async function UpgradePage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900">Plan &amp; usage</h1>
+      <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+        Upgrade
+      </p>
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+        Plan &amp; usage
+      </h1>
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="text-lg font-semibold text-slate-900">
@@ -38,7 +43,7 @@ export default async function UpgradePage() {
             </p>
           </div>
           {!unlimited && (
-            <span className="rounded-full bg-emerald-600 px-4 py-1.5 text-sm font-semibold text-white">
+            <span className="rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30">
               $15 / month
             </span>
           )}
@@ -46,7 +51,7 @@ export default async function UpgradePage() {
 
         {!unlimited && (
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-sm text-slate-500">Resume rewrites left</p>
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {rewritesLeft}
@@ -55,7 +60,7 @@ export default async function UpgradePage() {
                 </span>
               </p>
             </div>
-            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
               <p className="text-sm text-slate-500">In-app applies left</p>
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {appliesLeft}
@@ -72,9 +77,14 @@ export default async function UpgradePage() {
         {features.map((f) => (
           <li
             key={f}
-            className="rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700"
+            className="flex items-center gap-2.5 rounded-xl border border-slate-200 bg-white p-4 text-sm text-slate-700 shadow-sm"
           >
-            ✓ {f}
+            <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
+              </svg>
+            </span>
+            {f}
           </li>
         ))}
       </ul>

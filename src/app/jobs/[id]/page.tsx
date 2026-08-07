@@ -67,14 +67,14 @@ export default async function JobDetailPage({
           </p>
         </div>
         {matchScore !== null && (
-          <span className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white">
+          <span className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30">
             Match {matchScore}/100
           </span>
         )}
       </div>
 
       <div className="mt-6 space-y-6">
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-2 font-semibold text-slate-900">Agents</h2>
           <p className="mb-3 text-sm text-slate-500">
             Deep-dive the role: analyze your fit, tailor your documents, and
@@ -114,7 +114,7 @@ export default async function JobDetailPage({
           limit={plan.limit}
         />
 
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-3 font-semibold text-slate-900">Job description</h2>
           <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
             {job.description}

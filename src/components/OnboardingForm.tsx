@@ -24,7 +24,7 @@ const COMMON_COUNTRIES = [
 ];
 
 const inputClass =
-  "mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm";
+  "mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20";
 const labelClass = "text-sm font-medium text-slate-700";
 
 export function OnboardingForm({
@@ -42,7 +42,7 @@ export function OnboardingForm({
   );
 
   return (
-    <div className="mx-auto max-w-xl rounded-xl border border-slate-200 bg-white p-8">
+    <div className="mx-auto max-w-xl rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
       <h1 className="text-xl font-semibold text-slate-900">
         Welcome to Noventra
       </h1>
@@ -150,7 +150,7 @@ export function OnboardingForm({
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+          className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
         >
           {pending ? "Saving…" : "Continue to dashboard →"}
         </button>

@@ -132,7 +132,7 @@ export function JobFeed({
           />
           <button
             type="submit"
-            className="shrink-0 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+            className="shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
           >
             Search jobs
           </button>
@@ -162,7 +162,7 @@ export function JobFeed({
               aria-pressed={hours === opt.hours}
               className={`rounded px-2.5 py-1 transition ${
                 hours === opt.hours
-                  ? "bg-slate-900 text-white"
+                  ? "bg-indigo-600 text-white"
                   : "text-slate-600 hover:bg-slate-100"
               }`}
             >
@@ -180,7 +180,7 @@ export function JobFeed({
               key={opt.value}
               className={`flex cursor-pointer items-center gap-1 rounded-md border px-2 py-1 transition ${
                 types.includes(opt.value)
-                  ? "border-slate-900 bg-slate-900 text-white"
+                  ? "border-indigo-600 bg-indigo-600 text-white"
                   : "border-slate-300 bg-white hover:bg-slate-50"
               }`}
             >
@@ -209,7 +209,7 @@ export function JobFeed({
               aria-pressed={sponsorship === opt.value}
               className={`rounded-md border px-2 py-1 transition ${
                 sponsorship === opt.value
-                  ? "border-slate-900 bg-slate-900 text-white"
+                  ? "border-indigo-600 bg-indigo-600 text-white"
                   : "border-slate-300 bg-white hover:bg-slate-50"
               }`}
             >
@@ -237,7 +237,7 @@ export function JobFeed({
             type="button"
             onClick={matchAll}
             disabled={matching}
-            className="rounded-md bg-slate-900 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-slate-700 disabled:opacity-50"
+            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
           >
             {matching ? "Matching with your resume…" : "Match all with my resume"}
           </button>
@@ -257,7 +257,7 @@ export function JobFeed({
         {filtered.map((job) => {
           const score = scores?.[job.id];
           return (
-            <li key={job.id} className="rounded-xl border border-slate-200 bg-white p-5">
+            <li key={job.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <Link

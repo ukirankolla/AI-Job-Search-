@@ -35,7 +35,12 @@ export default async function ApplicationsPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900">Application pipeline</h1>
+      <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+        Pipeline
+      </p>
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+        Application pipeline
+      </h1>
       <PipelineBoard apps={apps} />
     </main>
   );

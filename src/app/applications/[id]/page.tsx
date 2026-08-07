@@ -74,7 +74,7 @@ export default async function ApplicationDetailPage({
         </div>
         <div className="flex items-center gap-3">
           {app.match_score !== null && (
-            <span className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white">
+            <span className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30">
               Match {app.match_score}/100
             </span>
           )}
@@ -90,7 +90,7 @@ export default async function ApplicationDetailPage({
         </div>
       )}
 
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+      <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="mb-3 font-semibold text-slate-900">Agents</h2>
         {app.job_id ? (
           <>
@@ -114,7 +114,7 @@ export default async function ApplicationDetailPage({
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-3 font-semibold text-slate-900">Tailored resume</h2>
           {resume ? (
             <pre className="whitespace-pre-wrap text-sm text-slate-700">{resume.content}</pre>
@@ -123,7 +123,7 @@ export default async function ApplicationDetailPage({
           )}
         </section>
 
-        <section className="rounded-xl border border-slate-200 bg-white p-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-3 font-semibold text-slate-900">Cover letter</h2>
           {coverLetter ? (
             <pre className="whitespace-pre-wrap text-sm text-slate-700">{coverLetter.content}</pre>
@@ -133,7 +133,7 @@ export default async function ApplicationDetailPage({
         </section>
       </div>
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="mb-3 font-semibold text-slate-900">Interview prep</h2>
         {prep ? (
           <div className="space-y-4">
@@ -164,7 +164,7 @@ export default async function ApplicationDetailPage({
         )}
       </section>
 
-      <section className="mt-6 rounded-xl border border-slate-200 bg-white p-6">
+      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="mb-3 font-semibold text-slate-900">Agent run history</h2>
         {runHistory.length === 0 ? (
           <Empty label="No agent runs yet." />

@@ -44,7 +44,7 @@ export function ApplyKit({
 
   if (!hasResume) {
     return (
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-semibold text-slate-900">Resume &amp; apply</h2>
         <p className="mt-2 text-sm text-slate-500">
           Upload your resume to see your match % for this job and get an
@@ -58,11 +58,11 @@ export function ApplyKit({
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-6">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="font-semibold text-slate-900">Resume &amp; apply</h2>
         {matchScore !== null && matchScore !== undefined && (
-          <span className="rounded-full bg-slate-900 px-4 py-1.5 text-sm font-semibold text-white">
+          <span className="rounded-full bg-indigo-600 px-4 py-1.5 text-sm font-semibold text-white">
             Match {matchScore}%
           </span>
         )}

@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { parseResume } from "@/lib/agents/workers";
+import { indexProfile } from "@/lib/rag/embed";
 
 const profileSchema = z.object({
   full_name: z.string().min(1).max(200),
@@ -106,24 +107,25 @@ export async function uploadResume(
     .eq("id", userId);
   if (error) return { ok: false, error: error.message };
 
-  const res = await fetch(
-    new URL("/api/profile/vectorize", process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resume_text: resumeText }),
-    },
-  );
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    return { ok: false, error: body.error ?? "Failed to index resume." };
+  try {
+    await indexProfile(userId, resumeText);
+  } catch (err) {
+    await supabase
+      .from("profiles")
+      .update({ resume_embedding_status: "failed" })
+      .eq("id", userId);
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Failed to index resume.",
+    };
   }
 
   revalidatePath("/profile");
   return { ok: true, message: "Resume uploaded and vectorized." };
 }
 
-const MAX_RESUME_FILE_SIZE = 4 * 1024 * 1024;
+const MAX_RESUME_FILE_SIZE = 50 * 1024 * 1024;
 
 async function extractResumeText(file: File): Promise<string> {
   const name = file.name.toLowerCase();
@@ -200,17 +202,18 @@ export async function uploadResumeFile(
     .eq("id", userId);
   if (error) return { ok: false, error: error.message };
 
-  const res = await fetch(
-    new URL("/api/profile/vectorize", process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ resume_text: resumeText }),
-    },
-  );
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    return { ok: false, error: body.error ?? "Failed to index resume." };
+  try {
+    await indexProfile(userId, resumeText);
+  } catch (err) {
+    await supabase
+      .from("profiles")
+      .update({ resume_embedding_status: "failed" })
+      .eq("id", userId);
+    return {
+      ok: false,
+      error:
+        err instanceof Error ? err.message : "Failed to index resume.",
+    };
   }
 
   revalidatePath("/profile");

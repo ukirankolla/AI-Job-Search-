@@ -61,13 +61,13 @@ export function PipelineBoard({ apps }: { apps: PipelineCard[] }) {
             return (
               <section
                 key={col.status}
-                className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                className="rounded-2xl border border-slate-200 bg-slate-50/70 p-3"
               >
                 <div className="mb-3 flex items-center justify-between">
                   <h2 className="text-sm font-semibold text-slate-700">
                     {col.label}
                   </h2>
-                  <span className="rounded-full bg-white px-2 py-0.5 text-xs text-slate-500">
+                  <span className="rounded-full border border-slate-200 bg-white px-2 py-0.5 text-xs text-slate-500">
                     {inCol.length}
                   </span>
                 </div>
@@ -75,7 +75,7 @@ export function PipelineBoard({ apps }: { apps: PipelineCard[] }) {
                   {inCol.map((a) => (
                     <li
                       key={a.id}
-                      className="rounded-lg border border-slate-200 bg-white p-3"
+                      className="rounded-xl border border-slate-200 bg-white p-3 shadow-sm transition hover:border-slate-300 hover:shadow-md"
                     >
                       <Link
                         href={`/applications/${a.id}`}

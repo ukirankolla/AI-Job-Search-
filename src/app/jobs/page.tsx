@@ -48,8 +48,13 @@ export default async function JobsPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-slate-900">Job feed</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+        Jobs
+      </p>
+      <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+        Job feed
+      </h1>
+      <p className="mt-1 max-w-2xl text-sm text-slate-500">
         Fresh postings are discovered automatically. Filter by the last 4, 8, or
         12 hours, and every job shows its match % against your resume. Run the
         agents on any role to tailor documents and prep.

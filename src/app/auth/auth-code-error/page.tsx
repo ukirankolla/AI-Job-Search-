@@ -23,7 +23,7 @@ export default async function AuthCodeErrorPage({
         </p>
         <Link
           href="/login"
-          className="mt-6 inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+          className="mt-6 inline-block rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
         >
           Back to sign in
         </Link>

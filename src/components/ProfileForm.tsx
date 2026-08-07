@@ -20,7 +20,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       <form
         key={profile.updated_at}
         action={formAction}
-        className="space-y-4 rounded-lg border border-slate-200 p-6"
+        className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <h2 className="text-lg font-semibold">Profile</h2>
         <div>
@@ -29,7 +29,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             name="full_name"
             defaultValue={profile.full_name}
             required
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
         <div>
@@ -38,7 +38,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             name="title"
             defaultValue={profile.title}
             placeholder="Senior Full-Stack Engineer"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
         <div>
@@ -47,7 +47,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             name="summary"
             defaultValue={profile.summary}
             rows={4}
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
         <div>
@@ -58,7 +58,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             name="skills"
             defaultValue={profile.skills.join(", ")}
             placeholder="TypeScript, React, Node.js, PostgreSQL"
-            className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
           />
         </div>
 
@@ -69,7 +69,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               name="email"
               type="email"
               defaultValue={profile.email}
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div>
@@ -79,7 +79,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               type="tel"
               defaultValue={profile.phone}
               placeholder="+1 555 000 1234"
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div>
@@ -90,7 +90,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               name="country"
               defaultValue={profile.country}
               placeholder="United States"
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div>
@@ -99,7 +99,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               name="city"
               defaultValue={profile.city}
               placeholder="Austin, TX"
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div>
@@ -111,7 +111,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               type="url"
               defaultValue={profile.linkedin_url}
               placeholder="https://www.linkedin.com/in/..."
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div>
@@ -123,7 +123,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               type="url"
               defaultValue={profile.github_url}
               placeholder="https://github.com/..."
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div>
@@ -135,14 +135,14 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               type="url"
               defaultValue={profile.website_url}
               placeholder="https://..."
-              className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
         </div>
         <button
           type="submit"
           disabled={pending}
-          className="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-50"
+          className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
         >
           {pending ? "Saving…" : "Save profile"}
         </button>
@@ -153,7 +153,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
       <form
         key={profile.resume_text}
         action={fileAction}
-        className="space-y-4 rounded-lg border border-slate-200 p-6"
+        className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <h2 className="text-lg font-semibold">Resume</h2>
         <div className="space-y-2 rounded-md border border-dashed border-slate-300 p-4">
@@ -174,10 +174,10 @@ export function ProfileForm({ profile }: { profile: Profile }) {
                 if (e.target.files?.length) e.currentTarget.form?.requestSubmit();
               }}
               disabled={filePending}
-              className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-slate-900 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-slate-700 disabled:opacity-50"
+              className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500 disabled:opacity-50"
             />
             <button type="submit" className="hidden" aria-hidden="true" />
-            <span className="text-xs text-slate-400">max 4 MB</span>
+            <span className="text-xs text-slate-400">max 50 MB</span>
           </div>
           {filePending && (
             <p className="text-sm text-slate-500">Uploading…</p>
