@@ -5,7 +5,7 @@ import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from 'r
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView from 'react-native-webview';
 
-const FALLBACK_WEB_URL = 'https://noventra.com';
+const FALLBACK_WEB_URL = 'https://www.noventrahelp.com';
 
 function resolveWebUrl(): string {
   const extra = Constants.expoConfig?.extra as { webUrl?: string } | undefined;

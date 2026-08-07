@@ -18,7 +18,7 @@ export default async function JobsPage() {
         .from("jobs")
         .select("id, title, company, location, salary_min, salary_max, posted_at, url, description, employment_type, sponsorship")
         .order("posted_at", { ascending: false })
-        .limit(50),
+        .limit(100),
       supabase
         .from("applications")
         .select("job_id")
@@ -55,9 +55,9 @@ export default async function JobsPage() {
         Job feed
       </h1>
       <p className="mt-1 max-w-2xl text-sm text-slate-500">
-        Fresh postings are discovered automatically. Filter by the last 4, 8, or
-        12 hours, and every job shows its match % against your resume. Run the
-        agents on any role to tailor documents and prep.
+        Search pulls live postings from LinkedIn and company career sites across
+        the US, filtered by your time window. Every job shows its match % against
+        your resume. Run the agents on any role to tailor documents and prep.
       </p>
 
       <div className="mt-6 grid gap-8 lg:grid-cols-3">

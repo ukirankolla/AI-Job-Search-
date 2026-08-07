@@ -70,6 +70,11 @@ export function JobFeed({
   const [sponsorship, setSponsorship] = useState<"yes" | "no" | null>(null);
   const [directOnly, setDirectOnly] = useState(true);
   const [matching, setMatching] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+  const [indexing, setIndexing] = useState(false);
+  const [locationDraft, setLocationDraft] = useState("United States");
   const saved = useMemo(() => new Set(savedIds), [savedIds]);
 
   const filtered = useMemo(() => {
@@ -78,7 +83,9 @@ export function JobFeed({
       if (types.length > 0 && !types.includes(job.employment_type ?? "")) {
         return false;
       }
-      if (sponsorship !== null && job.sponsorship !== sponsorship) return false;
+      if (sponsorship !== null && job.sponsorship !== null && job.sponsorship !== sponsorship) {
+        return false;
+      }
       if (directOnly && !isDirect(job.applyKind)) return false;
       return true;
     });
@@ -91,6 +98,54 @@ export function JobFeed({
   };
 
   const unmatchable = jobs.some((j) => !scores?.[j.id]);
+
+  const runSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setQuery(draft);
+    if (searching) return;
+    setSearching(true);
+    setSearchError(null);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/jobs/search", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: draft,
+          hours,
+          types,
+          location: locationDraft,
+        }),
+      });
+      const data = (await res.json().catch(() => null)) as
+        | {
+            error?: string;
+            found?: number;
+            message?: string;
+            warnings?: string[];
+            sources?: string[];
+          }
+        | null;
+      if (!res.ok) {
+        setSearchError(data?.error ?? "Search failed. Please try again.");
+        return;
+      }
+      if (data?.found === 0) {
+        setSearchError(
+          data?.message ?? "No jobs found for that search.",
+        );
+        return;
+      }
+      if (data?.warnings?.length) {
+        setNotice(data.warnings.join(" "));
+      }
+      router.refresh();
+    } catch {
+      setSearchError("Network error while searching. Please try again.");
+    } finally {
+      setSearching(false);
+    }
+  };
 
   const matchAll = async () => {
     if (matching) return;
@@ -112,42 +167,81 @@ export function JobFeed({
     }
   };
 
+  const refreshIndex = async () => {
+    if (indexing) return;
+    setIndexing(true);
+    setSearchError(null);
+    setNotice(null);
+    try {
+      const res = await fetch("/api/jobs/index", { method: "POST" });
+      const data = (await res.json().catch(() => null)) as
+        | {
+            error?: string;
+            found?: number;
+            errors?: { page: string; message: string }[];
+          }
+        | null;
+      if (!res.ok) {
+        setSearchError(data?.error ?? "Index refresh failed. Please try again.");
+        return;
+      }
+      if (data?.errors?.length) {
+        setNotice(
+          `Indexed ${data.found ?? 0} jobs. ${data.errors.length} career site(s) couldn't be reached.`,
+        );
+      }
+      router.refresh();
+    } catch {
+      setSearchError("Network error while updating the index.");
+    } finally {
+      setIndexing(false);
+    }
+  };
+
   return (
     <div>
       <div className="flex items-center gap-3">
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setQuery(draft);
-          }}
-          className="flex w-full items-center gap-2"
+          onSubmit={runSearch}
+          className="flex w-full flex-col gap-2"
         >
-          <input
-            type="search"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder="Search by title, company, location, skills…"
-            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-            aria-label="Search jobs"
-          />
-          <button
-            type="submit"
-            className="shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500"
-          >
-            Search jobs
-          </button>
-          {query && (
+          <div className="flex w-full items-center gap-2">
+            <input
+              type="search"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="Search by title, company, location, skills…"
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+              aria-label="Search jobs"
+            />
             <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                setDraft("");
-              }}
-              className="shrink-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              type="submit"
+              disabled={searching}
+              className="shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
             >
-              Clear
+              {searching ? "Searching jobs…" : "Search jobs"}
             </button>
-          )}
+            {query && (
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setDraft("");
+                }}
+                className="shrink-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              >
+                Clear
+              </button>
+            )}
+          </div>
+          <input
+            type="text"
+            value={locationDraft}
+            onChange={(e) => setLocationDraft(e.target.value)}
+            placeholder="Location (e.g. United States, Austin TX)"
+            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600"
+            aria-label="Job location"
+          />
         </form>
         <div
           className="flex shrink-0 items-center gap-1 rounded-md border border-slate-300 bg-white p-1 text-sm"
@@ -171,6 +265,18 @@ export function JobFeed({
           ))}
         </div>
       </div>
+
+      {searchError && (
+        <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+          {searchError}
+        </p>
+      )}
+
+      {notice && (
+        <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+          {notice}
+        </p>
+      )}
 
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600">
         <fieldset className="flex items-center gap-1.5">
@@ -242,6 +348,14 @@ export function JobFeed({
             {matching ? "Matching with your resume…" : "Match all with my resume"}
           </button>
         )}
+        <button
+          type="button"
+          onClick={refreshIndex}
+          disabled={indexing}
+          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+        >
+          {indexing ? "Updating company index…" : "Update company index"}
+        </button>
         {!hasResume && (
           <p className="text-xs text-slate-400">
             Upload your resume in{" "}
@@ -334,8 +448,9 @@ export function JobFeed({
 
       {jobs.length === 0 && (
         <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          No jobs yet. Fresh postings are pulled in automatically — or add one
-          manually, load the sample jobs, or bulk-import a feed.
+          No jobs yet. Click Search jobs to pull live postings from LinkedIn and
+          company career sites, or add one manually, load the sample jobs, or
+          bulk-import a feed.
         </p>
       )}
       {jobs.length > 0 && filtered.length === 0 && (
