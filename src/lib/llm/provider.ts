@@ -58,10 +58,11 @@ class MockChatProvider implements ChatProvider {
 
   private buildMockReply(system: string, user: string): string {
     const userLower = user.toLowerCase();
+    const systemLower = system.toLowerCase();
     const jobTitle =
       /title[":\s]*([^\n,]{2,60})/i.exec(user)?.[1]?.trim() || "the role";
 
-    if (system.toLowerCase().includes("resume parser")) {
+    if (systemLower.includes("resume parser")) {
       const body = user.replace(/^RESUME:[\s\S]*?\n/, "");
       const lines = body.split("\n").map((l) => l.trim()).filter(Boolean);
       const knownSkills = [
@@ -86,7 +87,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (system.includes("matcher")) {
+    if (systemLower.includes("matcher")) {
       const skills = ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"];
       const missing = userLower.includes("python")
         ? ["Python"]
@@ -101,7 +102,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (system.includes("tailor")) {
+    if (systemLower.includes("tailor")) {
       return JSON.stringify({
         resume:
           "### SUMMARY\nFull-stack engineer delivering end-to-end product features with React, Node.js and PostgreSQL.\n\n### EXPERIENCE\n- Shipped user-facing features for web products.\n\n### SKILLS\nTypeScript, React, Node.js, PostgreSQL, AWS",
@@ -110,7 +111,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (system.includes("prep")) {
+    if (systemLower.includes("prep")) {
       return JSON.stringify({
         summary: `Preparation plan for ${jobTitle}.`,
         questions: [
@@ -131,7 +132,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (system.includes("tracker")) {
+    if (systemLower.includes("tracker")) {
       return JSON.stringify([
         {
           title: "Follow up on your interview",

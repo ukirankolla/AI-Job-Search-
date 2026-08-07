@@ -1,5 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getChatProvider, parseJsonObject } from "@/lib/llm/provider";
+
+beforeEach(() => vi.stubEnv("OPENAI_API_KEY", ""));
+afterEach(() => vi.unstubAllEnvs());
 
 describe("parseJsonObject", () => {
   it("parses plain JSON objects", () => {
@@ -66,5 +69,50 @@ describe("mock resume parser", () => {
     expect(parsed.full_name).toBe("Jane Smith");
     expect(parsed.title).toContain("Engineer");
     expect(parsed.skills).toContain("TypeScript");
+  });
+});
+
+describe("mock agents", () => {
+  const user =
+    "JOB:\nTitle: Senior Full-Stack Engineer\nCompany: Acme\n\nDescription: Build web systems with TypeScript.\n\nPROFILE:\nJane Smith\nSkills: TypeScript, React, Node.js";
+
+  it("returns parseable JSON for the matcher system prompt", async () => {
+    const provider = getChatProvider();
+    const system =
+      "You are the MATCHER agent in a job-search multi-agent system.";
+    const { content } = await provider.complete(system, user);
+    const parsed = JSON.parse(content);
+    expect(typeof parsed.score).toBe("number");
+    expect(parsed.score).toBeGreaterThan(0);
+  });
+
+  it("returns parseable JSON for the tailor system prompt", async () => {
+    const provider = getChatProvider();
+    const system =
+      "You are the TAILOR agent in a job-search multi-agent system.";
+    const { content } = await provider.complete(system, user);
+    const parsed = JSON.parse(content);
+    expect(typeof parsed.resume).toBe("string");
+    expect(parsed.resume.length).toBeGreaterThan(0);
+  });
+
+  it("returns parseable JSON for the prep system prompt", async () => {
+    const provider = getChatProvider();
+    const system =
+      "You are the PREP agent in a job-search multi-agent system.";
+    const { content } = await provider.complete(system, user);
+    const parsed = JSON.parse(content);
+    expect(Array.isArray(parsed.questions)).toBe(true);
+    expect(parsed.questions.length).toBeGreaterThan(0);
+  });
+
+  it("returns parseable JSON for the tracker system prompt", async () => {
+    const provider = getChatProvider();
+    const system =
+      "You are the TRACKER agent in a job-search multi-agent system.";
+    const { content } = await provider.complete(system, user);
+    const parsed = JSON.parse(content);
+    expect(Array.isArray(parsed)).toBe(true);
+    expect(parsed.length).toBeGreaterThan(0);
   });
 });
