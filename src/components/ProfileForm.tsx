@@ -177,6 +177,16 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               ) : (
                 <span className="text-xs italic">pasted as text</span>
               )}
+              {profile.resume_file_path && (
+                <a
+                  href="/api/profile/resume"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100"
+                >
+                  View document
+                </a>
+              )}
             </div>
             <details className="rounded-lg border border-slate-200 bg-white">
               <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-slate-600">

@@ -15,6 +15,7 @@ export interface Profile {
   resume_embedding_status: "none" | "pending" | "done" | "failed";
   resume_filename?: string;
   resume_file_size?: number;
+  resume_file_path?: string;
   email?: string;
   phone?: string;
   country?: string;

@@ -196,6 +196,27 @@ export async function uploadResumeFile(
   }
 
   const supabase = await createClient();
+
+  const safeName = file.name.replace(/[^\w.\-]+/g, "_");
+  const filePath = `${userId}/${safeName}`;
+
+  const { data: current } = await supabase
+    .from("profiles")
+    .select("resume_file_path")
+    .eq("id", userId)
+    .maybeSingle();
+  const previousPath = current?.resume_file_path;
+
+  const { error: uploadError } = await supabase.storage
+    .from("resumes")
+    .upload(filePath, file, {
+      contentType: file.type || "application/octet-stream",
+      upsert: true,
+    });
+  if (uploadError) {
+    return { ok: false, error: `Could not store the file: ${uploadError.message}` };
+  }
+
   const { error } = await supabase
     .from("profiles")
     .update({
@@ -203,6 +224,7 @@ export async function uploadResumeFile(
       resume_embedding_status: "pending",
       resume_filename: file.name,
       resume_file_size: file.size,
+      resume_file_path: filePath,
     })
     .eq("id", userId);
   if (error) {
@@ -215,6 +237,8 @@ export async function uploadResumeFile(
     } else {
       return { ok: false, error: error.message };
     }
+  } else if (previousPath && previousPath !== filePath) {
+    await supabase.storage.from("resumes").remove([previousPath]);
   }
 
   try {
