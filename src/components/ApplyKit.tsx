@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { AgentRunner } from "@/components/AgentRunner";
 import { ApplyButton } from "@/components/ApplyButton";
+import { classifyApplySource } from "@/lib/jobs/applySource";
 import type { SubscriptionTier, UsageSnapshot } from "@/lib/subscription";
 
 interface Props {
@@ -32,6 +33,19 @@ export function ApplyKit({
   const [resume, setResume] = useState<string | null>(null);
   const [autoApply, setAutoApply] = useState(false);
   const [copied, setCopied] = useState(false);
+
+  const applyLabel = (() => {
+    switch (classifyApplySource(jobUrl)) {
+      case "linkedin":
+        return "Apply on LinkedIn ↗";
+      case "company":
+        return "Apply on company site ↗";
+      case "board":
+        return "Apply on job board ↗";
+      default:
+        return undefined;
+    }
+  })();
 
   const copyResume = async () => {
     if (!resume) return;
@@ -127,7 +141,7 @@ export function ApplyKit({
             </p>
           )}
           {jobUrl && (
-            <ApplyButton jobId={jobId} url={jobUrl} autoApply={autoApply} />
+            <ApplyButton jobId={jobId} url={jobUrl} autoApply={autoApply} label={applyLabel} />
           )}
           <p className="mt-2 text-xs text-slate-400">
             Opens the original posting on the company or job-board career site.

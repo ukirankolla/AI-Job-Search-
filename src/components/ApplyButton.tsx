@@ -8,9 +8,10 @@ interface Props {
   jobId: string;
   url: string;
   autoApply?: boolean;
+  label?: string;
 }
 
-export function ApplyButton({ jobId, url, autoApply = false }: Props) {
+export function ApplyButton({ jobId, url, autoApply = false, label }: Props) {
   const [busy, setBusy] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -43,8 +44,8 @@ export function ApplyButton({ jobId, url, autoApply = false }: Props) {
         {busy
           ? "Checking…"
           : autoApply
-            ? "Auto-apply now ↗"
-            : "Apply now ↗"}
+            ? label ?? "Auto-apply now ↗"
+            : label ?? "Apply now ↗"}
       </button>
 
       {blocked && (

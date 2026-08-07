@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getUsageSummary } from "@/lib/subscription";
+import { formatRelativeTime } from "@/lib/jobTime";
 import { fetchLinkedInDescription } from "@/lib/jobs/linkedin";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
@@ -10,6 +11,13 @@ import { DeleteJobButton } from "@/components/DeleteJobButton";
 import { ApplyKit } from "@/components/ApplyKit";
 
 export const metadata = { title: "Job | Noventra" };
+
+const EMPLOYMENT_TYPE_LABELS: Record<string, string> = {
+  full_time: "Full-time",
+  c2c: "Contract",
+  internship: "Internship",
+  w2: "W-2",
+};
 
 export default async function JobDetailPage({
   params,
@@ -74,10 +82,18 @@ export default async function JobDetailPage({
       <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">{job.title}</h1>
-          <p className="text-slate-500">
+          <p className="mt-1 text-slate-500">
             {job.company}
             {job.location ? ` · ${job.location}` : ""}
-            {job.salary_min ? ` · $${job.salary_min.toLocaleString()}${job.salary_max ? `–$${job.salary_max.toLocaleString()}` : "+"}` : ""}
+            {job.salary_min
+              ? ` · $${job.salary_min.toLocaleString()}${job.salary_max ? `–$${job.salary_max.toLocaleString()}` : "+"}`
+              : ""}
+          </p>
+          <p className="mt-1 text-sm text-slate-400">
+            {job.posted_at ? `Posted ${formatRelativeTime(job.posted_at)}` : ""}
+            {job.employment_type
+              ? ` · ${EMPLOYMENT_TYPE_LABELS[job.employment_type] ?? job.employment_type}`
+              : ""}
           </p>
         </div>
         {matchScore !== null && (
