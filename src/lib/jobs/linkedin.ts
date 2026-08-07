@@ -154,6 +154,67 @@ export function parseLinkedInJobs(html: string, now = new Date()): JobPosting[] 
 const BROWSER_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
 
+/**
+ * Converts a job description's rich HTML to plain text, preserving paragraph
+ * and list breaks as line breaks.
+ */
+export function descriptionToText(html: string): string {
+  return html
+    .replace(/<span[^>]*class="sr-only"[^>]*>[\s\S]*?<\/span>/gi, "")
+    .replace(/<\s*br\s*\/?\s*>/gi, "\n")
+    .replace(/<\/(p|div|section|tr|table)>/gi, "\n\n")
+    .replace(/<\/(li|ul|ol|h[1-6])>/gi, "\n")
+    .replace(/<li[^>]*>/gi, "- ")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#39;|&apos;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .join("\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
+/**
+ * Extracts the full description from a LinkedIn job detail page. The markup is
+ * a rich-HTML div under `show-more-less-html__markup`; fall back to the plain
+ * `description__text` node if the class name changes.
+ */
+export function extractLinkedInDescription(html: string): string {
+  const rich = html.match(
+    /class="show-more-less-html__markup[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+  );
+  if (rich) {
+    const text = descriptionToText(rich[1]);
+    if (text) return text;
+  }
+  const plain = html.match(
+    /class="description__text[^"]*"[^>]*>([\s\S]*?)<\/div>/i,
+  );
+  return plain ? descriptionToText(plain[1]) : "";
+}
+
+export async function fetchLinkedInDescription(
+  url: string,
+  opts?: { signal?: AbortSignal },
+): Promise<string> {
+  const res = await fetch(url, {
+    headers: {
+      accept: "text/html",
+      "accept-language": "en-US,en;q=0.9",
+      "user-agent": BROWSER_UA,
+    },
+    signal: opts?.signal,
+    next: { revalidate: 0 },
+  });
+  if (!res.ok) return "";
+  return extractLinkedInDescription(await res.text());
+}
+
 export async function searchLinkedInJobs(
   params: LinkedInSearchParams,
   opts?: { signal?: AbortSignal },

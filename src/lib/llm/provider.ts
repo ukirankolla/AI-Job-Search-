@@ -189,14 +189,57 @@ export function getEmbeddings(): Embeddings {
 
 export const isMockProvider = () => !process.env.OPENAI_API_KEY;
 
-export function parseJsonObject<T>(text: string): T | null {
-  const cleaned = text
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/, "")
-    .trim();
+function tryJsonParse(text: string): unknown {
   try {
-    return JSON.parse(cleaned) as T;
+    return JSON.parse(text);
   } catch {
     return null;
   }
+}
+
+/**
+ * Extracts the first top-level JSON value (object or array) from a string,
+ * walking brackets while respecting quoted strings and escapes. Handles LLM
+ * output that wraps JSON in prose or code fences.
+ */
+function extractJsonValue(text: string): string | null {
+  const start = text.search(/[[{]/);
+  if (start === -1) return null;
+  const open = text[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
+export function parseJsonObject<T>(text: string): T | null {
+  const cleaned = text.replace(/```(?:json)?/gi, "").trim();
+
+  const direct = tryJsonParse(cleaned);
+  if (direct !== null) return direct as T;
+
+  const extracted = extractJsonValue(cleaned);
+  if (extracted === null) return null;
+
+  const parsed = tryJsonParse(extracted);
+  if (parsed !== null) return parsed as T;
+
+  const repaired = tryJsonParse(extracted.replace(/,\s*([}\]])/g, "$1"));
+  return repaired !== null ? (repaired as T) : null;
 }

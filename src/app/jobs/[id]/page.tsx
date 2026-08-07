@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getUsageSummary } from "@/lib/subscription";
+import { fetchLinkedInDescription } from "@/lib/jobs/linkedin";
 import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
@@ -50,6 +51,19 @@ export default async function JobDetailPage({
   const matchScore = jobMatch?.score ?? app?.match_score ?? null;
   const hasResume = Boolean(profile?.resume_text?.trim());
   const plan = await getUsageSummary(user.id, user.email);
+
+  let description = (job.description ?? "").trim();
+  if (!description && job.source === "linkedin" && job.url) {
+    description = await fetchLinkedInDescription(job.url).catch(() => "");
+    if (description) {
+      try {
+        await supabase
+          .from("jobs")
+          .update({ description })
+          .eq("id", job.id);
+      } catch {}
+    }
+  }
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-8">
@@ -117,7 +131,7 @@ export default async function JobDetailPage({
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <h2 className="mb-3 font-semibold text-slate-900">Job description</h2>
           <div className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-            {job.description}
+            {description || "No description available for this posting."}
           </div>
         </div>
       </div>

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLinkedInSearchUrl,
+  descriptionToText,
+  extractLinkedInDescription,
   hoursToTPR,
   parseLinkedInJobs,
   parseRelativeTime,
@@ -193,5 +195,48 @@ describe("parseRelativeTime", () => {
   it("defaults to now for unknown input", () => {
     expect(parseRelativeTime("", now)).toBe(now.toISOString());
     expect(parseRelativeTime("gibberish", now)).toBe(now.toISOString());
+  });
+});
+
+describe("extractLinkedInDescription", () => {
+  const PAGE_HTML = `
+    <section class="core-section-container my-3 description">
+      <div class="description__text description__text--rich">
+        <section class="show-more-less-html" data-max-lines="5">
+          <div class="show-more-less-html__markup show-more-less-html__markup--clamp-after-5 relative overflow-hidden">
+            <strong>Job Description</strong><br><br>
+            We build <strong>React</strong> apps.
+            <ul><li>Ship features</li><li>Own your work</li></ul>
+          </div>
+        </section>
+      </div>
+    </section>
+  `;
+
+  it("extracts rich markup to plain text", () => {
+    const text = extractLinkedInDescription(PAGE_HTML);
+    expect(text).toContain("Job Description");
+    expect(text).toContain("We build React apps.");
+    expect(text).toContain("- Ship features");
+    expect(text).toContain("- Own your work");
+  });
+
+  it("falls back to the plain description node", () => {
+    const html =
+      '<div class="description__text description__text--rich">Fallback body</div>';
+    expect(extractLinkedInDescription(html)).toBe("Fallback body");
+  });
+
+  it("returns empty for pages without a description", () => {
+    expect(extractLinkedInDescription("<html><body></body></html>")).toBe("");
+  });
+});
+
+describe("descriptionToText", () => {
+  it("keeps paragraph and list breaks", () => {
+    const text = descriptionToText(
+      "<p>First</p><p>Second</p><ul><li>A</li><li>B</li></ul>",
+    );
+    expect(text).toBe("First\n\nSecond\n\n- A\n- B");
   });
 });

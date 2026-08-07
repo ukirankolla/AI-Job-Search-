@@ -23,6 +23,30 @@ describe("parseJsonObject", () => {
     expect(parseJsonObject('  \n\n {"score": 90} \n ')).toEqual({ score: 90 });
   });
 
+  it("extracts JSON embedded in prose", () => {
+    expect(
+      parseJsonObject(
+        'Sure! Here is the result:\n{"score": 85, "summary": "Great fit"}\nLet me know if you need more.',
+      ),
+    ).toEqual({ score: 85, summary: "Great fit" });
+  });
+
+  it("extracts the first top-level JSON value", () => {
+    expect(parseJsonObject('prefix [1, 2, 3] suffix {"a":1}')).toEqual([1, 2, 3]);
+  });
+
+  it("handles braces inside string values", () => {
+    expect(parseJsonObject('{"resume": "line {with} braces", "ok": true}')).toEqual(
+      { resume: "line {with} braces", ok: true },
+    );
+  });
+
+  it("tolerates trailing commas", () => {
+    expect(
+      parseJsonObject('{"skills": ["a", "b",], "score": 5,}'),
+    ).toEqual({ skills: ["a", "b"], score: 5 });
+  });
+
   it("returns null for invalid or empty input", () => {
     expect(parseJsonObject("not json")).toBeNull();
     expect(parseJsonObject('{"score":')).toBeNull();
