@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, isOnboarded } from "@/lib/auth";
 
 export const metadata = {
   title: "Noventra — Upload Your Resume, We Do the Rest",
@@ -79,8 +79,18 @@ const stats = [
 
 export default async function Home() {
   const user = await getSessionUser();
-  const ctaHref = user ? "/dashboard" : "/login";
-  const ctaLabel = user ? "Go to dashboard" : "Get started free";
+  const onboarded = user ? await isOnboarded(user.id) : false;
+  const getStartedHref = !user
+    ? "/login?next=/onboarding"
+    : onboarded
+      ? "/dashboard"
+      : "/onboarding";
+  const signInHref = "/login?next=/dashboard";
+  const ctaLabel = !user
+    ? "Get started free"
+    : onboarded
+      ? "Go to dashboard"
+      : "Complete profile";
 
   return (
     <main className="overflow-hidden">
@@ -117,7 +127,7 @@ export default async function Home() {
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
-                href={ctaHref}
+                href={getStartedHref}
                 className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30 transition hover:bg-indigo-500"
               >
                 {ctaLabel}
@@ -233,7 +243,7 @@ export default async function Home() {
                     ))}
                   </div>
                   <Link
-                    href={ctaHref}
+                    href={getStartedHref}
                     className="mt-6 block w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-indigo-500"
                   >
                     Tailor & apply →
@@ -340,18 +350,18 @@ export default async function Home() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link
-              href={ctaHref}
+              href={getStartedHref}
               className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
             >
               {ctaLabel}
             </Link>
             {!user && (
-              <a
-                href="/login"
+              <Link
+                href={signInHref}
                 className="rounded-lg border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-400"
               >
                 Sign in
-              </a>
+              </Link>
             )}
           </div>
         </div>
