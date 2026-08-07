@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { initialState } from "@/app/actions/form-state";
 import { updateProfile, uploadResumeFile } from "@/app/actions/profile";
 import type { Profile } from "@/lib/types";
@@ -14,6 +14,7 @@ export function ProfileForm({ profile }: { profile: Profile }) {
     uploadResumeFile,
     initialState,
   );
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="space-y-8">
@@ -161,20 +162,30 @@ export function ProfileForm({ profile }: { profile: Profile }) {
             Upload your resume file
           </p>
           <p className="text-xs text-slate-500">
-            PDF, Word (.docx), or plain text (.txt). The text is extracted and
-            indexed automatically — it powers your match % and the tailor and
-            prep agents for every job.
+            PDF, Word (.doc/.docx), or plain text (.txt). The text is extracted
+            and indexed automatically — it powers your match % and the tailor
+            and prep agents for every job.
           </p>
           <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={filePending}
+              className="rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+            >
+              Choose file
+            </button>
             <input
+              ref={fileInputRef}
               type="file"
               name="resume_file"
-              accept=".pdf,.docx,.txt,application/pdf,text/plain,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              accept=".pdf,.doc,.docx,.txt,application/pdf,text/plain,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
               onChange={(e) => {
-                if (e.target.files?.length) e.currentTarget.form?.requestSubmit();
+                if (e.target.files?.length)
+                  e.currentTarget.form?.requestSubmit();
               }}
-              disabled={filePending}
-              className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500 disabled:opacity-50"
+              className="sr-only"
+              aria-label="Choose resume file"
             />
             <button type="submit" className="hidden" aria-hidden="true" />
             {profile.resume_file_path ? (

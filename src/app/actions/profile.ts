@@ -2,6 +2,7 @@
 
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
+import { extractResumeText } from "@/lib/resume-extract";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { parseResume } from "@/lib/agents/workers";
@@ -126,31 +127,6 @@ export async function uploadResume(
 }
 
 const MAX_RESUME_FILE_SIZE = 50 * 1024 * 1024;
-
-async function extractResumeText(file: File): Promise<string> {
-  const name = file.name.toLowerCase();
-  if (name.endsWith(".pdf")) {
-    const { PDFParse } = await import("pdf-parse");
-    const parser = new PDFParse({ data: await file.arrayBuffer() });
-    try {
-      const result = await parser.getText();
-      return result.text ?? "";
-    } finally {
-      await parser.destroy().catch(() => {});
-    }
-  }
-  if (name.endsWith(".docx")) {
-    const mammoth = await import("mammoth");
-    const result = await mammoth.extractRawText({
-      buffer: await file.arrayBuffer(),
-    });
-    return result.value ?? "";
-  }
-  if (name.endsWith(".txt")) {
-    return await file.text();
-  }
-  throw new Error("Unsupported file type. Use PDF, Word (.docx), or .txt.");
-}
 
 export async function uploadResumeFile(
   _prev: ProfileFormState,
