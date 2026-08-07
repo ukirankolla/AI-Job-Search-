@@ -260,6 +260,12 @@ describe("extractLinkedInApplyUrl", () => {
     expect(extractLinkedInApplyUrl(html)).toBe("");
   });
 
+  it("handles apply-button anchors where href precedes class", () => {
+    const html =
+      '<a href="https://careers.acme.com/jobs/5678" class="jobs-apply-button jobs-apply-button--outline">Apply</a>';
+    expect(extractLinkedInApplyUrl(html)).toBe("https://careers.acme.com/jobs/5678");
+  });
+
   it("returns empty when no external link is present", () => {
     expect(extractLinkedInApplyUrl("<html><body></body></html>")).toBe("");
   });

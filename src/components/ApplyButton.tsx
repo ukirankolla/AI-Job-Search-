@@ -7,11 +7,9 @@ import { applyForJob } from "@/app/actions/subscription";
 interface Props {
   jobId: string;
   url: string;
-  autoApply?: boolean;
-  label?: string;
 }
 
-export function ApplyButton({ jobId, url, autoApply = false, label }: Props) {
+export function ApplyButton({ jobId, url }: Props) {
   const [busy, setBusy] = useState(false);
   const [blocked, setBlocked] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -41,11 +39,7 @@ export function ApplyButton({ jobId, url, autoApply = false, label }: Props) {
         disabled={busy}
         className="mt-3 inline-flex items-center rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-emerald-500 disabled:opacity-50"
       >
-        {busy
-          ? "Checking…"
-          : autoApply
-            ? label ?? "Auto-apply now ↗"
-            : label ?? "Apply now ↗"}
+        {busy ? "Checking…" : "Apply ↗"}
       </button>
 
       {blocked && (

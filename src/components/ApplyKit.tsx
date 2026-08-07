@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { AgentRunner } from "@/components/AgentRunner";
 import { ApplyButton } from "@/components/ApplyButton";
-import { classifyApplySource } from "@/lib/jobs/applySource";
 import type { SubscriptionTier, UsageSnapshot } from "@/lib/subscription";
 
 interface Props {
@@ -31,21 +30,8 @@ export function ApplyKit({
   limit,
 }: Props) {
   const [resume, setResume] = useState<string | null>(null);
-  const [autoApply, setAutoApply] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [copied, setCopied] = useState(false);
-
-  const applyLabel = (() => {
-    switch (classifyApplySource(jobUrl)) {
-      case "linkedin":
-        return "Apply on LinkedIn ↗";
-      case "company":
-        return "Apply on company site ↗";
-      case "board":
-        return "Apply on job board ↗";
-      default:
-        return undefined;
-    }
-  })();
 
   const copyResume = async () => {
     if (!resume) return;
@@ -54,15 +40,29 @@ export function ApplyKit({
     setTimeout(() => setCopied(false), 1500);
   };
 
-  const downloadResume = () => {
-    if (!resume) return;
-    const blob = new Blob([resume], { type: "text/plain;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tailored-resume.txt";
-    a.click();
-    URL.revokeObjectURL(url);
+  const downloadResume = async () => {
+    if (!resume || downloading) return;
+    setDownloading(true);
+    try {
+      const { jsPDF } = await import("jspdf");
+      const doc = new jsPDF();
+      const margin = 15;
+      const pageWidth = doc.internal.pageSize.getWidth() - margin * 2;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const lines = doc.splitTextToSize(resume, pageWidth) as string[];
+      let y = margin;
+      for (const line of lines) {
+        if (y > pageHeight - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        doc.text(line, margin, y);
+        y += 5;
+      }
+      doc.save("tailored-resume.pdf");
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const unlimited = tier === "premium" || admin;
@@ -122,9 +122,10 @@ export function ApplyKit({
               <button
                 type="button"
                 onClick={downloadResume}
-                className="rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50"
+                disabled={downloading}
+                className="rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
               >
-                Download
+                {downloading ? "Preparing…" : "Download"}
               </button>
               <button
                 type="button"
@@ -143,26 +144,7 @@ export function ApplyKit({
 
       {jobUrl && (
         <div className="mt-5 border-t border-slate-100 pt-4">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              checked={autoApply}
-              onChange={(e) => setAutoApply(e.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 accent-emerald-600"
-            />
-            Auto-apply for me
-          </label>
-          {autoApply && (
-            <p className="mt-2 rounded-lg bg-emerald-50 p-3 text-xs text-emerald-800">
-              We’ll open the official application page with your tailored resume
-              and cover letter ready — one click and you’re submitted. (Some
-              sites don’t allow fully automated submissions, so this is the
-              fastest, safest path that works everywhere.)
-            </p>
-          )}
-          {jobUrl && (
-            <ApplyButton jobId={jobId} url={jobUrl} autoApply={autoApply} label={applyLabel} />
-          )}
+          <ApplyButton jobId={jobId} url={jobUrl} />
           <p className="mt-2 text-xs text-slate-400">
             Opens the original posting on the company or job-board career site.
           </p>

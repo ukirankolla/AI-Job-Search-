@@ -143,6 +143,51 @@ describe("mock agents", () => {
   });
 });
 
+describe("mock profile field parsing", () => {
+  it("does not leak an empty Summary field into the next line", async () => {
+    const provider = getChatProvider();
+    const user =
+      "JOB:\nTitle: Data Engineer\nCompany: Optomi\n\nDescription: Work with Python and Spark.\n\nPROFILE:\nName: Jane Smith\nHeadline: Data Engineer\nSummary: \nSkills: Python, Spark";
+    const { content } = await provider.complete(
+      "You are the TAILOR agent in a job-search multi-agent system.",
+      user,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.resume).not.toContain("Skills:");
+    expect(parsed.resume).toContain("specializing in");
+    expect(parsed.resume).toContain("Tailored for the Data Engineer at Optomi");
+  });
+
+  it("builds a complete resume from RAG chunks without section headers", async () => {
+    const provider = getChatProvider();
+    const user =
+      "JOB:\nTitle: Data Engineer\nCompany: Optomi\n\nDescription: Work with Python, Spark, and Kafka.\n\nPROFILE:\nName: Jane Smith\nHeadline: Data Engineer\nSummary: Builds data pipelines.\nSkills: Python\n\n--- Relevant resume excerpts (RAG) ---\n[Experience]\nQA Automation Engineer at Optomi\nAutomated end-to-end test suites.\n\n[Skills]\nPython, Spark, SQL";
+    const { content } = await provider.complete(
+      "You are the TAILOR agent in a job-search multi-agent system.",
+      user,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.resume).toContain("QA Automation Engineer");
+    expect(parsed.resume).toContain("Python, Spark, SQL");
+    expect(parsed.resume).not.toContain("--- Relevant resume excerpts (RAG) ---");
+    expect(parsed.resume).not.toMatch(/Summary: \n/);
+    expect(parsed.resume).toContain("Tailored for the Data Engineer at Optomi");
+  });
+
+  it("falls back to a placeholder name instead of stealing the Headline line", async () => {
+    const provider = getChatProvider();
+    const user =
+      "JOB:\nTitle: Data Engineer\nCompany: Optomi\n\nDescription: Work with Python.\n\nPROFILE:\nName: \nHeadline: Data Engineer\nSummary: Builds data pipelines.\nSkills: Python, Spark";
+    const { content } = await provider.complete(
+      "You are the TAILOR agent in a job-search multi-agent system.",
+      user,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.cover_letter).toContain("[Your Name]");
+    expect(parsed.cover_letter).not.toContain("Headline:");
+  });
+});
+
 describe("mock apply graph end to end", () => {
   const input: AgentInput = {
     profile: {

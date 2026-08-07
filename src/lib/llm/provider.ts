@@ -62,6 +62,9 @@ const MOCK_SKILL_TERMS = [
   "Power BI", "Excel", "gRPC", "WebSockets",
 ];
 
+const SECTION_HEADER_RE =
+  /^(professional summary|summary|skills?|skill set|technical skills|experience|work experience|employment( history)?|education|projects|accomplishments|achievements|certifications?|objective|profile|about|job title|roles?|duties?|responsibilities)\s*[:|-]?\s*$/i;
+
 function mockUniqueSkills(list: string[]): string[] {
   const seen = new Set<string>();
   return list.filter((s) => {
@@ -88,8 +91,8 @@ function mockJobInfo(user: string): {
     /JOB:\s*\n([\s\S]*?)(?=\n\n(?:PROFILE|TAILORED RESUME):)/i.exec(user)?.[1] ??
     "";
   return {
-    title: /Title:\s*(.+)/i.exec(jobBlock)?.[1]?.trim() ?? "",
-    company: /Company:\s*(.+)/i.exec(jobBlock)?.[1]?.trim() ?? "",
+    title: /Title:[ \t]*(.+)/i.exec(jobBlock)?.[1]?.trim() ?? "",
+    company: /Company:[ \t]*(.+)/i.exec(jobBlock)?.[1]?.trim() ?? "",
     description: /Description:\s*\n?([\s\S]*)/i.exec(jobBlock)?.[1]?.trim() ?? "",
   };
 }
@@ -104,20 +107,23 @@ function mockProfileInfo(user: string): {
   const profileBlock =
     /PROFILE:\s*\n([\s\S]*?)(?=\n\n(?:JOB|TAILORED RESUME):|$)/i.exec(user)?.[1] ??
     "";
-  const skills = (/Skills:\s*(.+)/i.exec(profileBlock)?.[1] ?? "")
+  const [headerText, ragText] = profileBlock.split(
+    "--- Relevant resume excerpts (RAG) ---",
+  );
+  const header = headerText ?? "";
+  const skills = (/Skills:[ \t]*(.+)/i.exec(header)?.[1] ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  const rag = user.split("--- Relevant resume excerpts (RAG) ---")[1] ?? "";
-  const chunks = rag
+  const chunks = (ragText ?? "")
     .split(/\[[^\]]+\]\n/)
     .slice(1)
     .map((c) => c.trim())
     .filter(Boolean);
   return {
-    name: /Name:\s*(.+)/i.exec(profileBlock)?.[1]?.trim() ?? "",
-    headline: /Headline:\s*(.+)/i.exec(profileBlock)?.[1]?.trim() ?? "",
-    summary: /Summary:\s*(.+)/i.exec(profileBlock)?.[1]?.trim() ?? "",
+    name: /Name:[ \t]*(.+)/i.exec(header)?.[1]?.trim() ?? "",
+    headline: /Headline:[ \t]*(.+)/i.exec(header)?.[1]?.trim() ?? "",
+    summary: /Summary:[ \t]*(.+)/i.exec(header)?.[1]?.trim() ?? "",
     skills,
     chunks,
   };
@@ -210,17 +216,19 @@ class MockChatProvider implements ChatProvider {
     }
 
     if (agent === "tailor") {
-      const { title, company } = mockJobInfo(user);
+      const { title, company, description } = mockJobInfo(user);
       const profile = mockProfileInfo(user);
-      const jobSkills = mockExtractSkills(`${title} ${mockJobInfo(user).description}`);
+      const jobSkills = mockExtractSkills(`${title} ${description}`);
       const allSkills = mockUniqueSkills([...profile.skills, ...jobSkills]);
-      const expBullets = profile.chunks.slice(0, 3).map((c) => {
-        const first = c.split("\n").map((l) => l.trim()).filter(Boolean)[0];
-        return `- ${first ?? c}`;
+      const expBullets = profile.chunks.slice(0, 4).map((c) => {
+        const lines = c.split("\n").map((l) => l.trim()).filter(Boolean);
+        const keep = lines.filter((l) => !SECTION_HEADER_RE.test(l)).slice(0, 4);
+        return `- ${keep.join(" · ") || lines[0] || "Relevant experience"}`;
       });
+      const summaryLine = `${profile.summary || `${profile.headline || "Software professional"} specializing in ${allSkills.slice(0, 4).join(", ") || "software engineering"}.`} Tailored for the ${title || "role"}${company ? ` at ${company}` : ""}.`;
       const resume = [
         "### SUMMARY",
-        `${profile.summary || `${profile.headline || "Software professional"} with a strong product background.`} Tailored for the ${title || "role"}${company ? ` at ${company}` : ""}.`,
+        summaryLine,
         "",
         "### EXPERIENCE",
         expBullets.length

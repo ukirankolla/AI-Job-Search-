@@ -215,15 +215,16 @@ export async function fetchLinkedInDescription(
  */
 export function extractLinkedInApplyUrl(html: string): string {
   const candidates: string[] = [];
-  const button =
-    /class="[^"]*jobs-apply-button[^"]*"[^>]*href="([^"]+)"/i.exec(html);
-  if (button) candidates.push(button[1].replace(/&amp;/g, "&"));
+  const anchor = /<a[^>]*class="[^"]*jobs-apply-button[^"]*"[^>]*>/i.exec(html)?.[0];
+  const href = anchor ? /href="([^"]+)"/i.exec(anchor)?.[1] : undefined;
+  if (href) candidates.push(href.replace(/&amp;/g, "&"));
   const json = /"applyUrl":"([^"]+)"/i.exec(html);
   if (json) candidates.push(json[1].replace(/\\\//g, "/"));
   for (const candidate of candidates) {
     try {
-      const host = new URL(candidate).hostname.toLowerCase();
-      if (!host.includes("linkedin.com") && /^https?:$/.test(new URL(candidate).protocol)) {
+      const url = new URL(candidate);
+      const host = url.hostname.toLowerCase();
+      if (!host.includes("linkedin.com") && /^https?:$/.test(url.protocol)) {
         return candidate;
       }
     } catch {
