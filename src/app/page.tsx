@@ -232,12 +232,12 @@ export default async function Home() {
                       </div>
                     ))}
                   </div>
-                  <button
-                    type="button"
-                    className="mt-6 w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
+                  <Link
+                    href={ctaHref}
+                    className="mt-6 block w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white transition hover:bg-indigo-500"
                   >
                     Tailor & apply →
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
