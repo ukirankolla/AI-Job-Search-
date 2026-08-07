@@ -1,64 +1,45 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-
-const COOLDOWN_SECONDS = 60;
 
 export function LoginForm({ next = "/dashboard" }: { next?: string }) {
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
-  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [resetSent, setResetSent] = useState(false);
 
   const supabase = createClient();
 
-  useEffect(() => {
-    return () => {
-      if (timer.current) clearInterval(timer.current);
-    };
-  }, []);
-
-  const startCooldown = () => {
-    setCooldown(COOLDOWN_SECONDS);
-    timer.current = setInterval(() => {
-      setCooldown((s) => {
-        if (s <= 1) {
-          if (timer.current) clearInterval(timer.current);
-          return 0;
-        }
-        return s - 1;
-      });
-    }, 1000);
-  };
-
   const friendlyError = (message: string) => {
+    if (/invalid login|invalid.*credentials|no user|user not found/i.test(message)) {
+      return "Invalid email or password.";
+    }
+    if (/email not confirmed|not confirmed/i.test(message)) {
+      return "Please confirm your email first. Check your inbox for the confirmation link.";
+    }
     if (/rate limit|too many requests/i.test(message)) {
-      return "We've hit our email limit for this hour. Please try again in a bit.";
+      return "Too many attempts. Please try again in a bit.";
     }
     return message;
   };
 
-  const signInWithEmail = async (e: React.FormEvent) => {
+  const signInWithPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setSent(false);
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
-      },
+      password,
     });
     setLoading(false);
-    startCooldown();
     if (error) {
       setError(friendlyError(error.message));
       return;
     }
-    setSent(true);
+    window.location.href = next;
   };
 
   const signInWithGoogle = async () => {
@@ -74,7 +55,24 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
     if (error) setError(friendlyError(error.message));
   };
 
-  const sendDisabled = loading || cooldown > 0;
+  const resetPassword = async () => {
+    if (!email) {
+      setError("Enter your email above, then click forgot password.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    setResetSent(false);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+    });
+    setLoading(false);
+    if (error) {
+      setError(friendlyError(error.message));
+      return;
+    }
+    setResetSent(true);
+  };
 
   return (
     <div className="mx-auto mt-24 max-w-sm space-y-6 rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-900/5">
@@ -104,34 +102,59 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
         <span className="h-px flex-1 bg-slate-200" />
       </div>
 
-      <form onSubmit={signInWithEmail} className="space-y-3">
+      <form onSubmit={signInWithPassword} className="space-y-3">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="you@example.com"
+          placeholder="Email"
+          autoComplete="email"
+          required
+          className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+        />
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Password"
+          autoComplete="current-password"
           required
           className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
         />
         <button
           type="submit"
-          disabled={sendDisabled}
+          disabled={loading}
           className="w-full rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
         >
-          {loading
-            ? "Sending…"
-            : cooldown > 0
-              ? `Try again in ${cooldown}s`
-              : "Send to Gmail"}
+          {loading ? "Signing in…" : "Sign in"}
         </button>
       </form>
 
-      {sent && (
+      <button
+        type="button"
+        onClick={resetPassword}
+        disabled={loading}
+        className="w-full text-center text-sm font-medium text-slate-500 transition hover:text-slate-700 disabled:opacity-50"
+      >
+        Forgot password?
+      </button>
+
+      {resetSent && (
         <p className="text-sm text-emerald-600">
-          Check your Gmail for the sign-in link.
+          Check your email for the password-reset link.
         </p>
       )}
       {error && <p className="text-sm text-rose-600">{error}</p>}
+
+      <p className="text-center text-sm text-slate-500">
+        New to Noventra?{" "}
+        <Link
+          href={`/signup?next=${encodeURIComponent(next)}`}
+          className="font-medium text-indigo-600 hover:text-indigo-500"
+        >
+          Get started free
+        </Link>
+      </p>
     </div>
   );
 }

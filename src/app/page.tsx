@@ -81,7 +81,7 @@ export default async function Home() {
   const user = await getSessionUser();
   const onboarded = user ? await isOnboarded(user.id) : false;
   const getStartedHref = !user
-    ? "/login?next=/onboarding"
+    ? "/signup"
     : onboarded
       ? "/dashboard"
       : "/onboarding";
