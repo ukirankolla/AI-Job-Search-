@@ -98,21 +98,28 @@ export function parseRelativeTime(text: string, now = new Date()): string {
 }
 
 /**
- * Extracts job cards from the guest search HTML response.
+ * Extracts job cards from the guest search HTML response. LinkedIn's markup has
+ * changed over time: cards used to be `<li class="base-card">` and now are a
+ * `<div class="base-card ...">` nested inside a bare `<li>`, with title/company
+ * under `base-search-card__title`/`base-search-card__subtitle`. Handle both.
  */
 export function parseLinkedInJobs(html: string, now = new Date()): JobPosting[] {
   const out: JobPosting[] = [];
   const seen = new Set<string>();
 
-  for (const raw of html.split('<li class="base-card').slice(1)) {
-    const block = `<li class="base-card${raw}`;
+  for (const raw of html.split(/<div class="base-card |<li class="base-card /).slice(1)) {
+    const block = `<div class="base-card ${raw}`;
     const url = extractText(block, /href="(https:\/\/www\.linkedin\.com\/jobs\/view\/[^"]+)"/);
     if (!url) continue;
-    const idMatch = url.match(/jobs\/view\/(\d+)/);
-    const externalId = idMatch ? idMatch[1] : url;
+    const cleanUrl = url.replace(/&amp;/g, "&");
+    const idMatch = cleanUrl.split("?")[0].match(/(\d+)$/);
+    const externalId = idMatch ? idMatch[1] : cleanUrl;
     if (seen.has(externalId)) continue;
 
-    const title = extractText(block, /base-card__title[^>]*>([\s\S]*?)<\/h3>/i);
+    const title = extractText(
+      block,
+      /class="base(?:-search)?-card__title[^"]*"[^>]*>([\s\S]*?)<\/h3>/i,
+    );
     if (!title) continue;
     seen.add(externalId);
 
@@ -120,10 +127,16 @@ export function parseLinkedInJobs(html: string, now = new Date()): JobPosting[] 
       source: "linkedin",
       external_id: externalId,
       title,
-      company: extractText(block, /base-card__subtitle[^>]*>([\s\S]*?)<\/h4>/i),
-      location: extractText(block, /job-search-card__location[^>]*>([\s\S]*?)<\/span>/i),
+      company: extractText(
+        block,
+        /class="base(?:-search)?-card__subtitle[^"]*"[^>]*>([\s\S]*?)<\/h4>/i,
+      ),
+      location: extractText(
+        block,
+        /job-search-card__location[^>]*>([\s\S]*?)<\/(?:span|p)>/i,
+      ),
       description: extractText(block, /job-search-card__snippet[^>]*>([\s\S]*?)<\/p>/i),
-      url,
+      url: cleanUrl,
       salary_min: null,
       salary_max: null,
       posted_at: parseRelativeTime(

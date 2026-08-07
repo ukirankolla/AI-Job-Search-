@@ -12,50 +12,56 @@ const now = new Date("2026-08-05T12:00:00Z");
 const SAMPLE_HTML = `
 <main>
   <ul class="jobs-search__results-list">
-    <li class="base-card relative w-full hover:no-underline focus:no-underline base-card--link base-search-card base-search-card--link job-search-card">
-      <a class="base-card__full-link absolute z-10 h-full w-full" href="https://www.linkedin.com/jobs/view/4065342521"></a>
-      <div class="base-card__wrapper">
-        <h3 class="base-card__title base-search-card--title">
-          <span class="sr-only">Software Engineer</span>
-          Software Engineer
-        </h3>
-        <h4 class="base-card__subtitle">
-          <span class="sr-only">Acme Inc</span>
-          Acme Inc
-        </h4>
-        <div class="base-search-card__metadata">
-          <p class="job-search-card__location">
-            <span class="sr-only">Austin, TX</span>
-            Austin, TX
-          </p>
-          <time class="job-search-card__listdate">3 hours ago</time>
-          <p class="job-search-card__snippet">Build React &amp; TypeScript products with a great team.</p>
+    <li>
+      <div class="base-card relative w-full hover:no-underline focus:no-underline base-card--link base-search-card base-search-card--link job-search-card">
+        <a class="base-card__full-link absolute z-10 h-full w-full" href="https://www.linkedin.com/jobs/view/software-engineer-at-acme-4065342521?position=1&amp;pageNum=0"></a>
+        <img class="search-entity-media" src="https://example.com/logo.jpg">
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">Software Engineer</h3>
+          <h4 class="base-search-card__subtitle"><a class="hidden-nested-link">Acme Inc</a></h4>
+          <div class="base-search-card__metadata">
+            <span class="job-search-card__location">Austin, TX</span>
+            <time class="job-search-card__listdate--new" datetime="2026-08-05">3 hours ago</time>
+          </div>
         </div>
       </div>
     </li>
-    <li class="base-card relative w-full hover:no-underline focus:no-underline base-card--link base-search-card base-search-card--link job-search-card">
-      <a class="base-card__full-link absolute z-10 h-full w-full" href="https://www.linkedin.com/jobs/view/4065342522"></a>
-      <div class="base-card__wrapper">
-        <h3 class="base-card__title base-search-card--title">
-          <span class="sr-only">Frontend Developer</span>
-          Frontend Developer
-        </h3>
-        <h4 class="base-card__subtitle">
-          <span class="sr-only">Northwind Labs</span>
-          Northwind Labs
-        </h4>
-        <div class="base-search-card__metadata">
-          <p class="job-search-card__location">
-            <span class="sr-only">Remote</span>
-            Remote
-          </p>
-          <time class="job-search-card__listdate">Just now</time>
-          <p class="job-search-card__snippet">Full-stack work on the core product.</p>
+    <li>
+      <div class="base-card relative w-full hover:no-underline focus:no-underline base-card--link base-search-card base-search-card--link job-search-card">
+        <a class="base-card__full-link absolute z-10 h-full w-full" href="https://www.linkedin.com/jobs/view/frontend-developer-at-northwind-labs-4065342522?position=2&amp;pageNum=0"></a>
+        <div class="base-search-card__info">
+          <h3 class="base-search-card__title">Frontend Developer</h3>
+          <h4 class="base-search-card__subtitle"><a class="hidden-nested-link">Northwind Labs</a></h4>
+          <div class="base-search-card__metadata">
+            <span class="job-search-card__location">Remote</span>
+            <time class="job-search-card__listdate--new" datetime="2026-08-05">Just now</time>
+          </div>
         </div>
       </div>
     </li>
   </ul>
 </main>
+`;
+
+const LEGACY_HTML = `
+<ul class="jobs-search__results-list">
+  <li class="base-card relative w-full base-search-card job-search-card">
+    <a class="base-card__full-link" href="https://www.linkedin.com/jobs/view/4065342523"></a>
+    <div class="base-card__wrapper">
+      <h3 class="base-card__title base-search-card--title">
+        <span class="sr-only">Backend Engineer</span>
+        Backend Engineer
+      </h3>
+      <h4 class="base-card__subtitle">
+        <span class="sr-only">Acme Inc</span>
+        Acme Inc
+      </h4>
+      <p class="job-search-card__location">Seattle, WA</p>
+      <time class="job-search-card__listdate">1 day ago</time>
+      <p class="job-search-card__snippet">Scale the platform APIs.</p>
+    </div>
+  </li>
+</ul>
 `;
 
 describe("hoursToTPR", () => {
@@ -107,7 +113,7 @@ describe("buildLinkedInSearchUrl", () => {
 });
 
 describe("parseLinkedInJobs", () => {
-  it("maps guest search cards into postings", () => {
+  it("maps current guest search cards into postings", () => {
     const jobs = parseLinkedInJobs(SAMPLE_HTML, now);
     expect(jobs).toHaveLength(2);
 
@@ -117,11 +123,26 @@ describe("parseLinkedInJobs", () => {
       title: "Software Engineer",
       company: "Acme Inc",
       location: "Austin, TX",
-      url: "https://www.linkedin.com/jobs/view/4065342521",
-      description: "Build React & TypeScript products with a great team.",
+      url: "https://www.linkedin.com/jobs/view/software-engineer-at-acme-4065342521?position=1&pageNum=0",
+      description: "",
     });
     expect(jobs[0].posted_at).toBe(
       new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(),
+    );
+  });
+
+  it("still parses legacy <li class=base-card> markup", () => {
+    const jobs = parseLinkedInJobs(LEGACY_HTML, now);
+    expect(jobs).toHaveLength(1);
+    expect(jobs[0]).toMatchObject({
+      external_id: "4065342523",
+      title: "Backend Engineer",
+      company: "Acme Inc",
+      location: "Seattle, WA",
+      description: "Scale the platform APIs.",
+    });
+    expect(jobs[0].posted_at).toBe(
+      new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString(),
     );
   });
 
