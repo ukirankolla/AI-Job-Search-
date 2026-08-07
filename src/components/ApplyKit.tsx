@@ -54,6 +54,17 @@ export function ApplyKit({
     setTimeout(() => setCopied(false), 1500);
   };
 
+  const downloadResume = () => {
+    if (!resume) return;
+    const blob = new Blob([resume], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "tailored-resume.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const unlimited = tier === "premium" || admin;
 
   if (!hasResume) {
@@ -107,13 +118,22 @@ export function ApplyKit({
             <p className="text-sm font-medium text-emerald-700">
               ATS-friendly resume rewritten for this job.
             </p>
-            <button
-              type="button"
-              onClick={copyResume}
-              className="rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50"
-            >
-              {copied ? "Copied!" : "Copy resume"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={downloadResume}
+                className="rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50"
+              >
+                Download
+              </button>
+              <button
+                type="button"
+                onClick={copyResume}
+                className="rounded-md border border-slate-300 px-3 py-1 text-xs text-slate-600 transition hover:bg-slate-50"
+              >
+                {copied ? "Copied!" : "Copy resume"}
+              </button>
+            </div>
           </div>
           <pre className="mt-2 max-h-80 overflow-auto whitespace-pre-wrap rounded-lg border border-slate-200 bg-slate-50 p-4 text-xs leading-relaxed text-slate-700">
             {resume}

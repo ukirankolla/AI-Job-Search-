@@ -56,6 +56,33 @@ export async function runMatcher(input: AgentInput): Promise<MatchResult> {
   };
 }
 
+export async function runRematch(
+  input: AgentInput,
+  tailoredResume: string,
+): Promise<MatchResult> {
+  const system = [
+    "You are the REMATCH agent in a job-search multi-agent system.",
+    "You score a candidate's REWRITTEN resume against the job posting from 0-100 after it has been tailored for the role.",
+    "Respond with STRICT JSON matching this schema:",
+    '{"score": number, "summary": string, "matched_skills": string[], "missing_skills": string[], "strengths": string[], "concerns": string[]}',
+  ].join("\n");
+
+  const user = `JOB:\n${jobBrief(input.job)}\n\nTAILORED RESUME:\n${tailoredResume}`;
+
+  const provider = getChatProvider();
+  const { content } = await provider.complete(system, user);
+  const parsed = parseJsonObject<Partial<MatchResult>>(content);
+
+  return {
+    score: clampScore(parsed?.score),
+    summary: parsed?.summary ?? "No summary provided.",
+    matched_skills: parsed?.matched_skills ?? [],
+    missing_skills: parsed?.missing_skills ?? [],
+    strengths: parsed?.strengths ?? [],
+    concerns: parsed?.concerns ?? [],
+  };
+}
+
 export async function runTailor(input: AgentInput): Promise<TailorResult> {
   const system = [
     "You are the TAILOR agent in a job-search multi-agent system.",

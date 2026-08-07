@@ -7,7 +7,7 @@ import type {
   PrepResult,
   TailorResult,
 } from "@/lib/types";
-import { runMatcher, runPrep, runTailor } from "@/lib/agents/workers";
+import { runMatcher, runPrep, runRematch, runTailor } from "@/lib/agents/workers";
 
 export type RunType = "analyze" | "apply" | "prep";
 
@@ -90,6 +90,24 @@ async function prepNode(state: State): Promise<Partial<State>> {
   }
 }
 
+async function rematchNode(state: State): Promise<Partial<State>> {
+  try {
+    const result = await runRematch(state.input, state.tailor?.resume ?? "");
+    return {
+      steps: [
+        step(
+          "matcher",
+          "completed",
+          `Matched at ${result.score}/100 after tailoring`,
+        ),
+      ],
+      match: result,
+    };
+  } catch (err) {
+    return { steps: [step("matcher", "failed", message(err))], error: message(err) };
+  }
+}
+
 export function buildGraph(runType: RunType) {
   const graph = new StateGraph(GraphState)
     .addNode("matcher", matcherNode)
@@ -98,11 +116,15 @@ export function buildGraph(runType: RunType) {
   if (runType === "apply" || runType === "prep") {
     graph
       .addNode("runTailor", tailorNode)
+      .addNode("rematch", rematchNode)
       .addNode("runPrep", prepNode)
       .addConditionalEdges("matcher", (state: State) =>
         state.error ? END : "runTailor",
       )
-      .addEdge("runTailor", "runPrep")
+      .addConditionalEdges("runTailor", (state: State) =>
+        state.error ? END : "rematch",
+      )
+      .addEdge("rematch", "runPrep")
       .addEdge("runPrep", END);
   } else {
     graph.addEdge("matcher", END);

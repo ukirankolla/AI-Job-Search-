@@ -43,6 +43,15 @@ const matchJson = JSON.stringify({
   concerns: [],
 });
 
+const rematchJson = JSON.stringify({
+  score: 100,
+  summary: "Resume rewritten to match the role.",
+  matched_skills: ["TypeScript", "React", "Node.js"],
+  missing_skills: [],
+  strengths: ["Tailored resume"],
+  concerns: [],
+});
+
 const tailorJson = JSON.stringify({
   resume: "### SUMMARY\nJane is a senior engineer.",
   cover_letter: "Dear Acme,",
@@ -79,35 +88,37 @@ describe("buildGraph orchestration", () => {
     ]);
   });
 
-  it("apply chains matcher, tailor, and prep", async () => {
+  it("apply chains matcher, tailor, rematch, and prep", async () => {
     mockComplete
       .mockResolvedValueOnce({ content: matchJson })
       .mockResolvedValueOnce({ content: tailorJson })
+      .mockResolvedValueOnce({ content: rematchJson })
       .mockResolvedValueOnce({ content: prepJson });
 
     const state = await runGraph("apply");
 
-    expect(mockComplete).toHaveBeenCalledTimes(3);
-    expect(state.match?.score).toBe(88);
+    expect(mockComplete).toHaveBeenCalledTimes(4);
+    expect(state.match?.score).toBe(100);
     expect(state.tailor?.resume).toContain("Jane is a senior engineer");
     expect(state.tailor?.cover_letter).toBe("Dear Acme,");
     expect(state.prep?.questions).toHaveLength(1);
     expect(state.error).toBeNull();
     expect(
       state.steps.map((s: { agent: string }) => s.agent),
-    ).toEqual(["matcher", "tailor", "prep"]);
+    ).toEqual(["matcher", "tailor", "matcher", "prep"]);
   });
 
   it("prep also runs the full chain", async () => {
     mockComplete
       .mockResolvedValueOnce({ content: matchJson })
       .mockResolvedValueOnce({ content: tailorJson })
+      .mockResolvedValueOnce({ content: rematchJson })
       .mockResolvedValueOnce({ content: prepJson });
 
     const state = await runGraph("prep");
 
-    expect(mockComplete).toHaveBeenCalledTimes(3);
-    expect(state.match?.score).toBe(88);
+    expect(mockComplete).toHaveBeenCalledTimes(4);
+    expect(state.match?.score).toBe(100);
     expect(state.tailor?.resume).toBeDefined();
     expect(state.prep?.summary).toBe("Focus on system design.");
   });

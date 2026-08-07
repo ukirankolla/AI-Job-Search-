@@ -58,11 +58,14 @@ class MockChatProvider implements ChatProvider {
 
   private buildMockReply(system: string, user: string): string {
     const userLower = user.toLowerCase();
-    const systemLower = system.toLowerCase();
     const jobTitle =
       /title[":\s]*([^\n,]{2,60})/i.exec(user)?.[1]?.trim() || "the role";
 
-    if (systemLower.includes("resume parser")) {
+    const agent =
+      /you are the ([a-z][a-z\s-]*) agent/i.exec(system)?.[1]?.toLowerCase().trim() ??
+      "";
+
+    if (agent.startsWith("resume parser")) {
       const body = user.replace(/^RESUME:[\s\S]*?\n/, "");
       const lines = body.split("\n").map((l) => l.trim()).filter(Boolean);
       const knownSkills = [
@@ -87,7 +90,18 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (systemLower.includes("matcher")) {
+    if (agent === "rematch" || agent === "re-matcher") {
+      return JSON.stringify({
+        score: 100,
+        summary: `Resume rewritten to match ${jobTitle}; now at 100%.`,
+        matched_skills: ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"],
+        missing_skills: [],
+        strengths: ["Resume tailored to this posting"],
+        concerns: [],
+      });
+    }
+
+    if (agent === "matcher") {
       const skills = ["TypeScript", "React", "Node.js", "PostgreSQL", "AWS"];
       const missing = userLower.includes("python")
         ? ["Python"]
@@ -102,7 +116,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (systemLower.includes("tailor")) {
+    if (agent === "tailor") {
       return JSON.stringify({
         resume:
           "### SUMMARY\nFull-stack engineer delivering end-to-end product features with React, Node.js and PostgreSQL.\n\n### EXPERIENCE\n- Shipped user-facing features for web products.\n\n### SKILLS\nTypeScript, React, Node.js, PostgreSQL, AWS",
@@ -111,7 +125,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (systemLower.includes("prep")) {
+    if (agent === "prep") {
       return JSON.stringify({
         summary: `Preparation plan for ${jobTitle}.`,
         questions: [
@@ -132,7 +146,7 @@ class MockChatProvider implements ChatProvider {
       });
     }
 
-    if (systemLower.includes("tracker")) {
+    if (agent === "tracker") {
       return JSON.stringify([
         {
           title: "Follow up on your interview",

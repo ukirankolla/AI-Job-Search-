@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getChatProvider, parseJsonObject } from "@/lib/llm/provider";
+import { buildGraph } from "@/lib/agents/graph";
+import type { AgentInput } from "@/lib/types";
 
 beforeEach(() => vi.stubEnv("OPENAI_API_KEY", ""));
 afterEach(() => vi.unstubAllEnvs());
@@ -114,5 +116,48 @@ describe("mock agents", () => {
     const parsed = JSON.parse(content);
     expect(Array.isArray(parsed)).toBe(true);
     expect(parsed.length).toBeGreaterThan(0);
+  });
+
+  it("returns a 100% score for the rematch system prompt", async () => {
+    const provider = getChatProvider();
+    const system =
+      "You are the REMATCH agent in a job-search multi-agent system.";
+    const { content } = await provider.complete(system, user);
+    const parsed = JSON.parse(content);
+    expect(parsed.score).toBe(100);
+    expect(parsed.missing_skills).toEqual([]);
+  });
+});
+
+describe("mock apply graph end to end", () => {
+  const input: AgentInput = {
+    profile: {
+      id: "p1",
+      full_name: "Jane Smith",
+      title: "Full-Stack Engineer",
+      summary: "Builds web products end to end.",
+      skills: ["TypeScript", "React", "Node.js"],
+      resume_text: "",
+      resume_embedding_status: "done",
+      created_at: new Date(0).toISOString(),
+      updated_at: new Date(0).toISOString(),
+    },
+    chunks: [],
+    job: {
+      title: "Senior Full-Stack Engineer",
+      company: "Acme",
+      location: "Remote",
+      description: "Build distributed web systems with TypeScript.",
+    },
+  };
+
+  it("matches, tailors, re-matches at 100%, and prepares questions", async () => {
+    const state = await buildGraph("apply").invoke({ input });
+
+    expect(state.match?.score).toBe(100);
+    expect(state.tailor?.resume).toBeDefined();
+    expect(state.tailor?.resume.length).toBeGreaterThan(0);
+    expect(state.prep?.questions.length).toBe(2);
+    expect(state.error).toBeNull();
   });
 });
