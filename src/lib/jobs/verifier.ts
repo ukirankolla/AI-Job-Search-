@@ -83,6 +83,40 @@ async function fetchWithTimeout<T>(
   }
 }
 
+/**
+ * Lightweight liveness probe for an apply URL. Returns:
+ *  - "ok"      when the server responds 2xx/3xx (posting is reachable),
+ *  - "gone"    when it returns 404/410 (posting is closed or filled),
+ *  - "unknown" when the request times out, errors, or gets throttled/bot-blocked.
+ * A HEAD request is tried first; servers that reject it fall back to GET.
+ */
+export async function checkUrlLive(
+  url: string,
+): Promise<"ok" | "gone" | "unknown"> {
+  const probe = async (method: "HEAD" | "GET"): Promise<number | null> =>
+    fetchWithTimeout(async (signal) => {
+      const res = await fetch(url, {
+        method,
+        redirect: "follow",
+        signal,
+        headers: {
+          "user-agent": BROWSER_UA,
+          accept: "text/html",
+        },
+      });
+      return res.status;
+    }, null);
+
+  let status = await probe("HEAD");
+  if (status === 405 || status === 501) {
+    status = await probe("GET");
+  }
+  if (status === null) return "unknown";
+  if (status === 404 || status === 410) return "gone";
+  if (status >= 200 && status < 400) return "ok";
+  return "unknown";
+}
+
 async function fetchPageExcerpt(url: string): Promise<string> {
   return fetchWithTimeout(async (signal) => {
     const res = await fetch(url, {
@@ -134,7 +168,31 @@ export async function verifyJob(
 
   const kind = classifyApplySource(url);
   if (kind === "company") {
-    return verifiedFromUrl(url, "The posting lives on the company's own domain.");
+    if (isMockProvider()) {
+      return verifiedFromUrl(url, "The posting lives on the company's own domain.");
+    }
+    const live = await checkUrlLive(url);
+    if (live === "gone") {
+      return {
+        status: "likely",
+        confidence: 40,
+        apply_url: url,
+        source_url: (() => {
+          try {
+            return new URL(url).origin;
+          } catch {
+            return url;
+          }
+        })(),
+        reason: "The company apply URL returns 404/410 — the posting may be closed or filled.",
+      };
+    }
+    return verifiedFromUrl(
+      url,
+      live === "ok"
+        ? "The posting URL responds on the company's own domain."
+        : "The posting lives on the company's own domain.",
+    );
   }
   if (kind !== "linkedin") {
     return unverifiedResult(
@@ -231,17 +289,10 @@ export async function verifyJobBatch(
     else if (kind === "linkedin") linkedin.push(job);
   }
 
-  for (const job of quick) {
-    results.set(
-      job.url ?? "",
-      verifiedFromUrl(job.url ?? "", "The posting lives on the company's own domain."),
-    );
-  }
-
   const cap = Math.min(linkedin.length, opts?.maxLinkedIn ?? 60);
   const targets = linkedin.slice(0, cap);
 
-  const queue = [...targets];
+  const queue = [...quick, ...targets];
   let next = 0;
   const workers = Math.max(1, opts?.concurrency ?? 5);
   await Promise.all(

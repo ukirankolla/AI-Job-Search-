@@ -66,7 +66,16 @@ describe("verifyJob", () => {
     vi.unstubAllEnvs();
   });
 
-  it("marks company-domain jobs as verified without network or agent", async () => {
+  it("marks company-domain jobs as verified when the URL responds", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        text: async () => "",
+      } as Response),
+    );
+
     const job: JobPosting = {
       title: "Engineer",
       company: "Northwind Labs",
@@ -81,6 +90,45 @@ describe("verifyJob", () => {
     expect(result.source_url).toBe("https://careers.northwindlabs.com");
     expect(mockFetchLinkedInJobPage).not.toHaveBeenCalled();
     expect(mockRunVerifier).not.toHaveBeenCalled();
+  });
+
+  it("downgrades company-domain jobs to likely when the URL is gone", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: false,
+        status: 404,
+        text: async () => "",
+      } as Response),
+    );
+
+    const result = await verifyJob({
+      title: "Engineer",
+      company: "Northwind Labs",
+      description: "",
+      url: "https://careers.northwindlabs.com/jobs/99",
+    });
+
+    expect(result.status).toBe("likely");
+    expect(result.confidence).toBe(40);
+    expect(result.reason).toContain("404");
+    expect(mockRunVerifier).not.toHaveBeenCalled();
+  });
+
+  it("keeps company-domain jobs verified when the probe is inconclusive", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new Error("network down")),
+    );
+
+    const result = await verifyJob({
+      title: "Engineer",
+      company: "Northwind Labs",
+      description: "",
+      url: "https://careers.northwindlabs.com/jobs/99",
+    });
+
+    expect(result.status).toBe("verified");
   });
 
   it("returns unverified for aggregator or missing URLs", async () => {
@@ -195,6 +243,15 @@ describe("verifyJobBatch", () => {
   });
 
   it("verifies company-domain jobs instantly and caps LinkedIn checks", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        text: async () => "",
+      } as Response),
+    );
+
     const jobs = [
       { ...linkedinJob(), url: "https://careers.northwindlabs.com/jobs/1" },
       { ...linkedinJob(), url: "https://www.linkedin.com/jobs/view/2" },

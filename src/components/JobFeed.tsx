@@ -133,9 +133,16 @@ export function JobFeed({
         return;
       }
       if (data?.found === 0) {
-        setSearchError(
-          data?.message ?? "No jobs found for that search.",
-        );
+        const hasLocalMatches = filterJobs(jobs, draft).length > 0;
+        if (hasLocalMatches) {
+          setNotice(
+            "No new postings found for that search — showing existing matches.",
+          );
+        } else {
+          setSearchError(
+            data?.message ?? "No jobs found for that search.",
+          );
+        }
         return;
       }
       if (data?.warnings?.length) {

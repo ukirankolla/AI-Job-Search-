@@ -50,6 +50,31 @@ describe("filterJobs", () => {
     expect(filterJobs(jobs, "quantum")).toEqual([]);
   });
 
+  it("matches all query tokens across different fields", () => {
+    expect(filterJobs(jobs, "engineer new york")).toHaveLength(1);
+    expect(filterJobs(jobs, "engineer new york")[0].company).toBe(
+      "Dataflow Labs",
+    );
+  });
+
+  it("is tolerant of a typo in one token", () => {
+    const matched = filterJobs(jobs, "enginner");
+    expect(matched).toHaveLength(2);
+    const titles = matched.map((j) => j.title);
+    expect(titles).toContain("Senior Frontend Engineer");
+    expect(titles).toContain("Backend Engineer");
+  });
+
+  it("matches a skill typo against the description", () => {
+    expect(filterJobs(jobs, "postgres")).toHaveLength(1);
+    expect(filterJobs(jobs, "postgres")[0].company).toBe("Dataflow Labs");
+  });
+
+  it("does not over-match distant words", () => {
+    expect(filterJobs(jobs, "enginner kafka")).toEqual([]);
+    expect(filterJobs(jobs, "quantum analyst")).toEqual([]);
+  });
+
   it("does not mutate the input array", () => {
     const before = jobs.length;
     filterJobs(jobs, "engineer");

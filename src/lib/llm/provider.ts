@@ -57,6 +57,11 @@ const MOCK_SKILL_TERMS = [
   "CI/CD", "Linux", "HTML", "CSS", "Tailwind CSS", "Redux", "Vue.js",
   "Angular", "Git", "Agile", "Scrum", "Jest", "Cypress", "Playwright",
   "Machine Learning", "TensorFlow", "PyTorch", "Pandas", "NumPy",
+  "QA", "Quality Assurance", "Quality Engineer", "QA Engineer", "Testing",
+  "Test Automation", "Automation", "Selenium", "TestNG", "JUnit", "Appium",
+  "Postman", "Cucumber", "API Testing", "Regression Testing",
+  "Manual Testing", "Test Cases", "Test Plans", "Test Strategy",
+  "SDLC", "STLC", "Defect Tracking", "JIRA", "Jenkins", "TDD", "BDD",
   "Kafka", "Spark", "Elasticsearch", "Firebase", "Supabase", "Prisma",
   "Microservices", "Figma", "Product Management", "Analytics", "Tableau",
   "Power BI", "Excel", "gRPC", "WebSockets",
@@ -193,7 +198,12 @@ class MockChatProvider implements ChatProvider {
       const { title, company, description } = mockJobInfo(user);
       const profile = mockProfileInfo(user);
       const jobSkills = mockExtractSkills(`${title} ${description}`);
-      const profileText = [...profile.skills, profile.headline, profile.summary]
+      const profileText = [
+        ...profile.skills,
+        profile.headline,
+        profile.summary,
+        ...profile.chunks,
+      ]
         .filter(Boolean)
         .join(" ")
         .toLowerCase();

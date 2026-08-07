@@ -141,6 +141,21 @@ describe("mock agents", () => {
     expect(parsed.score).toBeLessThan(50);
     expect(parsed.missing_skills).toContain("Python");
   });
+
+  it("uses RAG resume chunks to score even when the profile fields are empty", async () => {
+    const provider = getChatProvider();
+    const user =
+      "JOB:\nTitle: QA Automation Engineer\nCompany: Burford Capital\n\nDescription: Write Selenium and TestNG automation in Java.\n\nPROFILE:\nName: Uday Kumar\nHeadline: \nSummary: \nSkills: \n\n--- Relevant resume excerpts (RAG) ---\n[Experience]\nQA Automation Engineer, 4+ years\nBuilt Selenium and TestNG test suites in Java.\n\n[Skills]\nSelenium, TestNG, Java, API Testing";
+    const { content } = await provider.complete(
+      "You are the MATCHER agent in a job-search multi-agent system.",
+      user,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.score).toBeGreaterThan(0);
+    expect(parsed.matched_skills).toContain("Selenium");
+    expect(parsed.matched_skills).toContain("TestNG");
+    expect(parsed.matched_skills).toContain("Java");
+  });
 });
 
 describe("mock verifier agent", () => {
