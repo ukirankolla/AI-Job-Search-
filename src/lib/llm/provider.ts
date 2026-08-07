@@ -102,12 +102,21 @@ function mockJobInfo(user: string): {
   };
 }
 
+interface MockSection {
+  label: string;
+  content: string;
+}
+
+const CONTACT_INFO_RE =
+  /^(name|phone|ph\.?|mobile|email|address|linkedin|github|website|location|city|state|country|zip)\s*[:|]/i;
+
 function mockProfileInfo(user: string): {
   name: string;
   headline: string;
   summary: string;
   skills: string[];
   chunks: string[];
+  sections: MockSection[];
 } {
   const profileBlock =
     /PROFILE:\s*\n([\s\S]*?)(?=\n\n(?:JOB|TAILORED RESUME):|$)/i.exec(user)?.[1] ??
@@ -120,18 +129,51 @@ function mockProfileInfo(user: string): {
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-  const chunks = (ragText ?? "")
-    .split(/\[[^\]]+\]\n/)
-    .slice(1)
-    .map((c) => c.trim())
-    .filter(Boolean);
+
+  const sections: MockSection[] = [];
+  for (const part of (ragText ?? "").split(/\n(?=\[[^\]]+\]\n)/)) {
+    const m = /^\[([^\]]+)\]\n([\s\S]*)$/.exec(part.trimStart());
+    if (!m) continue;
+    const content = m[2].trim();
+    if (content) sections.push({ label: m[1].trim(), content });
+  }
+
   return {
     name: /Name:[ \t]*(.+)/i.exec(header)?.[1]?.trim() ?? "",
     headline: /Headline:[ \t]*(.+)/i.exec(header)?.[1]?.trim() ?? "",
     summary: /Summary:[ \t]*(.+)/i.exec(header)?.[1]?.trim() ?? "",
     skills,
-    chunks,
+    chunks: sections.map((s) => s.content),
+    sections,
   };
+}
+
+function classifySection(label: string): string {
+  const l = label.trim().toLowerCase();
+  if (/summary|objective|about|profile/.test(l)) return "summary";
+  if (/skill|technolog|competenc|language|tool/.test(l)) return "skills";
+  if (/education|academ|degree/.test(l)) return "education";
+  if (/project|portfolio|accomplishment|achievement|certif/.test(l)) {
+    return "projects";
+  }
+  return "experience";
+}
+
+function mockResumeSections(
+  profile: ReturnType<typeof mockProfileInfo>,
+): Record<string, string[]> {
+  const grouped: Record<string, string[]> = {
+    summary: [],
+    experience: [],
+    skills: [],
+    education: [],
+    projects: [],
+  };
+  for (const section of profile.sections) {
+    const type = classifySection(section.label);
+    grouped[type].push(section.content);
+  }
+  return grouped;
 }
 
 class MockChatProvider implements ChatProvider {
@@ -226,29 +268,57 @@ class MockChatProvider implements ChatProvider {
     }
 
     if (agent === "tailor") {
-      const { title, company, description } = mockJobInfo(user);
+      const { title, company } = mockJobInfo(user);
       const profile = mockProfileInfo(user);
-      const jobSkills = mockExtractSkills(`${title} ${description}`);
-      const allSkills = mockUniqueSkills([...profile.skills, ...jobSkills]);
-      const expBullets = profile.chunks.slice(0, 4).map((c) => {
-        const lines = c.split("\n").map((l) => l.trim()).filter(Boolean);
-        const keep = lines.filter((l) => !SECTION_HEADER_RE.test(l)).slice(0, 4);
-        return `- ${keep.join(" · ") || lines[0] || "Relevant experience"}`;
-      });
-      const summaryLine = `${profile.summary || `${profile.headline || "Software professional"} specializing in ${allSkills.slice(0, 4).join(", ") || "software engineering"}.`} Tailored for the ${title || "role"}${company ? ` at ${company}` : ""}.`;
+      const grouped = mockResumeSections(profile);
+
+      const cleanLines = (content: string): string[] =>
+        content
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .filter((l) => !SECTION_HEADER_RE.test(l))
+          .filter((l) => !CONTACT_INFO_RE.test(l));
+
+      const experienceBullets = [
+        ...grouped.experience.flatMap(cleanLines),
+        ...grouped.projects.flatMap(cleanLines),
+      ].slice(0, 20);
+
+      const skills = mockUniqueSkills([
+        ...profile.skills,
+        ...grouped.skills.flatMap((c) =>
+          cleanLines(c).flatMap((l) => l.split(",")),
+        )
+          .map((s) => s.trim())
+          .filter(Boolean),
+      ]);
+
+      const education = grouped.education.flatMap(cleanLines).slice(0, 6);
+      const projects = grouped.projects.flatMap(cleanLines).slice(0, 6);
+      const summarySource =
+        profile.summary ||
+        grouped.summary.flatMap(cleanLines).join(" ");
+
+      const summaryLine = `${summarySource || `${profile.headline || "Software professional"} specializing in ${skills.slice(0, 4).join(", ") || "software engineering"}.`} Tailored for the ${title || "role"}${company ? ` at ${company}` : ""}.`;
+
       const resume = [
         "### SUMMARY",
         summaryLine,
         "",
         "### EXPERIENCE",
-        expBullets.length
-          ? expBullets.join("\n")
-          : "- Built and shipped web products end to end.",
+        experienceBullets.length
+          ? experienceBullets.map((b) => `- ${b}`).join("\n")
+          : "- Built and shipped software products end to end.",
+        education.length ? ["", "### EDUCATION", ...education.map((l) => `- ${l}`)] : [],
+        projects.length ? ["", "### PROJECTS", ...projects.map((l) => `- ${l}`)] : [],
         "",
         "### SKILLS",
-        allSkills.join(", "),
-      ].join("\n");
-      const cover_letter = `Dear Hiring Team,\n\nI am excited to apply for the ${title || "role"}${company ? ` at ${company}` : ""}. My background includes ${allSkills.slice(0, 6).join(", ") || "product engineering"} and I have shipped features end to end. I look forward to discussing how I can contribute to your team.\n\nBest regards,\n${profile.name || "[Your Name]"}`;
+        skills.length ? skills.join(", ") : "Software engineering",
+      ]
+        .flat()
+        .join("\n");
+      const cover_letter = `Dear Hiring Team,\n\nI am excited to apply for the ${title || "role"}${company ? ` at ${company}` : ""}. My background includes ${skills.slice(0, 6).join(", ") || "product engineering"} and I have shipped features end to end. I look forward to discussing how I can contribute to your team.\n\nBest regards,\n${profile.name || "[Your Name]"}`;
       return JSON.stringify({
         resume,
         cover_letter,

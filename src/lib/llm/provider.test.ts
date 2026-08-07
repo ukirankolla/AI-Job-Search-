@@ -129,6 +129,20 @@ describe("mock agents", () => {
     expect(parsed.missing_skills).toEqual([]);
   });
 
+  it("rematch is honest: reports missing skills instead of claiming 100%", async () => {
+    const provider = getChatProvider();
+    const system =
+      "You are the REMATCH agent in a job-search multi-agent system.";
+    const weakResume =
+      "JOB:\nTitle: Python Data Engineer\nCompany: Acme\n\nDescription: Work with Python, Pandas, TensorFlow, and Kafka.\n\nPROFILE:\nName: Jane Smith\nHeadline: Frontend Engineer\nSummary: Builds UIs with React.\nSkills: TypeScript, React";
+    const rematchUser = `${weakResume}\n\nTAILORED RESUME:\nJane Smith\n### SKILLS\nTypeScript, React`;
+    const { content } = await provider.complete(system, rematchUser);
+    const parsed = JSON.parse(content);
+    expect(parsed.score).toBeLessThan(50);
+    expect(parsed.missing_skills).toContain("Python");
+    expect(parsed.missing_skills).toContain("Pandas");
+  });
+
   it("derives the match score from the actual skills in the posting", async () => {
     const provider = getChatProvider();
     const weakUser =
@@ -226,6 +240,36 @@ describe("mock profile field parsing", () => {
     expect(parsed.resume).not.toContain("--- Relevant resume excerpts (RAG) ---");
     expect(parsed.resume).not.toMatch(/Summary: \n/);
     expect(parsed.resume).toContain("Tailored for the Data Engineer at Optomi");
+  });
+
+  it("includes every experience section, not just the first chunks", async () => {
+    const provider = getChatProvider();
+    const user =
+      "JOB:\nTitle: QA Automation Engineer\nCompany: Burford Capital\n\nDescription: Selenium, TestNG, API testing.\n\nPROFILE:\nName: Uday Kumar\nHeadline: \nSummary: \nSkills: \n\n--- Relevant resume excerpts (RAG) ---\n[Summary]\nSDET with 4+ years across banking, fintech, and healthcare.\n\n[Experience]\nIntuit - built Selenium and TestNG frameworks.\n\n[Experience]\nUS Bank - wrote API tests with REST Assured.\n\n[Experience]\nDXC Technology - led mobile automation with Appium.\n\n[Skills]\nSelenium, TestNG, Java, Appium, REST Assured";
+    const { content } = await provider.complete(
+      "You are the TAILOR agent in a job-search multi-agent system.",
+      user,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.resume).toContain("Intuit");
+    expect(parsed.resume).toContain("US Bank");
+    expect(parsed.resume).toContain("DXC Technology");
+    expect(parsed.resume).toContain("SDET with 4+ years");
+    expect(parsed.resume).not.toContain("Name:");
+  });
+
+  it("keeps contact info out of the experience bullets", async () => {
+    const provider = getChatProvider();
+    const user =
+      "JOB:\nTitle: QA Automation Engineer\nCompany: Burford Capital\n\nDescription: Selenium and API testing.\n\nPROFILE:\nName: Uday Kumar\nHeadline: \nSummary: \nSkills: \n\n--- Relevant resume excerpts (RAG) ---\n[Contact]\nName: Uday Kumar\nEmail: uday@example.com\nPhone: +1 555-0100\n\n[Experience]\nQA Automation Engineer at Intuit\nBuilt Selenium and TestNG suites.";
+    const { content } = await provider.complete(
+      "You are the TAILOR agent in a job-search multi-agent system.",
+      user,
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.resume).not.toContain("uday@example.com");
+    expect(parsed.resume).not.toContain("+1 555-0100");
+    expect(parsed.resume).toContain("Built Selenium and TestNG suites.");
   });
 
   it("falls back to a placeholder name instead of stealing the Headline line", async () => {
