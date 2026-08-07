@@ -23,6 +23,12 @@ const jobSchema = z.object({
   posted_at: z.string().optional().nullable(),
   employment_type: z.string().optional().nullable(),
   sponsorship: z.string().optional().nullable(),
+  apply_url: z.string().optional().nullable(),
+  verified_status: z
+    .enum(["verified", "likely", "unverified"])
+    .optional()
+    .nullable(),
+  verified_source_url: z.string().optional().nullable(),
 });
 
 const bodySchema = z.object({

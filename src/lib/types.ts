@@ -52,6 +52,31 @@ export interface JobPosting {
   posted_at?: string | null;
   employment_type?: string | null;
   sponsorship?: string | null;
+  apply_url?: string | null;
+  verified_status?: VerificationStatus | null;
+  verified_at?: string | null;
+  verified_source_url?: string | null;
+}
+
+export type VerificationStatus = "verified" | "likely" | "unverified";
+
+export interface VerificationResult {
+  status: VerificationStatus;
+  confidence: number;
+  apply_url: string;
+  source_url: string;
+  reason: string;
+}
+
+export interface VerifierInput {
+  title: string;
+  company: string;
+  location: string;
+  source: string;
+  posting_url: string;
+  candidate_apply_url: string;
+  candidate_source_url: string;
+  company_page_excerpt: string;
 }
 
 export interface Application {

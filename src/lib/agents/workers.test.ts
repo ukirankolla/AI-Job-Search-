@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { AgentInput } from "@/lib/types";
+import type { AgentInput, VerifierInput } from "@/lib/types";
 
 const mockComplete = vi.fn();
 
@@ -11,7 +11,7 @@ vi.mock("@/lib/llm/provider", async (importOriginal) => {
   };
 });
 
-import { runMatcher, runTailor, runTracker, parseResume } from "@/lib/agents/workers";
+import { runMatcher, runTailor, runTracker, parseResume, runVerifier } from "@/lib/agents/workers";
 
 const input: AgentInput = {
   profile: {
@@ -173,6 +173,90 @@ describe("runTracker", () => {
 
     mockComplete.mockResolvedValue({ content: JSON.stringify({ title: "x" }) });
     expect(await runTracker("context")).toEqual([]);
+  });
+});
+
+describe("runVerifier", () => {
+  beforeEach(() => {
+    mockComplete.mockReset();
+  });
+
+  const input: VerifierInput = {
+    title: "Senior Engineer",
+    company: "Acme",
+    location: "Remote",
+    source: "linkedin",
+    posting_url: "https://www.linkedin.com/jobs/view/123",
+    candidate_apply_url: "https://careers.acme.com",
+    candidate_source_url: "https://careers.acme.com",
+    company_page_excerpt: "Acme careers",
+  };
+
+  it("normalizes a verified verdict with its URLs and confidence", async () => {
+    mockComplete.mockResolvedValue({
+      content: JSON.stringify({
+        status: "verified",
+        confidence: 98,
+        apply_url: "https://careers.acme.com/jobs/9",
+        source_url: "https://careers.acme.com",
+        reason: "Posting confirmed on the ATS.",
+      }),
+    });
+
+    const result = await runVerifier(input);
+    expect(result).toEqual({
+      status: "verified",
+      confidence: 98,
+      apply_url: "https://careers.acme.com/jobs/9",
+      source_url: "https://careers.acme.com",
+      reason: "Posting confirmed on the ATS.",
+    });
+  });
+
+  it("rejects LinkedIn apply URLs and falls back to the candidate", async () => {
+    mockComplete.mockResolvedValue({
+      content: JSON.stringify({
+        status: "verified",
+        confidence: 90,
+        apply_url: "https://www.linkedin.com/jobs/view/999",
+        source_url: "https://careers.acme.com",
+        reason: "Found it.",
+      }),
+    });
+
+    const result = await runVerifier(input);
+    expect(result.status).toBe("verified");
+    expect(result.apply_url).toBe(input.candidate_apply_url);
+  });
+
+  it("empties URLs when the agent says unverified", async () => {
+    mockComplete.mockResolvedValue({
+      content: JSON.stringify({
+        status: "unverified",
+        confidence: 10,
+        apply_url: "https://www.linkedin.com/jobs/view/123",
+        source_url: "https://careers.acme.com",
+        reason: "Not on the company site.",
+      }),
+    });
+
+    const result = await runVerifier(input);
+    expect(result.status).toBe("unverified");
+    expect(result.apply_url).toBe("");
+    expect(result.source_url).toBe("");
+  });
+
+  it("defaults to unverified with empty URLs for invalid output", async () => {
+    mockComplete.mockResolvedValue({ content: "not json at all" });
+
+    const result = await runVerifier(input);
+    expect(result).toEqual({
+      status: "unverified",
+      confidence: 0,
+      apply_url: "",
+      source_url: "",
+      reason: "No company-owned posting found.",
+    });
   });
 });
 

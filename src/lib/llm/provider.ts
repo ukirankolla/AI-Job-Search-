@@ -286,6 +286,68 @@ class MockChatProvider implements ChatProvider {
       ]);
     }
 
+    if (agent === "verifier") {
+      const field = (re: RegExp) =>
+        new RegExp(re.source, "i").exec(user)?.[1]?.trim() ?? "";
+      const postingUrl = field(/POSTING URL:[ \t]*(.+)/);
+      const candidateApply = field(/CANDIDATE APPLY URL:[ \t]*(.+)/);
+      const candidateSource = field(/CANDIDATE SOURCE URL:[ \t]*(.+)/);
+      const company = field(/COMPANY:[ \t]*(.+)/);
+      const excerpt = user.split(/COMPANY PAGE EXCERPT:/i)[1]?.trim() ?? "";
+      const applyUrl = candidateApply === "(none)" ? "" : candidateApply;
+      const sourceUrl = candidateSource === "(none)" ? "" : candidateSource;
+
+      let postingHost = "";
+      let postingOrigin = "";
+      try {
+        const u = new URL(postingUrl);
+        postingHost = u.hostname.toLowerCase().replace(/^www\./, "");
+        postingOrigin = u.origin;
+      } catch {
+        // malformed or missing posting URL
+      }
+
+      if (postingUrl && postingHost && !postingHost.includes("linkedin.com")) {
+        return JSON.stringify({
+          status: "verified",
+          confidence: 95,
+          apply_url: postingUrl,
+          source_url: postingOrigin,
+          reason: "The posting lives on the company's own domain.",
+        });
+      }
+
+      if (sourceUrl) {
+        const mentionsCompany =
+          company &&
+          excerpt.toLowerCase().includes(company.toLowerCase());
+        if (mentionsCompany) {
+          return JSON.stringify({
+            status: "likely",
+            confidence: 85,
+            apply_url: applyUrl || sourceUrl,
+            source_url: sourceUrl,
+            reason: "The company career site mentions the company name.",
+          });
+        }
+        return JSON.stringify({
+          status: "likely",
+          confidence: 70,
+          apply_url: applyUrl || sourceUrl,
+          source_url: sourceUrl,
+          reason: "Company career site resolved; exact posting not confirmed.",
+        });
+      }
+
+      return JSON.stringify({
+        status: "unverified",
+        confidence: 30,
+        apply_url: "",
+        source_url: "",
+        reason: "No company-owned apply source found.",
+      });
+    }
+
     return "Acknowledged.";
   }
 }

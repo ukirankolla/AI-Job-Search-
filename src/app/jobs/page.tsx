@@ -13,7 +13,7 @@ export default async function JobsPage() {
     await Promise.all([
       supabase
         .from("jobs")
-        .select("id, title, company, location, salary_min, salary_max, posted_at, url, description, employment_type, sponsorship")
+        .select("id, title, company, location, salary_min, salary_max, posted_at, url, description, employment_type, sponsorship, apply_url, verified_status, verified_source_url")
         .order("posted_at", { ascending: false })
         .limit(100),
       supabase

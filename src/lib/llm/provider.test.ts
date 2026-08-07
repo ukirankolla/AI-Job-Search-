@@ -143,6 +143,45 @@ describe("mock agents", () => {
   });
 });
 
+describe("mock verifier agent", () => {
+  const system = "You are the VERIFIER agent in a job-search multi-agent system.";
+
+  it("marks a company-domain posting as verified", async () => {
+    const provider = getChatProvider();
+    const { content } = await provider.complete(
+      system,
+      "JOB:\nTITLE: Engineer\nCOMPANY: Northwind Labs\nPOSTING URL: https://careers.northwindlabs.com/jobs/1\n\nEVIDENCE:\nCANDIDATE APPLY URL: (none)\nCANDIDATE SOURCE URL: (none)\nCOMPANY PAGE EXCERPT:\n(none)",
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.status).toBe("verified");
+    expect(parsed.apply_url).toBe("https://careers.northwindlabs.com/jobs/1");
+    expect(parsed.source_url).toBe("https://careers.northwindlabs.com");
+  });
+
+  it("marks a LinkedIn posting with a resolved careers URL as likely", async () => {
+    const provider = getChatProvider();
+    const { content } = await provider.complete(
+      system,
+      "JOB:\nTITLE: Engineer\nCOMPANY: Northwind Labs\nPOSTING URL: https://www.linkedin.com/jobs/view/1\n\nEVIDENCE:\nCANDIDATE APPLY URL: https://careers.northwindlabs.com\nCANDIDATE SOURCE URL: https://careers.northwindlabs.com\nCOMPANY PAGE EXCERPT:\nNorthwind Labs is hiring engineers.",
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.status).toBe("likely");
+    expect(parsed.apply_url).toBe("https://careers.northwindlabs.com");
+    expect(parsed.confidence).toBe(85);
+  });
+
+  it("does not treat a '(none)' placeholder as a real candidate source", async () => {
+    const provider = getChatProvider();
+    const { content } = await provider.complete(
+      system,
+      "JOB:\nTITLE: Engineer\nCOMPANY: Northwind Labs\nPOSTING URL: https://www.linkedin.com/jobs/view/1\n\nEVIDENCE:\nCANDIDATE APPLY URL: (none)\nCANDIDATE SOURCE URL: (none)\nCOMPANY PAGE EXCERPT:\n(none)",
+    );
+    const parsed = JSON.parse(content);
+    expect(parsed.status).toBe("unverified");
+    expect(parsed.apply_url).toBe("");
+  });
+});
+
 describe("mock profile field parsing", () => {
   it("does not leak an empty Summary field into the next line", async () => {
     const provider = getChatProvider();

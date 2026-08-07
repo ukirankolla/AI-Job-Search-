@@ -20,6 +20,8 @@ export interface JobFeedItem {
   employment_type?: string | null;
   sponsorship?: string | null;
   applyKind?: ApplySourceKind;
+  verified_status?: "verified" | "likely" | "unverified" | null;
+  verified_source_url?: string | null;
 }
 
 const TIME_OPTIONS = [
@@ -403,6 +405,34 @@ export function JobFeed({
                         {job.sponsorship === "yes"
                           ? "Sponsorship available"
                           : "No sponsorship"}
+                      </span>
+                    )}
+                    {job.verified_status === "verified" && (
+                      <span
+                        title={
+                          job.verified_source_url
+                            ? `Confirmed on ${job.verified_source_url}`
+                            : "Confirmed on the company career site"
+                        }
+                        className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700"
+                      >
+                        Verified
+                      </span>
+                    )}
+                    {job.verified_status === "likely" && (
+                      <span
+                        title="Company career site found; exact posting not confirmed"
+                        className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700"
+                      >
+                        Likely genuine
+                      </span>
+                    )}
+                    {job.verified_status === "unverified" && (
+                      <span
+                        title="No company-owned posting found"
+                        className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500"
+                      >
+                        Unverified
                       </span>
                     )}
                     {job.applyKind === "linkedin" && (

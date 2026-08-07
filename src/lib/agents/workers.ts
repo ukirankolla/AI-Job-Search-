@@ -5,6 +5,8 @@ import type {
   TailorResult,
   PrepResult,
   TrackerTask,
+  VerificationResult,
+  VerifierInput,
 } from "@/lib/types";
 
 function jobBrief(job: AgentInput["job"]): string {
@@ -124,6 +126,89 @@ export async function runPrep(input: AgentInput): Promise<PrepResult> {
     questions: parsed?.questions ?? [],
     tips: parsed?.tips ?? [],
   };
+}
+
+export function verifierBrief(input: VerifierInput): string {
+  return [
+    "JOB:",
+    `TITLE: ${input.title}`,
+    `COMPANY: ${input.company}`,
+    `LOCATION: ${input.location || "remote"}`,
+    `SOURCE: ${input.source}`,
+    `POSTING URL: ${input.posting_url}`,
+    "",
+    "EVIDENCE:",
+    `CANDIDATE APPLY URL: ${input.candidate_apply_url || "(none)"}`,
+    `CANDIDATE SOURCE URL: ${input.candidate_source_url || "(none)"}`,
+    "COMPANY PAGE EXCERPT:",
+    input.company_page_excerpt.slice(0, 4000) || "(no excerpt)",
+  ].join("\n");
+}
+
+function defaultVerifierReason(status: VerificationResult["status"]): string {
+  if (status === "verified") return "Posting confirmed on the company's own career site.";
+  if (status === "likely") return "Company career site resolved; exact posting not confirmed.";
+  return "No company-owned posting found.";
+}
+
+function normalizeVerification(
+  parsed: Partial<VerificationResult> | null,
+  input: VerifierInput,
+): VerificationResult {
+  const status: VerificationResult["status"] =
+    parsed?.status === "verified" || parsed?.status === "likely"
+      ? parsed.status
+      : "unverified";
+
+  const confidence =
+    typeof parsed?.confidence === "number"
+      ? Math.max(0, Math.min(100, Math.round(parsed.confidence)))
+      : status === "verified"
+        ? 95
+        : status === "likely"
+          ? 70
+          : 0;
+
+  const reason =
+    typeof parsed?.reason === "string" && parsed.reason.trim()
+      ? parsed.reason.trim()
+      : defaultVerifierReason(status);
+
+  if (status === "unverified") {
+    return { status, confidence, apply_url: "", source_url: "", reason };
+  }
+
+  let applyUrl =
+    typeof parsed?.apply_url === "string" ? parsed.apply_url.trim() : "";
+  let sourceUrl =
+    typeof parsed?.source_url === "string" ? parsed.source_url.trim() : "";
+
+  if (applyUrl && /linkedin\.com/i.test(applyUrl)) applyUrl = "";
+  if (sourceUrl && /linkedin\.com/i.test(sourceUrl)) sourceUrl = "";
+  if (!applyUrl) {
+    applyUrl =
+      input.candidate_apply_url?.trim() || input.candidate_source_url?.trim() || "";
+  }
+  if (!sourceUrl) sourceUrl = input.candidate_source_url;
+
+  return { status, confidence, apply_url: applyUrl, source_url: sourceUrl, reason };
+}
+
+export async function runVerifier(input: VerifierInput): Promise<VerificationResult> {
+  const system = [
+    "You are the VERIFIER agent in a job-search multi-agent system.",
+    "You decide whether a job posting is genuinely published on the company's own career site, and find the direct apply URL on that site - never a LinkedIn page, never an aggregator like Indeed or Adzuna.",
+    'Respond with STRICT JSON matching this schema:',
+    '{"status": "verified"|"likely"|"unverified", "confidence": number, "apply_url": string, "source_url": string, "reason": string}',
+    'Use "verified" only when the company apply page was actually found (title or company confirmed on the company site).',
+    'Use "likely" when the company\'s own career site was resolved but the exact posting is not confirmed.',
+    'Use "unverified" when no company-owned apply source could be found; apply_url and source_url must be empty then.',
+  ].join("\n");
+
+  const provider = getChatProvider();
+  const { content } = await provider.complete(system, verifierBrief(input));
+  const parsed = parseJsonObject<Partial<VerificationResult>>(content);
+  return normalizeVerification(parsed, input);
 }
 
 export async function runTracker(

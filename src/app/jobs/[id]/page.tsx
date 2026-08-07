@@ -113,6 +113,24 @@ export default async function JobDetailPage({
               ? ` · $${job.salary_min.toLocaleString()}${job.salary_max ? `–$${job.salary_max.toLocaleString()}` : "+"}`
               : ""}
           </p>
+          {job.verified_status === "verified" && (
+            <p
+              className="mt-1 text-xs font-medium text-emerald-600"
+              title={job.verified_source_url ?? undefined}
+            >
+              Verified — posted on the company career site
+            </p>
+          )}
+          {job.verified_status === "likely" && (
+            <p className="mt-1 text-xs font-medium text-amber-600">
+              Likely genuine — company career site found
+            </p>
+          )}
+          {job.verified_status === "unverified" && (
+            <p className="mt-1 text-xs text-slate-400">
+              Unverified — no company-owned posting found
+            </p>
+          )}
           <p className="mt-1 text-sm text-slate-400">
             {job.posted_at ? `Posted ${formatRelativeTime(job.posted_at)}` : ""}
             {job.employment_type
