@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
   buildLinkedInSearchUrl,
+  companyCareersUrl,
   descriptionToText,
+  extractCompanySlug,
+  extractCompanyWebsite,
   extractLinkedInApplyUrl,
   extractLinkedInDescription,
   hoursToTPR,
@@ -268,5 +271,36 @@ describe("extractLinkedInApplyUrl", () => {
 
   it("returns empty when no external link is present", () => {
     expect(extractLinkedInApplyUrl("<html><body></body></html>")).toBe("");
+  });
+});
+
+describe("company career-site resolution", () => {
+  it("extracts the company slug from a job page", () => {
+    const html =
+      '<a href="https://www.linkedin.com/company/state-of-nevada?trk=public_jobs_topcard-org-name">State of Nevada</a>';
+    expect(extractCompanySlug(html)).toBe("state-of-nevada");
+  });
+
+  it("returns null when the job page has no company link", () => {
+    expect(extractCompanySlug("<html></html>")).toBeNull();
+  });
+
+  it("extracts the company website from the guest company page JSON-LD", () => {
+    const html =
+      '{"@type":"Organization","name":"State of Nevada","sameAs":"http://careers.nv.gov"}';
+    expect(extractCompanyWebsite(html)).toBe("http://careers.nv.gov");
+  });
+
+  it("returns empty when the company page has no website", () => {
+    expect(extractCompanyWebsite("<html></html>")).toBe("");
+  });
+
+  it("keeps careers-oriented hosts as-is", () => {
+    expect(companyCareersUrl("https://careers.nv.gov")).toBe("https://careers.nv.gov");
+    expect(companyCareersUrl("https://jobs.acme.com/")).toBe("https://jobs.acme.com/");
+  });
+
+  it("appends the conventional /careers path to a plain company domain", () => {
+    expect(companyCareersUrl("https://acme.com")).toBe("https://acme.com/careers");
   });
 });

@@ -5,8 +5,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getUsageSummary } from "@/lib/subscription";
 import { formatRelativeTime } from "@/lib/jobTime";
 import {
+  extractCompanySlug,
   extractLinkedInApplyUrl,
   extractLinkedInDescription,
+  fetchCompanyCareersUrl,
   fetchLinkedInJobPage,
 } from "@/lib/jobs/linkedin";
 import { AgentRunner } from "@/components/AgentRunner";
@@ -81,7 +83,10 @@ export default async function JobDetailPage({
         }
       }
       if (!job.apply_url) {
-        const resolved = extractLinkedInApplyUrl(html);
+        let resolved = extractLinkedInApplyUrl(html);
+        if (!resolved && extractCompanySlug(html)) {
+          resolved = await fetchCompanyCareersUrl(html).catch(() => "");
+        }
         if (resolved) {
           try {
             await supabase.from("jobs").update({ apply_url: resolved }).eq("id", job.id);

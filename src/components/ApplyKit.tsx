@@ -66,6 +66,7 @@ export function ApplyKit({
   };
 
   const unlimited = tier === "premium" || admin;
+  const isLinkedInTarget = Boolean(jobUrl && /linkedin\.com/i.test(jobUrl));
 
   if (!hasResume) {
     return (
@@ -146,7 +147,9 @@ export function ApplyKit({
         <div className="mt-5 border-t border-slate-100 pt-4">
           <ApplyButton jobId={jobId} url={jobUrl} />
           <p className="mt-2 text-xs text-slate-400">
-            Opens the original posting on the company or job-board career site.
+            {isLinkedInTarget
+              ? "LinkedIn doesn't reveal the company's direct apply link to logged-out visitors, so this opens the LinkedIn posting — use its Apply button to reach the company's career site."
+              : "Opens the company's own career site so you can apply directly."}
           </p>
           {!unlimited && usage && limit && (
             <p className="mt-1 text-xs text-slate-400">

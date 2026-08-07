@@ -242,6 +242,83 @@ export async function fetchLinkedInApplyUrl(
   return extractLinkedInApplyUrl(html);
 }
 
+const COMPANY_SLUG_RE = /linkedin\.com\/company\/([a-z0-9-]+)/i;
+
+/**
+ * Extracts the company URL slug (e.g. "state-of-nevada") from a LinkedIn job
+ * detail page so we can look up the company's own website.
+ */
+export function extractCompanySlug(html: string): string | null {
+  return COMPANY_SLUG_RE.exec(html)?.[1] ?? null;
+}
+
+/**
+ * The guest company page embeds the company website in its JSON-LD
+ * Organization block as `"sameAs"`. Returns it, or "" when absent.
+ */
+export function extractCompanyWebsite(companyHtml: string): string {
+  const m = /"sameAs"\s*:\s*"([^"]+)"/i.exec(companyHtml);
+  if (!m) return "";
+  const url = m[1].replace(/&amp;/g, "&");
+  try {
+    const u = new URL(url);
+    if (/^https?:$/.test(u.protocol)) return url;
+  } catch {
+    // malformed URL, ignore
+  }
+  return "";
+}
+
+/**
+ * Turns a company website into a best-effort career-site URL: if the host
+ * already looks careers-oriented (careers., jobs., ...), keep it; otherwise
+ * guess the conventional /careers path on the company's own domain.
+ */
+export function companyCareersUrl(website: string): string {
+  try {
+    const u = new URL(website);
+    if (/careers|jobs|join|work|recruit/i.test(u.hostname)) {
+      return website;
+    }
+    return `${u.origin}/careers`;
+  } catch {
+    return website;
+  }
+}
+
+export async function fetchLinkedInCompanyPage(
+  slug: string,
+  opts?: { signal?: AbortSignal },
+): Promise<string> {
+  const res = await fetch(`https://www.linkedin.com/company/${slug}`, {
+    headers: {
+      accept: "text/html",
+      "accept-language": "en-US,en;q=0.9",
+      "user-agent": BROWSER_UA,
+    },
+    signal: opts?.signal,
+    next: { revalidate: 0 },
+  });
+  if (!res.ok) return "";
+  return await res.text();
+}
+
+/**
+ * Resolves a LinkedIn job page to the company's own career site. Linkedin no
+ * longer serves the offsite "apply" URL to logged-out visitors, so we fall back
+ * to the company website it exposes on its guest company page.
+ */
+export async function fetchCompanyCareersUrl(
+  jobHtml: string,
+  opts?: { signal?: AbortSignal },
+): Promise<string> {
+  const slug = extractCompanySlug(jobHtml);
+  if (!slug) return "";
+  const companyHtml = await fetchLinkedInCompanyPage(slug, opts);
+  const website = extractCompanyWebsite(companyHtml);
+  return website ? companyCareersUrl(website) : "";
+}
+
 export async function fetchLinkedInJobPage(
   url: string,
   opts?: { signal?: AbortSignal },
