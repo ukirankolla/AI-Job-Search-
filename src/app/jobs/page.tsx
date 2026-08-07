@@ -1,9 +1,6 @@
 import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { classifyApplySource } from "@/lib/jobs/applySource";
-import { JobForm } from "@/components/JobForm";
-import { JobFeedImporter } from "@/components/JobFeedImporter";
-import { SampleJobsButton } from "@/components/SampleJobsButton";
 import { JobFeed } from "@/components/JobFeed";
 
 export const metadata = { title: "Jobs | Noventra" };
@@ -60,16 +57,8 @@ export default async function JobsPage() {
         your resume. Run the agents on any role to tailor documents and prep.
       </p>
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-          <JobFeed jobs={feedJobs} savedIds={savedIds} scores={scores} hasResume={hasResume} />
-        </div>
-
-        <div className="space-y-4">
-          <JobForm />
-          <SampleJobsButton />
-          <JobFeedImporter />
-        </div>
+      <div className="mt-6">
+        <JobFeed jobs={feedJobs} savedIds={savedIds} scores={scores} hasResume={hasResume} />
       </div>
     </main>
   );
