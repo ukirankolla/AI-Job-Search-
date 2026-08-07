@@ -79,10 +79,8 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
   return (
     <div className="mx-auto mt-24 max-w-sm space-y-6 rounded-xl border border-slate-200 bg-white p-8">
       <div>
-        <h1 className="text-xl font-semibold text-slate-900">Welcome back</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Sign in to run your agents.
-        </p>
+        <h1 className="text-xl font-semibold text-slate-900">Sign in</h1>
+        <p className="mt-1 text-sm text-slate-500">Your job feed.</p>
       </div>
 
       <button
@@ -118,13 +116,13 @@ export function LoginForm({ next = "/dashboard" }: { next?: string }) {
             ? "Sending…"
             : cooldown > 0
               ? `Try again in ${cooldown}s`
-              : "Send magic link"}
+              : "Send to Gmail"}
         </button>
       </form>
 
       {sent && (
         <p className="text-sm text-emerald-600">
-          Check your email for the sign-in link.
+          Check your Gmail for the sign-in link.
         </p>
       )}
       {error && <p className="text-sm text-rose-600">{error}</p>}
