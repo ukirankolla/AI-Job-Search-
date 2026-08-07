@@ -5,13 +5,6 @@ import { initialState } from "@/app/actions/form-state";
 import { updateProfile, uploadResumeFile } from "@/app/actions/profile";
 import type { Profile } from "@/lib/types";
 
-function formatBytes(bytes: number): string {
-  if (!bytes || bytes <= 0) return "";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
 export function ProfileForm({ profile }: { profile: Profile }) {
   const [state, formAction, pending] = useActionState(
     updateProfile,
@@ -163,41 +156,6 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <h2 className="text-lg font-semibold">Resume</h2>
-        {profile.resume_text.trim() && (
-          <div className="space-y-2 rounded-md border border-slate-200 bg-slate-50 p-4">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
-              <span className="font-medium">Current resume:</span>
-              {profile.resume_filename ? (
-                <span className="font-mono text-xs">
-                  {profile.resume_filename}
-                  {profile.resume_file_size
-                    ? ` (${formatBytes(profile.resume_file_size)})`
-                    : ""}
-                </span>
-              ) : (
-                <span className="text-xs italic">pasted as text</span>
-              )}
-              {profile.resume_file_path && (
-                <a
-                  href="/api/profile/resume"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-md border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 hover:bg-indigo-100"
-                >
-                  View document
-                </a>
-              )}
-            </div>
-            <details className="rounded-lg border border-slate-200 bg-white">
-              <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-slate-600">
-                Preview extracted text
-              </summary>
-              <pre className="max-h-64 overflow-auto whitespace-pre-wrap px-3 pb-3 text-xs text-slate-600">
-                {profile.resume_text}
-              </pre>
-            </details>
-          </div>
-        )}
         <div className="space-y-2 rounded-md border border-dashed border-slate-300 p-4">
           <p className="text-sm font-medium text-slate-700">
             Upload your resume file
@@ -219,6 +177,19 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               className="text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0 file:bg-indigo-600 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-white hover:file:bg-indigo-500 disabled:opacity-50"
             />
             <button type="submit" className="hidden" aria-hidden="true" />
+            {profile.resume_file_path ? (
+              <a
+                href="/api/profile/resume"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="max-w-full truncate text-sm font-medium text-indigo-600 underline underline-offset-2 hover:text-indigo-500"
+                title="Open resume document"
+              >
+                {profile.resume_filename ?? "Resume"}
+              </a>
+            ) : (
+              <span className="text-xs text-slate-400">No file chosen</span>
+            )}
             <span className="text-xs text-slate-400">max 50 MB</span>
           </div>
           {filePending && (
