@@ -171,7 +171,10 @@ export async function uploadResumeFile(
     return { ok: false, error: "The selected file is empty." };
   }
   if (file.size > MAX_RESUME_FILE_SIZE) {
-    return { ok: false, error: "File is too large. Max size is 4 MB." };
+    return {
+      ok: false,
+      error: "File is too large. Please upload a file below 50 MB.",
+    };
   }
 
   let resumeText: string;

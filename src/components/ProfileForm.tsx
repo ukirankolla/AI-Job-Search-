@@ -187,10 +187,13 @@ export function ProfileForm({ profile }: { profile: Profile }) {
               >
                 {profile.resume_filename ?? "Resume"}
               </a>
+            ) : profile.resume_text.trim() ? (
+              <span className="text-xs italic text-slate-400">
+                Pasted resume (no document)
+              </span>
             ) : (
               <span className="text-xs text-slate-400">No file chosen</span>
             )}
-            <span className="text-xs text-slate-400">max 50 MB</span>
           </div>
           {filePending && (
             <p className="text-sm text-slate-500">Uploading…</p>
