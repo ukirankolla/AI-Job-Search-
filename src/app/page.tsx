@@ -101,10 +101,10 @@ export default async function Home() {
               Multi-agent AI job search
             </div>
 
-            <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">
+            <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
               Upload your resume once.
               <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
-                We run the search.
+                We can take care of the rest.
               </span>
             </h1>
 
