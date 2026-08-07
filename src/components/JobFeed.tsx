@@ -63,6 +63,7 @@ export function JobFeed({
   hasResume?: boolean;
 }) {
   const router = useRouter();
+  const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
   const [hours, setHours] = useState<number | null>(8);
   const [types, setTypes] = useState<string[]>([]);
@@ -114,14 +115,40 @@ export function JobFeed({
   return (
     <div>
       <div className="flex items-center gap-3">
-        <input
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by title, company, location, skills…"
-          className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-          aria-label="Search jobs"
-        />
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setQuery(draft);
+          }}
+          className="flex w-full items-center gap-2"
+        >
+          <input
+            type="search"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            placeholder="Search by title, company, location, skills…"
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+            aria-label="Search jobs"
+          />
+          <button
+            type="submit"
+            className="shrink-0 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-700"
+          >
+            Search jobs
+          </button>
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setDraft("");
+              }}
+              className="shrink-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+            >
+              Clear
+            </button>
+          )}
+        </form>
         <div
           className="flex shrink-0 items-center gap-1 rounded-md border border-slate-300 bg-white p-1 text-sm"
           role="group"
