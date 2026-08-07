@@ -5,6 +5,13 @@ import { initialState } from "@/app/actions/form-state";
 import { updateProfile, uploadResumeFile } from "@/app/actions/profile";
 import type { Profile } from "@/lib/types";
 
+function formatBytes(bytes: number): string {
+  if (!bytes || bytes <= 0) return "";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 export function ProfileForm({ profile }: { profile: Profile }) {
   const [state, formAction, pending] = useActionState(
     updateProfile,
@@ -156,6 +163,31 @@ export function ProfileForm({ profile }: { profile: Profile }) {
         className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm"
       >
         <h2 className="text-lg font-semibold">Resume</h2>
+        {profile.resume_text.trim() && (
+          <div className="space-y-2 rounded-md border border-slate-200 bg-slate-50 p-4">
+            <div className="flex flex-wrap items-center gap-2 text-sm text-slate-700">
+              <span className="font-medium">Current resume:</span>
+              {profile.resume_filename ? (
+                <span className="font-mono text-xs">
+                  {profile.resume_filename}
+                  {profile.resume_file_size
+                    ? ` (${formatBytes(profile.resume_file_size)})`
+                    : ""}
+                </span>
+              ) : (
+                <span className="text-xs italic">pasted as text</span>
+              )}
+            </div>
+            <details className="rounded-lg border border-slate-200 bg-white">
+              <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-slate-600">
+                Preview extracted text
+              </summary>
+              <pre className="max-h-64 overflow-auto whitespace-pre-wrap px-3 pb-3 text-xs text-slate-600">
+                {profile.resume_text}
+              </pre>
+            </details>
+          </div>
+        )}
         <div className="space-y-2 rounded-md border border-dashed border-slate-300 p-4">
           <p className="text-sm font-medium text-slate-700">
             Upload your resume file

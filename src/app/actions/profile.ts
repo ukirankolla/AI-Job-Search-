@@ -198,9 +198,24 @@ export async function uploadResumeFile(
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
-    .update({ resume_text: resumeText, resume_embedding_status: "pending" })
+    .update({
+      resume_text: resumeText,
+      resume_embedding_status: "pending",
+      resume_filename: file.name,
+      resume_file_size: file.size,
+    })
     .eq("id", userId);
-  if (error) return { ok: false, error: error.message };
+  if (error) {
+    if (String(error.code) === "42703") {
+      const fallback = await supabase
+        .from("profiles")
+        .update({ resume_text: resumeText, resume_embedding_status: "pending" })
+        .eq("id", userId);
+      if (fallback.error) return { ok: false, error: fallback.error.message };
+    } else {
+      return { ok: false, error: error.message };
+    }
+  }
 
   try {
     await indexProfile(userId, resumeText);
@@ -266,7 +281,10 @@ export async function parseResumeProfile(
   const supabase = await createClient();
   const { error } = await supabase
     .from("profiles")
-    .update(updates)
+    .update({
+      resume_text: resumeText,
+      resume_embedding_status: "pending",
+    })
     .eq("id", userId);
   if (error) return { ok: false, error: error.message };
 
