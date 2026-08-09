@@ -1,13 +1,45 @@
 # Noventra
 
-> A resume-first, AI job-search copilot. Upload your resume **once**, and a
-> team of collaborating AI agents matches fresh job postings to your skills,
-> shows a match percentage for every job, rewrites an ATS-friendly resume and
-> cover letter, and gets you to the official application page — one click away
-> from applying.
+### 🔗 Live site: [https://noventraresumehelp.vercel.app](https://noventraresumehelp.vercel.app)
+
+> **Click the link above to see the website live.** It's a resume-first, AI
+> job-search copilot: upload your resume **once**, and a team of collaborating
+> AI agents matches fresh job postings to your skills, shows a match percentage
+> for every job, rewrites an ATS-friendly resume and cover letter, and gets you
+> to the official application page — one click away from applying.
 
 Built with **Next.js 16** (App Router), **Supabase** (Postgres + Auth +
 pgvector), and **LangChain / LangGraph**.
+
+---
+
+## What the website does
+
+Noventra turns an uploaded resume into an automated job-hunting workflow.
+Anyone visiting the live link experiences this end-to-end flow:
+
+1. **Sign up** — email/password or Google (magic-link email also supported).
+2. **Onboarding** — first-time users fill in contact details (name, email,
+   phone, country, city, LinkedIn/GitHub/website) before anything else loads.
+3. **Upload resume once** — the resume is chunked and embedded into a vector
+   database; every later step reuses it.
+4. **Browse the job feed (`/jobs`)** — fresh postings pulled from real company
+   career portals and LinkedIn, defaulting to the last 8 hours. Filters let you
+   narrow by employment type, sponsorship, source (company/LinkedIn only), and
+   match percentage.
+5. **Open a job** — a **Match %** pill shows how well the role fits; the
+   **Agents** panel can run *Analyze* (score + skill gaps), *Tailor + prep*
+   (rewrite resume/cover letter + interview prep), or *Prep* (questions only).
+   Agent runs stream live in the browser.
+6. **Tailor & apply** — one button rewrites an ATS-friendly resume and drafts a
+   cover letter for that exact posting; **Apply now** opens the official company
+   or LinkedIn application page with your documents ready (no bot submissions).
+7. **Track** — applications land on the `/applications` kanban pipeline
+   (Saved / Applied / Interviewing / Offer / Rejected) and the tracker agent
+   schedules follow-up reminders.
+
+Free accounts get **15 resume rewrites + 15 in-app applies** per rolling
+7 days; premium ($15/mo) and admin accounts are unlimited.
 
 ---
 
@@ -314,7 +346,7 @@ can build and demo the full UX before wiring up real AI.
 ## Testing
 
 ```bash
-npm test             # Vitest — 129 tests across 19 files
+npm test             # Vitest — 222 tests across 25 files
 npm run typecheck    # tsc --noEmit
 npm run lint         # ESLint
 npm run build        # production build (verifies routes compile)
@@ -354,7 +386,10 @@ the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 
 ## Deploying
 
-The app runs anywhere Next.js runs. Cron jobs are wired for **Vercel Cron** via
+The app runs anywhere Next.js runs. It's currently deployed on **Vercel** at
+<https://noventraresumehelp.vercel.app> (set `NEXT_PUBLIC_SITE_URL` to that URL
+in the Vercel environment so sitemap/robots/SEO metadata use the live origin).
+Cron jobs are wired for **Vercel Cron** via
 `vercel.json`. Both run **once per day** (06:00 UTC job discovery, 07:00 UTC
 tracker sweep) — this matches Vercel's free Hobby plan, which only allows daily
 cron execution. On a paid Pro plan you can change `schedule` back to hourly or
