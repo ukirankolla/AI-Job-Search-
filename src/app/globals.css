@@ -41,3 +41,97 @@ body {
 .xp-pulse {
   animation: xp-pulse 1.6s ease-in-out infinite;
 }
+
+@keyframes bh-boy-in {
+  from {
+    transform: translateX(-80px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes bh-drop {
+  0% {
+    transform: translateY(-118px);
+  }
+  45% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-30px);
+  }
+  75% {
+    transform: translateY(-4px);
+  }
+  88% {
+    transform: translateY(-14px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes bh-lid-open {
+  to {
+    transform: rotate(-85deg);
+  }
+}
+
+@keyframes bh-glow-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes bh-options {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bh-boy {
+  animation: bh-boy-in 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.bh-drop {
+  animation: bh-drop 0.9s cubic-bezier(0.3, 0.6, 0.4, 1) 0.8s both;
+}
+
+.bh-lid {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bh-lid-open 0.45s ease-out 1.8s both;
+}
+
+.bh-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bh-glow-in 0.5s ease-out 1.85s both;
+}
+
+.bh-options {
+  animation: bh-options 0.6s ease-out 2.4s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bh-boy,
+  .bh-drop,
+  .bh-lid,
+  .bh-glow,
+  .bh-options {
+    animation: none !important;
+  }
+}

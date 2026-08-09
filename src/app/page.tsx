@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getSessionUser, isOnboarded } from "@/lib/auth";
-import { PendulumHero } from "@/components/PendulumHero";
+import { BriefcaseHero } from "@/components/BriefcaseHero";
 
 export const metadata = {
   title: "Noventra — Upload Your Resume, We Do the Rest",
@@ -95,7 +95,7 @@ export default async function Home() {
 
   return (
     <main className="overflow-hidden">
-      <section className="relative">
+      <section className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -105,37 +105,41 @@ export default async function Home() {
           }}
         />
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-20 sm:pt-28">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
-              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-              Multi-agent AI job search
-            </div>
+        <div className="relative mx-auto px-4 py-12">
+          <h1 className="sr-only">
+            Noventra — upload your resume once, AI agents take care of the rest
+          </h1>
+          <BriefcaseHero
+            getStartedHref={getStartedHref}
+            signInHref={signInHref}
+            ctaLabel={ctaLabel}
+          />
+        </div>
+      </section>
 
-            <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
-              Upload your resume once.
-              <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
-                We can take care of the rest.
-              </span>
-            </h1>
-
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-500">
-              Noventra&apos;s AI agents scan fresh job postings, match them to
-              your skills with a clear score, rewrite your resume and cover
-              letter for each role, and prep you for the interview — so you just
-              apply.
-            </p>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <PendulumHero
-                getStartedHref={getStartedHref}
-                signInHref={signInHref}
-                ctaLabel={ctaLabel}
-              />
-            </div>
+      <section className="mx-auto max-w-6xl px-4 pb-16 pt-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+            Multi-agent AI job search
           </div>
 
-          <div className="mx-auto mt-16 max-w-4xl">
+          <h2 className="mt-6 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Upload your resume once.
+            <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
+              We can take care of the rest.
+            </span>
+          </h2>
+
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-slate-500">
+            Noventra&apos;s AI agents scan fresh job postings, match them to
+            your skills with a clear score, rewrite your resume and cover
+            letter for each role, and prep you for the interview — so you just
+            apply.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-16 max-w-4xl">
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
               <div className="flex items-center gap-1.5 border-b border-slate-200 bg-slate-50 px-4 py-3">
                 <span className="h-3 w-3 rounded-full bg-rose-400" />
@@ -259,7 +263,6 @@ export default async function Home() {
               </div>
             ))}
           </dl>
-        </div>
       </section>
 
       <section
