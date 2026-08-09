@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSessionUser, isOnboarded } from "@/lib/auth";
+import { PendulumHero } from "@/components/PendulumHero";
 
 export const metadata = {
   title: "Noventra — Upload Your Resume, We Do the Rest",
@@ -126,18 +127,11 @@ export default async function Home() {
             </p>
 
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-              <Link
-                href={getStartedHref}
-                className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30 transition hover:bg-indigo-500"
-              >
-                {ctaLabel}
-              </Link>
-              <a
-                href="#how-it-works"
-                className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
-              >
-                See how it works
-              </a>
+              <PendulumHero
+                getStartedHref={getStartedHref}
+                signInHref={signInHref}
+                ctaLabel={ctaLabel}
+              />
             </div>
           </div>
 
