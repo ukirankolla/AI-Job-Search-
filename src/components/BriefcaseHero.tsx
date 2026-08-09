@@ -282,18 +282,49 @@ export function BriefcaseHero({
 }: BriefcaseHeroProps) {
   const [photoFailed, setPhotoFailed] = useState(false);
   const onError = () => setPhotoFailed(true);
+  const photo = !photoFailed;
 
   return (
     <div className="flex flex-col items-center">
-      {photoFailed ? <SvgScene /> : <PhotoScene onError={onError} />}
+      {photo ? <PhotoScene onError={onError} /> : <SvgScene />}
 
-      <p className="mt-3 text-sm font-medium text-slate-500">
-        Noventra — your AI job-search copilot
-      </p>
+      {photo && (
+        <div
+          className="bc-bag-drop relative mt-5 h-16 w-28"
+          role="img"
+          aria-label="The boy drops his briefcase, it pops open, and the sign-in buttons pop out"
+        >
+          <div className="absolute inset-x-2 top-1.5 h-6 rounded-t-lg bg-gradient-to-b from-amber-200 via-amber-300 to-amber-400" />
+          <div
+            className="bc-bag-glow pointer-events-none absolute -inset-4 rounded-full"
+            style={{
+              background:
+                "radial-gradient(circle, rgb(251 191 36 / 0.6) 0%, rgb(251 191 36 / 0) 70%)",
+            }}
+          />
+          <div className="absolute inset-x-2 bottom-1.5 top-5 rounded-b-xl bg-gradient-to-b from-amber-700 via-amber-800 to-amber-900 shadow-inner" />
+          <div
+            className="bc-bag-lid absolute inset-x-2 top-1.5 h-6 rounded-t-lg bg-gradient-to-b from-amber-800 via-amber-700 to-amber-600 shadow-md"
+            style={{ transformOrigin: "50% 0%" }}
+          >
+            <div className="absolute -bottom-1.5 left-1/2 h-2.5 w-7 -translate-x-1/2 rounded-sm bg-amber-400" />
+          </div>
+          <div
+            aria-hidden
+            className="absolute -top-1.5 left-1/2 h-2.5 w-9 -translate-x-1/2 rounded-full border-2 border-amber-900/60 bg-amber-800"
+          />
+          <span className="bc-bag-spark pointer-events-none absolute -left-5 top-0 text-xl text-amber-400">
+            ✦
+          </span>
+          <span className="bc-bag-spark bc-bag-spark-2 pointer-events-none absolute -right-4 top-2 text-lg text-amber-400">
+            ✦
+          </span>
+        </div>
+      )}
 
       <div
         className={`mt-5 flex flex-wrap items-center justify-center gap-3 ${
-          photoFailed ? "bc-options" : "bc-options-photo"
+          photo ? "bc-bag-buttons" : "bc-options"
         }`}
       >
         <Link
@@ -310,11 +341,15 @@ export function BriefcaseHero({
         </Link>
         <a
           href="#how-it-works"
-          className="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+          className="text-sm font-medium text-slate-500 underline-offset-4 transition hover:text-slate-700 hover:underline"
         >
           See how it works
         </a>
       </div>
+
+      <p className="mt-4 text-sm font-medium text-slate-500">
+        Noventra — your AI job-search copilot
+      </p>
     </div>
   );
 }
