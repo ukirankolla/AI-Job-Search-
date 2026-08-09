@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getSessionUser } from "@/lib/auth";
 import { NavLinks } from "@/components/NavLinks";
+import { PlayerBar } from "@/components/PlayerBar";
 
 export async function Nav() {
   const user = await getSessionUser();
@@ -17,7 +18,12 @@ export async function Nav() {
           </span>
         </Link>
 
-        {user && <NavLinks />}
+        {user && (
+          <div className="flex items-center gap-4">
+            <PlayerBar />
+            <NavLinks />
+          </div>
+        )}
       </div>
     </header>
   );

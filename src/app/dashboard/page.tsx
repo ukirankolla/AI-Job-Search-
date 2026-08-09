@@ -3,6 +3,7 @@ import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/StatusBadge";
 import { NotificationsList } from "@/components/NotificationsList";
+import { QuestCard } from "@/components/QuestCard";
 import type { Notification } from "@/lib/types";
 
 export const metadata = { title: "Dashboard | Noventra" };
@@ -131,6 +132,10 @@ export default async function DashboardPage() {
             </p>
           </div>
         ))}
+      </div>
+
+      <div className="mt-6">
+        <QuestCard userId={user.id} />
       </div>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-3">

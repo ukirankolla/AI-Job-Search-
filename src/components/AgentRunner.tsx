@@ -4,6 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { parseSseBuffer, parseSseEvent } from "@/lib/sse";
+import { Confetti } from "@/components/Confetti";
 import type { AgentStep, AgentName } from "@/lib/types";
 
 const AGENT_LABELS: Record<AgentName, string> = {
@@ -39,6 +40,7 @@ export function AgentRunner({
   );
   const [error, setError] = useState<string | null>(null);
   const [limitReached, setLimitReached] = useState(false);
+  const [burst, setBurst] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
 
   const start = useCallback(async () => {
@@ -92,6 +94,7 @@ export function AgentRunner({
             const { results } = data as { results: Record<string, unknown> };
             setStatus("done");
             setRunning(false);
+            setBurst((b) => b + 1);
             onDone?.(results ?? {});
             router.refresh();
             break;
@@ -134,6 +137,7 @@ export function AgentRunner({
 
   return (
     <div>
+      <Confetti burst={burst} />
       <button
         type="button"
         onClick={start}
