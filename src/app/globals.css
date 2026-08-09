@@ -431,6 +431,129 @@ body {
   animation: bc-options 0.6s ease-out 5.4s both;
 }
 
+/* Photoreal hero: boy walks in, briefcase drops from his hand, pops open */
+@keyframes bc-img-walk {
+  from {
+    transform: translateX(-140px);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes bc-img-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  25% {
+    transform: translateY(-6px) rotate(0.8deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0);
+  }
+  75% {
+    transform: translateY(-6px) rotate(-0.8deg);
+  }
+}
+
+@keyframes bc-img-shadow {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  25%,
+  75% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1);
+  }
+}
+
+@keyframes bc-case-drop {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  55% {
+    transform: translateY(118px) rotate(-24deg) scale(1.06);
+  }
+  70% {
+    transform: translateY(100px) rotate(-20deg) scale(1.04);
+  }
+  82% {
+    transform: translateY(116px) rotate(-22deg) scale(1.06);
+  }
+  100% {
+    transform: translateY(118px) rotate(-22deg) scale(1.06);
+  }
+}
+
+@keyframes bc-case-close {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes bc-case-open {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bc-case-glow {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.4);
+  }
+}
+
+.bc-img-walker {
+  animation: bc-img-walk 2.4s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+.bc-img-bob {
+  animation: bc-img-bob 0.8s ease-in-out 3 both;
+}
+
+.bc-img-shadow {
+  animation: bc-img-shadow 0.8s ease-in-out 3 both;
+}
+
+.bc-case-pos {
+  transform: translate(-50%, -50%);
+}
+
+.bc-case-drop {
+  transform: translateY(118px) rotate(-22deg) scale(1.06);
+  animation: bc-case-drop 0.9s cubic-bezier(0.4, 0, 0.2, 1) 2.5s both;
+}
+
+.bc-case-closed {
+  opacity: 0;
+  animation: bc-case-close 0.35s ease-out 3.5s both;
+}
+
+.bc-case-open {
+  opacity: 1;
+  animation: bc-case-open 0.4s ease-out 3.5s both;
+}
+
+.bc-case-glow {
+  opacity: 0;
+  animation: bc-case-glow 0.5s ease-out 3.55s both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bc-walker,
   .bc-body,
@@ -447,7 +570,14 @@ body {
   .bc-glow,
   .bc-suit-shadow,
   .bc-pop,
-  .bc-options {
+  .bc-options,
+  .bc-img-walker,
+  .bc-img-bob,
+  .bc-img-shadow,
+  .bc-case-drop,
+  .bc-case-closed,
+  .bc-case-open,
+  .bc-case-glow {
     animation: none !important;
   }
 }
