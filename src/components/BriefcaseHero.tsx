@@ -12,48 +12,36 @@ interface BriefcaseHeroProps {
 
 function PhotoScene({ onError }: { onError: () => void }) {
   return (
-    <div className="relative h-72 w-72 sm:h-80 sm:w-80">
+    <div className="relative h-72 w-56 sm:h-80 sm:w-64">
       <div className="bc-img-walker absolute inset-0">
-        <div className="bc-img-bob absolute inset-0">
-          <div className="bc-img-shadow absolute bottom-1 left-0 right-0 mx-auto h-4 w-36 rounded-full bg-slate-900/10" />
-          <Image
-            src="/hero/boy.png"
-            alt=""
-            width={1024}
-            height={1024}
-            draggable={false}
-            onError={onError}
-            className="absolute inset-0 h-full w-full object-contain"
-            priority
-          />
-          <div className="bc-case-pos absolute" style={{ top: "52%", left: "62%" }}>
-            <div className="bc-case-drop relative h-16 w-24">
+        <div className="bc-img-settle absolute inset-0">
+          <div className="bc-img-bob absolute inset-0">
+            <div className="bc-img-shadow absolute -bottom-3 left-0 right-0 mx-auto h-4 w-36 rounded-full bg-slate-900/10" />
+            <div className="relative h-full w-full overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
               <Image
-                src="/hero/briefcase-closed.png"
-                alt=""
+                src="/hero/boy.png"
+                alt="A young boy holding a briefcase"
                 width={1024}
                 height={1024}
                 draggable={false}
                 onError={onError}
-                className="bc-case-closed absolute left-0 top-0 h-full w-full object-contain"
-              />
-              <Image
-                src="/hero/briefcase-open.png"
-                alt=""
-                width={1024}
-                height={1024}
-                draggable={false}
-                onError={onError}
-                className="bc-case-open absolute left-0 top-0 h-full w-full object-contain"
-              />
-              <div
-                className="bc-case-glow absolute -inset-4 rounded-full"
-                style={{
-                  background:
-                    "radial-gradient(circle, rgb(251 191 36 / 0.55) 0%, rgb(251 191 36 / 0) 70%)",
-                }}
+                className="h-full w-full object-cover"
+                priority
               />
             </div>
+            <div
+              className="bc-open-glow pointer-events-none absolute left-0 right-0 top-[82%] mx-auto h-40 w-56 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, rgb(251 191 36 / 0.6) 0%, rgb(251 191 36 / 0) 70%)",
+              }}
+            />
+            <span className="bc-spark pointer-events-none absolute left-[34%] top-[70%] text-2xl text-amber-400">
+              ✦
+            </span>
+            <span className="bc-spark bc-spark-2 pointer-events-none absolute left-[58%] top-[66%] text-xl text-amber-400">
+              ✦
+            </span>
           </div>
         </div>
       </div>
@@ -303,7 +291,11 @@ export function BriefcaseHero({
         Noventra — your AI job-search copilot
       </p>
 
-      <div className="bc-options mt-5 flex flex-wrap items-center justify-center gap-3">
+      <div
+        className={`mt-5 flex flex-wrap items-center justify-center gap-3 ${
+          photoFailed ? "bc-options" : "bc-options-photo"
+        }`}
+      >
         <Link
           href={getStartedHref}
           className="rounded-lg bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm shadow-indigo-600/30 transition hover:bg-indigo-500"

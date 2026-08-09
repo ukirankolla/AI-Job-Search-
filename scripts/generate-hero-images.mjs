@@ -1,87 +1,62 @@
-// Generates the photorealistic hero images (boy, closed briefcase, open
-// briefcase) with OpenAI gpt-image-1 and writes them to public/hero/.
-//
-// Requires OPENAI_API_KEY (from the environment or a local .env.local file).
+// Generates the photoreal hero boy image with Pollinations.ai (free, no API
+// key required), normalizes it to a PNG, and writes it to public/hero/boy.png.
 //
 // Usage: npm run generate:hero
 
-import { readFileSync, mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const outDir = resolve(root, "public/hero");
+const outFile = resolve(outDir, "boy.png");
 
-function loadApiKey() {
-  if (process.env.OPENAI_API_KEY) return process.env.OPENAI_API_KEY;
-  const envFile = resolve(root, ".env.local");
-  if (existsSync(envFile)) {
-    const line = readFileSync(envFile, "utf8")
-      .split(/\r?\n/)
-      .find((l) => l.startsWith("OPENAI_API_KEY="));
-    if (line) return line.slice("OPENAI_API_KEY=".length).trim();
-  }
-  throw new Error(
-    "OPENAI_API_KEY not found. Add it to .env.local or the environment.",
-  );
+const PROMPT =
+  "photorealistic full body photograph of a cheerful 10 year old boy with short dark hair, wearing a light blue button-up shirt, dark jeans and white sneakers, holding a closed brown leather briefcase in his right hand down at his side, standing upright facing the camera, full body visible from head to toe, natural soft studio lighting, plain light gray seamless background, sharp focus, high quality";
+
+function buildUrl(model) {
+  const url = new URL("https://image.pollinations.ai/prompt/" + encodeURIComponent(PROMPT));
+  url.searchParams.set("width", "1024");
+  url.searchParams.set("height", "1024");
+  url.searchParams.set("seed", "11");
+  url.searchParams.set("nologo", "true");
+  url.searchParams.set("model", model);
+  return url.toString();
 }
 
-const COMMON = {
-  n: 1,
-  size: "1024x1024",
-  quality: "high",
-  background: "transparent",
-  output_format: "png",
-};
-
-const JOBS = [
-  {
-    file: "boy.png",
-    prompt:
-      "Photorealistic full-body photograph of a cheerful young boy around 10 years old, short dark hair, warm smile, wearing a light blue button-up shirt and dark jeans and white sneakers, standing upright facing the camera, both arms relaxed at his sides with empty hands, looking straight at the viewer, full body visible from head to toe, natural soft lighting, isolated on a transparent background, high detail, professional photography",
-  },
-  {
-    file: "briefcase-closed.png",
-    prompt:
-      "Photorealistic product photograph of a closed brown leather briefcase with a black top handle and two gold metal clasps, centered, front view, isolated on a transparent background, soft studio lighting, sharp detail",
-  },
-  {
-    file: "briefcase-open.png",
-    prompt:
-      "Photorealistic product photograph of an open brown leather briefcase, lid flipped fully open showing a warm glowing golden light coming from inside, centered, front view, isolated on a transparent background, soft studio lighting, sharp detail",
-  },
-];
-
 async function generate() {
-  const apiKey = loadApiKey();
-  mkdirSync(outDir, { recursive: true });
-
-  for (const job of JOBS) {
-    process.stdout.write(`Generating ${job.file} ... `);
-    const res = await fetch("https://api.openai.com/v1/images/generations", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({ model: "gpt-image-1", ...COMMON, prompt: job.prompt }),
-    });
-
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`gpt-image-1 failed (${res.status}): ${body}`);
-    }
-
-    const data = await res.json();
-    const b64 = data.data?.[0]?.b64_json;
-    if (!b64) throw new Error(`No image returned for ${job.file}`);
-
-    const file = resolve(outDir, job.file);
-    writeFileSync(file, Buffer.from(b64, "base64"));
-    console.log("done");
+  let sharp;
+  try {
+    sharp = (await import("sharp")).default;
+  } catch {
+    throw new Error("sharp is required: npm install");
   }
 
-  console.log(`\nSaved to ${outDir}`);
+  let lastErr;
+  for (const model of ["flux", "turbo", "sana"]) {
+    process.stdout.write(`Generating hero boy image (${model}) ... `);
+    try {
+      const res = await fetch(buildUrl(model));
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const buf = Buffer.from(await res.arrayBuffer());
+      if (buf.length < 10_000) throw new Error("response too small");
+      const meta = await sharp(buf).metadata();
+      const png = await sharp(buf)
+        .resize(1024, 1024, { fit: "contain", background: "#f1f5f9" })
+        .png()
+        .toBuffer();
+      mkdirSync(outDir, { recursive: true });
+      writeFileSync(outFile, png);
+      console.log(
+        `done (${meta.width}x${meta.height} -> 1024x1024 PNG, ${(png.length / 1024).toFixed(0)} KB)`,
+      );
+      return;
+    } catch (err) {
+      lastErr = err;
+      console.log(`failed (${err.message})`);
+    }
+  }
+  throw new Error(`All Pollinations models failed: ${lastErr?.message}`);
 }
 
 generate().catch((err) => {
