@@ -42,48 +42,265 @@ body {
   animation: xp-pulse 1.6s ease-in-out infinite;
 }
 
-@keyframes bh-boy-in {
-  from {
-    transform: translateX(-80px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes bh-drop {
+/* Briefcase hero: walk-in, bend, toss, briefcase opens, options appear */
+@keyframes bc-walk-in {
   0% {
-    transform: translateY(-118px);
-  }
-  45% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-30px);
-  }
-  75% {
-    transform: translateY(-4px);
-  }
-  88% {
-    transform: translateY(-14px);
+    transform: translateX(-180px);
   }
   100% {
-    transform: translateY(0);
+    transform: translateX(0);
   }
 }
 
-@keyframes bh-lid-open {
+@keyframes bc-bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+  25% {
+    transform: translateY(-5px) rotate(1.3deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0);
+  }
+  75% {
+    transform: translateY(-5px) rotate(-1.3deg);
+  }
+}
+
+@keyframes bc-thigh-front {
+  0% {
+    transform: rotate(20deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(18deg);
+  }
+  75% {
+    transform: rotate(-10deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-thigh-back {
+  0% {
+    transform: rotate(-18deg);
+  }
+  25% {
+    transform: rotate(14deg);
+  }
+  50% {
+    transform: rotate(-16deg);
+  }
+  75% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-shin-front {
+  0% {
+    transform: rotate(-10deg);
+  }
+  25% {
+    transform: rotate(5deg);
+  }
+  50% {
+    transform: rotate(-12deg);
+  }
+  75% {
+    transform: rotate(6deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-shin-back {
+  0% {
+    transform: rotate(10deg);
+  }
+  25% {
+    transform: rotate(-8deg);
+  }
+  50% {
+    transform: rotate(12deg);
+  }
+  75% {
+    transform: rotate(-6deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-arm-back {
+  0% {
+    transform: rotate(18deg);
+  }
+  25% {
+    transform: rotate(-12deg);
+  }
+  50% {
+    transform: rotate(16deg);
+  }
+  75% {
+    transform: rotate(-14deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-head-tilt {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  25% {
+    transform: rotate(3deg);
+  }
+  50% {
+    transform: rotate(0);
+  }
+  75% {
+    transform: rotate(-2deg);
+  }
+}
+
+@keyframes bc-bend {
+  0% {
+    transform: rotate(0);
+  }
+  48% {
+    transform: rotate(0);
+  }
+  66% {
+    transform: rotate(24deg);
+  }
+  76% {
+    transform: rotate(6deg);
+  }
+  84% {
+    transform: rotate(0);
+  }
+  90% {
+    transform: rotate(7deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-arm-front {
+  0% {
+    transform: rotate(-20deg);
+  }
+  20% {
+    transform: rotate(14deg);
+  }
+  40% {
+    transform: rotate(-18deg);
+  }
+  48% {
+    transform: rotate(0);
+  }
+  58% {
+    transform: rotate(42deg);
+  }
+  70% {
+    transform: rotate(28deg);
+  }
+  76% {
+    transform: rotate(-22deg);
+  }
+  84% {
+    transform: rotate(-6deg);
+  }
+  90% {
+    transform: rotate(10deg);
+  }
+  100% {
+    transform: rotate(0);
+  }
+}
+
+@keyframes bc-suitcase {
+  0% {
+    transform: translate(14px, -10px) rotate(0);
+  }
+  6% {
+    transform: translate(15px, -8px) rotate(3deg);
+  }
+  12% {
+    transform: translate(13px, -10px) rotate(-3deg);
+  }
+  18% {
+    transform: translate(15px, -8px) rotate(2deg);
+  }
+  24% {
+    transform: translate(13px, -10px) rotate(-2deg);
+  }
+  30% {
+    transform: translate(15px, -8px) rotate(2deg);
+  }
+  36% {
+    transform: translate(13px, -10px) rotate(-2deg);
+  }
+  42% {
+    transform: translate(14px, -10px) rotate(0);
+  }
+  48% {
+    transform: translate(14px, -10px) rotate(0);
+  }
+  58% {
+    transform: translate(26px, -8px) rotate(6deg);
+  }
+  66% {
+    transform: translate(44px, -2px) rotate(14deg);
+  }
+  72% {
+    transform: translate(56px, 22px) rotate(45deg);
+  }
+  78% {
+    transform: translate(64px, 2px) rotate(165deg);
+  }
+  84% {
+    transform: translate(76px, 74px) rotate(305deg);
+  }
+  88% {
+    transform: translate(80px, 82px) rotate(305deg);
+  }
+  92% {
+    transform: translate(80px, 68px) rotate(308deg);
+  }
+  96% {
+    transform: translate(80px, 80px) rotate(306deg);
+  }
+  100% {
+    transform: translate(80px, 82px) rotate(305deg);
+  }
+}
+
+@keyframes bc-lid-open {
+  from {
+    transform: rotate(0);
+  }
   to {
-    transform: rotate(-85deg);
+    transform: rotate(-100deg);
   }
 }
 
-@keyframes bh-glow-in {
+@keyframes bc-glow-in {
   from {
     opacity: 0;
-    transform: scale(0.5);
+    transform: scale(0.4);
   }
   to {
     opacity: 1;
@@ -91,10 +308,33 @@ body {
   }
 }
 
-@keyframes bh-options {
+@keyframes bc-shadow-in {
   from {
     opacity: 0;
-    transform: translateY(16px);
+  }
+  to {
+    opacity: 0.1;
+  }
+}
+
+@keyframes bc-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.4);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.4);
+  }
+}
+
+@keyframes bc-options {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -102,36 +342,112 @@ body {
   }
 }
 
-.bh-boy {
-  animation: bh-boy-in 0.9s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+.bc-walker {
+  animation: bc-walk-in 2.4s cubic-bezier(0.3, 0.7, 0.4, 1) both;
 }
 
-.bh-drop {
-  animation: bh-drop 0.9s cubic-bezier(0.3, 0.6, 0.4, 1) 0.8s both;
+.bc-body {
+  animation: bc-bob 0.6s ease-in-out 4 both;
 }
 
-.bh-lid {
+.bc-thigh-front,
+.bc-thigh-back,
+.bc-shin-front,
+.bc-shin-back,
+.bc-arm-back {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+}
+
+.bc-thigh-front {
+  animation: bc-thigh-front 0.6s ease-in-out 4 both;
+}
+
+.bc-thigh-back {
+  animation: bc-thigh-back 0.6s ease-in-out 4 both;
+}
+
+.bc-shin-front {
+  animation: bc-shin-front 0.6s ease-in-out 4 both;
+}
+
+.bc-shin-back {
+  animation: bc-shin-back 0.6s ease-in-out 4 both;
+}
+
+.bc-arm-back {
+  animation: bc-arm-back 0.6s ease-in-out 4 both;
+}
+
+.bc-head {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation: bh-lid-open 0.45s ease-out 1.8s both;
+  animation: bc-head-tilt 0.6s ease-in-out 4 both;
 }
 
-.bh-glow {
+.bc-torso {
+  transform-box: view-box;
+  transform-origin: 160px 230px;
+  animation: bc-bend 5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.bc-arm-front {
+  transform-box: fill-box;
+  transform-origin: 50% 0%;
+  animation: bc-arm-front 5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.bc-suitcase {
   transform-box: fill-box;
   transform-origin: center;
-  animation: bh-glow-in 0.5s ease-out 1.85s both;
+  animation: bc-suitcase 5s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-.bh-options {
-  animation: bh-options 0.6s ease-out 2.4s both;
+.bc-lid {
+  transform-box: fill-box;
+  transform-origin: 0% 100%;
+  animation: bc-lid-open 0.45s ease-out 4.85s both;
+}
+
+.bc-glow {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bc-glow-in 0.5s ease-out 4.9s both;
+}
+
+.bc-suit-shadow {
+  animation: bc-shadow-in 0.35s ease-out 4.2s both;
+}
+
+.bc-pop {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bc-pop 0.5s ease-out 4.15s both;
+}
+
+.bc-options {
+  opacity: 1;
+  animation: bc-options 0.6s ease-out 5.4s both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bh-boy,
-  .bh-drop,
-  .bh-lid,
-  .bh-glow,
-  .bh-options {
+  .bc-walker,
+  .bc-body,
+  .bc-thigh-front,
+  .bc-thigh-back,
+  .bc-shin-front,
+  .bc-shin-back,
+  .bc-arm-front,
+  .bc-arm-back,
+  .bc-head,
+  .bc-torso,
+  .bc-suitcase,
+  .bc-lid,
+  .bc-glow,
+  .bc-suit-shadow,
+  .bc-pop,
+  .bc-options {
     animation: none !important;
   }
 }
