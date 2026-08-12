@@ -34,28 +34,31 @@ describe("buildAdzunaSearchUrl", () => {
     expect(url).toContain("max_days_old=2");
   });
 
-  it("maps employment types to Adzuna params", () => {
+  it("does not add employment type filters to URL (filtered client-side)", () => {
     const url = buildAdzunaSearchUrl({
       employmentTypes: ["full_time", "c2c", "internship"],
       appId: "id",
       appKey: "key",
     });
-    expect(url).toContain("full_time=1");
-    expect(url).toContain("contract_type=internships");
+    // No employment filters in URL — they're applied client-side
+    expect(url).not.toContain("full_time=");
+    expect(url).not.toContain("contract_type=");
   });
 });
 
 describe("mapAdzunaEmploymentType", () => {
-  it("maps Adzuna contract types", () => {
+  it("maps Adzuna contract types from contract_time field", () => {
     expect(mapAdzunaEmploymentType("permanent")).toBe("full_time");
     expect(mapAdzunaEmploymentType("contract")).toBe("c2c");
-    expect(mapAdzunaEmploymentType("Internships")).toBe("internship");
+    expect(mapAdzunaEmploymentType("temporary")).toBe("c2c");
+    expect(mapAdzunaEmploymentType("internships")).toBe("internship");
+    expect(mapAdzunaEmploymentType("full_time")).toBe("full_time");
     expect(mapAdzunaEmploymentType(undefined)).toBeNull();
   });
 });
 
 describe("mapAdzunaJobs", () => {
-  it("maps results into postings with salary and direct URL", () => {
+  it("maps results into postings with employment_type detection", () => {
     const jobs = mapAdzunaJobs([
       {
         id: "abc123",
@@ -67,7 +70,7 @@ describe("mapAdzunaJobs", () => {
         created: "2026-08-05T09:00:00Z",
         salary_min: 100000,
         salary_max: 140000,
-        contract_type: "permanent",
+        contract_time: "permanent",
       },
     ]);
 
@@ -84,6 +87,43 @@ describe("mapAdzunaJobs", () => {
       salary_max: 140000,
       employment_type: "full_time",
     });
+  });
+
+  it("filters results by requested employment types", () => {
+    const results = [
+      {
+        id: "1",
+        title: "Full-time Job",
+        redirect_url: "https://x.com/1",
+        contract_time: "permanent",
+      },
+      {
+        id: "2",
+        title: "Contract Job",
+        redirect_url: "https://x.com/2",
+        contract_time: "contract",
+      },
+      {
+        id: "3",
+        title: "Internship",
+        redirect_url: "https://x.com/3",
+        contract_time: "internships",
+      },
+    ];
+
+    // Filter for only full_time jobs
+    const jobs = mapAdzunaJobs(results, ["full_time"]);
+    expect(jobs).toHaveLength(1);
+    expect(jobs[0].employment_type).toBe("full_time");
+
+    // Filter for C2C jobs
+    const c2c = mapAdzunaJobs(results, ["c2c"]);
+    expect(c2c).toHaveLength(1);
+    expect(c2c[0].employment_type).toBe("c2c");
+
+    // No filter = all jobs
+    const all = mapAdzunaJobs(results);
+    expect(all).toHaveLength(3);
   });
 
   it("skips rows missing a title or URL", () => {

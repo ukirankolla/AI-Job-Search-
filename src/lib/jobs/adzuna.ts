@@ -18,6 +18,7 @@ interface AdzunaResult {
   salary_min?: number | null;
   salary_max?: number | null;
   contract_type?: string;
+  contract_time?: string;
 }
 
 export interface AdzunaSearchParams {
@@ -33,8 +34,22 @@ export function mapAdzunaEmploymentType(
   const v = (type ?? "").toLowerCase();
   if (v.includes("intern")) return "internship";
   if (v.includes("contract") || v.includes("temp")) return "c2c";
-  if (v.includes("perm")) return "full_time";
+  if (v.includes("perm") || v.includes("full")) return "full_time";
+  if (v.includes("w2")) return "w2";
+  // Fallback: unknown types return null
   return null;
+}
+
+/**
+ * Determines if a job matches the requested employment types.
+ * If no types specified, all jobs match.
+ */
+export function matchesEmploymentType(
+  jobType: string | null,
+  requestedTypes: string[] | undefined,
+): boolean {
+  if (!requestedTypes || requestedTypes.length === 0) return true;
+  return requestedTypes.includes(jobType || "");
 }
 
 function stripHtml(input: string): string {
@@ -65,17 +80,22 @@ export function buildAdzunaSearchUrl(
   if (location && location.toLowerCase() !== "united states") {
     sp.set("where", location);
   }
-  const types = params.employmentTypes ?? [];
-  if (types.includes("full_time")) sp.set("full_time", "1");
-  // Note: Adzuna doesn't support C2C or Internship filters via API
-  // These need to be filtered client-side if needed
+  // Note: All employment type filtering is done client-side (matchesEmploymentType)
+  // Adzuna API only supports full_time=1, but we get more results without filters
+  // and filter by contract_time field in mapAdzunaJobs
   return `https://api.adzuna.com/v1/api/jobs/us/search/1?${sp.toString()}`;
 }
 
-export function mapAdzunaJobs(results: AdzunaResult[]): JobPosting[] {
+export function mapAdzunaJobs(
+  results: AdzunaResult[],
+  requestedTypes?: string[],
+): JobPosting[] {
   const out: JobPosting[] = [];
   for (const r of results) {
     if (!r.title || !r.redirect_url) continue;
+    const employment_type = mapAdzunaEmploymentType(r.contract_time);
+    // Filter by employment type if specified
+    if (!matchesEmploymentType(employment_type, requestedTypes)) continue;
     out.push({
       source: "adzuna",
       external_id: r.id ? `adzuna-${r.id}` : r.redirect_url,
@@ -87,7 +107,7 @@ export function mapAdzunaJobs(results: AdzunaResult[]): JobPosting[] {
       salary_min: r.salary_min ?? null,
       salary_max: r.salary_max ?? null,
       posted_at: r.created ?? null,
-      employment_type: mapAdzunaEmploymentType(r.contract_type),
+      employment_type,
       sponsorship: null,
     });
   }
@@ -116,7 +136,8 @@ export function adzunaSource() {
         throw new Error(`Adzuna request failed with status ${res.status}.`);
       }
       const data = (await res.json()) as { results?: AdzunaResult[] };
-      return mapAdzunaJobs(data.results ?? []);
+      // Filter by employment types client-side
+      return mapAdzunaJobs(data.results ?? [], params.employmentTypes);
     },
   };
 }
