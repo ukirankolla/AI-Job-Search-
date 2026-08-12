@@ -67,8 +67,8 @@ export function buildAdzunaSearchUrl(
   }
   const types = params.employmentTypes ?? [];
   if (types.includes("full_time")) sp.set("full_time", "1");
-  if (types.includes("c2c")) sp.set("contract_type", "contract");
-  if (types.includes("internship")) sp.set("contract_type", "internships");
+  // Note: Adzuna doesn't support C2C or Internship filters via API
+  // These need to be filtered client-side if needed
   return `https://api.adzuna.com/v1/api/jobs/us/search/1?${sp.toString()}`;
 }
 
