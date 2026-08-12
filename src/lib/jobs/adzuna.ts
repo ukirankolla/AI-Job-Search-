@@ -57,7 +57,6 @@ export function buildAdzunaSearchUrl(
     app_id: params.appId,
     app_key: params.appKey,
     "results_per_page": "25",
-    sort_by: "date",
     max_days_old: String(Math.max(1, Math.ceil((params.hours ?? 24) / 24))),
   });
   const query = params.query?.trim();
