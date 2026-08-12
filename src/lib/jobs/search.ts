@@ -16,6 +16,18 @@ export interface JobSearchOutcome {
   warnings: string[];
 }
 
+export function normalizeSearchHours(
+  value: number | string | null | undefined,
+): number | null {
+  if (value === null || value === undefined || value === "" || value === "all") {
+    return null;
+  }
+
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return Math.min(Math.max(numeric, 1), 72);
+}
+
 interface JobSearchProvider {
   name: string;
   fetch(

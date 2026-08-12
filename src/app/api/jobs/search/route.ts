@@ -1,6 +1,6 @@
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { searchJobs } from "@/lib/jobs/search";
+import { normalizeSearchHours, searchJobs } from "@/lib/jobs/search";
 import {
   ingestJobs,
   type IngestClient,
@@ -29,7 +29,11 @@ export async function POST(request: Request) {
   }
 
   const query = typeof body.query === "string" ? body.query.trim() : "";
-  const hours = Math.min(Math.max(Number(body.hours) || 8, 1), 72);
+  const hours = normalizeSearchHours(
+    typeof body.hours === "number" || typeof body.hours === "string"
+      ? body.hours
+      : null,
+  );
   const types = Array.isArray(body.types)
     ? body.types.filter((t): t is string => typeof t === "string")
     : [];

@@ -17,7 +17,7 @@ async function ensureJobsAreLoaded(supabase: Awaited<ReturnType<typeof createCli
 
   const { jobs } = await searchJobs({
     query: "",
-    hours: 8,
+    hours: null,
     location: "United States",
   });
 
