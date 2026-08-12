@@ -17,6 +17,8 @@ export interface PipelineCard {
   title: string;
   company: string;
   url: string | null;
+  origin?: "manual" | "auto";
+  auto_status?: "queued" | "ready" | "submitted" | "failed" | null;
 }
 
 const columns: { status: ApplicationStatus; label: string }[] = [
@@ -97,7 +99,24 @@ export function PipelineBoard({ apps }: { apps: PipelineCard[] }) {
                         )}
                       </p>
                       <div className="mt-2 flex items-center justify-between">
-                        <StatusBadge status={a.status} />
+                        <div className="flex items-center gap-1.5">
+                          <StatusBadge status={a.status} />
+                          {a.origin === "auto" && a.auto_status && (
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                                a.auto_status === "submitted"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : a.auto_status === "ready"
+                                    ? "bg-indigo-100 text-indigo-700"
+                                    : a.auto_status === "failed"
+                                      ? "bg-rose-100 text-rose-700"
+                                      : "bg-slate-100 text-slate-600"
+                              }`}
+                            >
+                              auto·{a.auto_status}
+                            </span>
+                          )}
+                        </div>
                         <div className="flex items-center gap-2">
                           {a.match_score !== null && (
                             <span

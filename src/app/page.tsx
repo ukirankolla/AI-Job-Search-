@@ -27,7 +27,7 @@ const steps = [
   {
     num: "04",
     title: "Apply",
-    desc: "One click opens the official application page with your tailored documents ready — no bot submissions, full control in your hands.",
+    desc: "Auto-pilot submits email-based postings for you and queues portal postings one-tap-ready with your tailored documents attached.",
   },
 ];
 
