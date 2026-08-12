@@ -1,13 +1,36 @@
 import { requireOnboarded } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { classifyApplySource } from "@/lib/jobs/applySource";
+import { searchJobs } from "@/lib/jobs/search";
+import { ingestJobs } from "@/lib/services/jobIngest";
 import { JobFeed } from "@/components/JobFeed";
 
 export const metadata = { title: "Jobs | Noventra" };
 
+async function ensureJobsAreLoaded(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { count, error } = await supabase
+    .from("jobs")
+    .select("id", { count: "exact", head: true });
+
+  if (error) return;
+  if ((count ?? 0) > 0) return;
+
+  const { jobs } = await searchJobs({
+    query: "",
+    hours: 8,
+    location: "United States",
+  });
+
+  if (jobs.length === 0) return;
+
+  await ingestJobs(supabase as never, jobs, { verify: false });
+}
+
 export default async function JobsPage() {
   const user = await requireOnboarded();
   const supabase = await createClient();
+
+  await ensureJobsAreLoaded(supabase);
 
   const [{ data: jobs }, { data: savedApps }, { data: profile }, { data: matches }] =
     await Promise.all([
