@@ -7,9 +7,11 @@ import { filterJobs } from "@/lib/jobFilter";
 import { formatRelativeTime, isRecentlyPosted } from "@/lib/jobTime";
 import type { ApplySourceKind } from "@/lib/jobs/applySource";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
+import { getJobSourceLabel } from "@/lib/jobs/pipelineEligibility";
 
 export interface JobFeedItem {
   id: string;
+  source?: string | null;
   title: string;
   company: string;
   location: string;
@@ -442,9 +444,12 @@ export function JobFeed({
                         Unverified
                       </span>
                     )}
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-600">
+                      {getJobSourceLabel(job.source ?? "search")}
+                    </span>
                     {job.applyKind === "linkedin" && (
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-600">
-                        LinkedIn
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                        Search result
                       </span>
                     )}
                     {job.applyKind === "company" && (

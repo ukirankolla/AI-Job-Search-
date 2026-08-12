@@ -42,6 +42,12 @@ export interface IngestClient {
   };
 }
 
+function normalizeSalary(value: number | null | undefined): number | null {
+  if (value === null || value === undefined || Number.isNaN(value)) return null;
+  const rounded = Math.round(Number(value));
+  return Number.isFinite(rounded) ? rounded : null;
+}
+
 export async function ingestJobs(
   client: IngestClient,
   jobs: JobPosting[],
@@ -86,8 +92,8 @@ export async function ingestJobs(
       location: job.location ?? "",
       description: job.description ?? "",
       url: job.url ?? "",
-      salary_min: job.salary_min ?? null,
-      salary_max: job.salary_max ?? null,
+      salary_min: normalizeSalary(job.salary_min),
+      salary_max: normalizeSalary(job.salary_max),
       posted_at: job.posted_at ?? null,
       employment_type: job.employment_type ?? null,
       sponsorship: job.sponsorship ?? null,
