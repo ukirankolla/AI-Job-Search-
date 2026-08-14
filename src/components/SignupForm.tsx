@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { authCallbackUrl } from "@/lib/authUrl";
 
 export function SignupForm({ next = "/onboarding" }: { next?: string }) {
   const [fullName, setFullName] = useState("");
@@ -40,7 +41,7 @@ export function SignupForm({ next = "/onboarding" }: { next?: string }) {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        emailRedirectTo: authCallbackUrl(next, location.origin),
       },
     });
     setLoading(false);
@@ -97,7 +98,7 @@ export function SignupForm({ next = "/onboarding" }: { next?: string }) {
           const { error } = await supabase.auth.signInWithOAuth({
             provider: "google",
             options: {
-              redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+              redirectTo: authCallbackUrl(next, location.origin),
             },
           });
           setLoading(false);
