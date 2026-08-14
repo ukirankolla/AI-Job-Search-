@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { filterJobs } from "@/lib/jobFilter";
 import { formatRelativeTime, isRecentlyPosted } from "@/lib/jobTime";
 import type { ApplySourceKind } from "@/lib/jobs/applySource";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
+import { getJobSourceLabel } from "@/lib/jobs/pipelineEligibility";
 
 export interface JobFeedItem {
   id: string;
+  source?: string | null;
   title: string;
   company: string;
   location: string;
@@ -67,7 +69,7 @@ export function JobFeed({
   const router = useRouter();
   const [draft, setDraft] = useState("");
   const [query, setQuery] = useState("");
-  const [hours, setHours] = useState<number | null>(8);
+  const [hours, setHours] = useState<number | null>(null);
   const [types, setTypes] = useState<string[]>([]);
   const [sponsorship, setSponsorship] = useState<"yes" | "no" | null>(null);
   const [directOnly, setDirectOnly] = useState(true);
@@ -100,10 +102,14 @@ export function JobFeed({
   };
 
   const unmatchable = jobs.some((j) => !scores?.[j.id]);
+  const isInitialMount = useRef(true);
 
-  const runSearch = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setQuery(draft);
+  const performSearchInternal = async (
+    searchQuery: string,
+    searchHours: number | null,
+    searchTypes: string[],
+    searchSponsorship: "yes" | "no" | null,
+  ) => {
     if (searching) return;
     setSearching(true);
     setSearchError(null);
@@ -113,9 +119,9 @@ export function JobFeed({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          query: draft,
-          hours,
-          types,
+          query: searchQuery,
+          hours: searchHours,
+          types: searchTypes,
           location: locationDraft,
         }),
       });
@@ -133,7 +139,7 @@ export function JobFeed({
         return;
       }
       if (data?.found === 0) {
-        const hasLocalMatches = filterJobs(jobs, draft).length > 0;
+        const hasLocalMatches = filterJobs(jobs, searchQuery).length > 0;
         if (hasLocalMatches) {
           setNotice(
             "No new postings found for that search — showing existing matches.",
@@ -155,6 +161,28 @@ export function JobFeed({
       setSearching(false);
     }
   };
+
+  const runSearch = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setQuery(draft);
+    await performSearchInternal(draft, hours, types, sponsorship);
+  };
+
+  // Auto-search when filters change (but not on initial mount)
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    if (!query) return; // Only auto-search if there's an active query
+
+    const timer = setTimeout(() => {
+      performSearchInternal(query, hours, types, sponsorship);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [hours, types, sponsorship, directOnly, query, locationDraft]);
 
   const matchAll = async () => {
     if (matching) return;
@@ -442,9 +470,12 @@ export function JobFeed({
                         Unverified
                       </span>
                     )}
+                    <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-600">
+                      {getJobSourceLabel(job.source ?? "search")}
+                    </span>
                     {job.applyKind === "linkedin" && (
-                      <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-600">
-                        LinkedIn
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                        Search result
                       </span>
                     )}
                     {job.applyKind === "company" && (

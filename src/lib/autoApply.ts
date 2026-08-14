@@ -15,7 +15,7 @@ export interface AutoApplySettings {
 }
 
 export const DEFAULT_AUTO_APPLY_SETTINGS: AutoApplySettings = {
-  enabled: false,
+  enabled: true,
   min_score: 75,
   max_per_day: 5,
   hours_lookback: 24,

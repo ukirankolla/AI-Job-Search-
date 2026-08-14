@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { isPipelineEligibleJob } from "@/lib/jobs/pipelineEligibility";
 import { revalidatePath } from "next/cache";
 
 const applicationSchema = z.object({
@@ -46,6 +47,23 @@ export async function createApplication(
   if (!parsed.success) return { ok: false, error: "Invalid application data." };
 
   const supabase = await createClient();
+  const { data: job, error: jobError } = await supabase
+    .from("jobs")
+    .select("source, url, apply_url")
+    .eq("id", parsed.data.job_id)
+    .maybeSingle();
+
+  if (jobError || !job) {
+    return { ok: false, error: "Job not found." };
+  }
+
+  if (!isPipelineEligibleJob(job)) {
+    return {
+      ok: false,
+      error: "This search result does not have a valid direct apply link. Open the job and resolve it before adding to the pipeline.",
+    };
+  }
+
   const { data, error } = await supabase
     .from("applications")
     .insert({

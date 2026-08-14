@@ -15,6 +15,7 @@ import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
 import { ApplyKit } from "@/components/ApplyKit";
+import { getJobSourceLabel } from "@/lib/jobs/pipelineEligibility";
 
 export const metadata = { title: "Job | Noventra" };
 
@@ -113,6 +114,16 @@ export default async function JobDetailPage({
               ? ` · $${job.salary_min.toLocaleString()}${job.salary_max ? `–$${job.salary_max.toLocaleString()}` : "+"}`
               : ""}
           </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-700">
+              Source: {getJobSourceLabel(job.source)}
+            </span>
+            {job.source === "linkedin" && (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                Search-generated result
+              </span>
+            )}
+          </div>
           {job.verified_status === "verified" && (
             <p
               className="mt-1 text-xs font-medium text-emerald-600"
@@ -128,7 +139,7 @@ export default async function JobDetailPage({
           )}
           {job.verified_status === "unverified" && (
             <p className="mt-1 text-xs text-slate-400">
-              Unverified — no company-owned posting found
+              Unverified — this LinkedIn search result has not been matched to a direct company-owned apply link yet.
             </p>
           )}
           <p className="mt-1 text-sm text-slate-400">
