@@ -1,0 +1,27 @@
+{
+  "schema": "etna-agent-contract/v1",
+  "generatedBy": "Agent Etna",
+  "agent": {
+    "name": "AI Job Search",
+    "role": null,
+    "repo": "ukirankolla/AI-Job-Search-",
+    "branch": "main"
+  },
+  "calibration": null,
+  "guardrails": [
+    "No behavioral calibration set yet — Agent Etna uses general defaults until you calibrate this agent."
+  ],
+  "changelog": [
+    {
+      "date": "2026-08-24",
+      "cycleNumber": 1,
+      "changes": [
+        {
+          "capability": "safety:dialog-scope",
+          "rationale": "The agent currently has a general instruction to decline out-of-scope requests, but it can be strengthened by explicitly mentioning non-job-related advice and reiterating its core purpose when declining."
+        }
+      ],
+      "merged": true
+    }
+  ]
+}
