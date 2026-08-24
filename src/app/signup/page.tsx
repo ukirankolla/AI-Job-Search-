@@ -1,4 +1,5 @@
 import { SignupForm } from "@/components/SignupForm";
+import { AuthShell } from "@/components/AuthShell";
 
 export const metadata = { title: "Get started free | Noventra" };
 
@@ -10,8 +11,8 @@ export default async function SignupPage({
   const { next } = await searchParams;
 
   return (
-    <main className="mx-auto max-w-6xl px-4">
+    <AuthShell photoAlt="Two professionals shaking hands in a modern office lobby">
       <SignupForm next={next} />
-    </main>
+    </AuthShell>
   );
 }

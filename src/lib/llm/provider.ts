@@ -451,16 +451,30 @@ class OpenAIProvider implements ChatProvider {
   }
 }
 
+export type ProviderMode = "live" | "mock" | "misconfigured";
+
+/**
+ * Why the provider is in its current mode:
+ * - "live": a well-formed OPENAI_API_KEY is set; agents call the real model.
+ * - "mock": no key at all; agents return deterministic sample output.
+ * - "misconfigured": a key is set but it is clearly not a real OpenAI key
+ *   (real keys are much longer), so live calls would fail — surfaced in the
+ *   UI instead of failing every agent run with an opaque 401.
+ */
+export function getProviderMode(): ProviderMode {
+  const key = process.env.OPENAI_API_KEY?.trim();
+  if (!key) return "mock";
+  return key.length >= 40 ? "live" : "misconfigured";
+}
+
 export function getChatProvider(): ChatProvider {
+  if (getProviderMode() !== "live") return new MockChatProvider();
   const model = process.env.AI_MODEL ?? "gpt-4o-mini";
-  if (!process.env.OPENAI_API_KEY) {
-    return new MockChatProvider();
-  }
   return new OpenAIProvider(model);
 }
 
 export function getEmbeddings(): Embeddings {
-  if (!process.env.OPENAI_API_KEY) {
+  if (getProviderMode() !== "live") {
     return new MockEmbeddings();
   }
   return new OpenAIEmbeddings({
@@ -469,7 +483,7 @@ export function getEmbeddings(): Embeddings {
   });
 }
 
-export const isMockProvider = () => !process.env.OPENAI_API_KEY;
+export const isMockProvider = () => getProviderMode() !== "live";
 
 function tryJsonParse(text: string): unknown {
   try {

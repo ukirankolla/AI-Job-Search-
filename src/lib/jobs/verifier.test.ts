@@ -49,9 +49,13 @@ const agentVerdict: VerificationResult = {
   reason: "Company career site mentions the company.",
 };
 
+// Real OpenAI keys are much longer than this; a short stub would be treated
+// as misconfigured by getProviderMode().
+const LIVE_KEY = `sk-${"t".repeat(48)}`;
+
 describe("verifyJob", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENAI_API_KEY", "sk-test");
+    vi.stubEnv("OPENAI_API_KEY", LIVE_KEY);
     vi.restoreAllMocks();
     mockRunVerifier.mockReset();
     mockFetchLinkedInJobPage.mockReset();
@@ -228,7 +232,7 @@ describe("verifyJob", () => {
 
 describe("verifyJobBatch", () => {
   beforeEach(() => {
-    vi.stubEnv("OPENAI_API_KEY", "sk-test");
+    vi.stubEnv("OPENAI_API_KEY", LIVE_KEY);
     mockRunVerifier.mockReset();
     mockFetchLinkedInJobPage.mockReset();
     mockFetchLinkedInCompanyPage.mockReset();

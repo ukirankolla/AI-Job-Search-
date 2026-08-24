@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/LoginForm";
+import { AuthShell } from "@/components/AuthShell";
 
 export const metadata = { title: "Sign in | Noventra" };
 
@@ -10,8 +11,8 @@ export default async function LoginPage({
   const { next } = await searchParams;
 
   return (
-    <main className="mx-auto max-w-6xl px-4">
+    <AuthShell photoAlt="Two professionals shaking hands in a modern office lobby">
       <LoginForm next={next} />
-    </main>
+    </AuthShell>
   );
 }
