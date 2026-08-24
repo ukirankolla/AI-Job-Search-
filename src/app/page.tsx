@@ -1,7 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
 import { getSessionUser, isOnboarded } from "@/lib/auth";
-import { BriefcaseHero } from "@/components/BriefcaseHero";
 
 export const metadata = {
   title: "Noventra — Upload Your Resume, We Do the Rest",
@@ -142,7 +141,7 @@ export default async function Home() {
 
   return (
     <main className="overflow-hidden">
-      <section className="relative flex min-h-[calc(100vh-4rem)] items-center justify-center overflow-hidden">
+      <section className="relative flex min-h-[calc(100vh-4rem)] items-center overflow-hidden">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -152,15 +151,108 @@ export default async function Home() {
           }}
         />
 
-        <div className="relative mx-auto px-4 py-12">
-          <h1 className="sr-only">
-            Noventra — upload your resume once, AI agents take care of the rest
-          </h1>
-          <BriefcaseHero
-            getStartedHref={getStartedHref}
-            signInHref={signInHref}
-            ctaLabel={ctaLabel}
-          />
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-14 px-4 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:py-24">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
+              Multi-agent AI job search
+            </div>
+
+            <h1 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-[3.4rem] lg:leading-[1.08]">
+              Upload your resume once.
+              <span className="mt-2 block bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text pb-1 text-transparent">
+                We take care of the rest.
+              </span>
+            </h1>
+
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate-500">
+              Noventra&apos;s AI agents scan fresh job postings every hour,
+              score each one against your resume, rewrite your application for
+              the role, and submit email-ready applications on a schedule — you
+              just review and send.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link
+                href={getStartedHref}
+                className="rounded-lg bg-indigo-600 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500"
+              >
+                {ctaLabel}
+              </Link>
+              {!user && (
+                <Link
+                  href={signInHref}
+                  className="rounded-lg border border-slate-300 bg-white px-7 py-3.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
+                >
+                  Sign in
+                </Link>
+              )}
+              <a
+                href="#how-it-works"
+                className="text-sm font-medium text-slate-500 underline-offset-4 transition hover:text-slate-700 hover:underline"
+              >
+                See how it works
+              </a>
+            </div>
+
+            <div className="mt-10 flex items-center gap-4">
+              <div className="flex -space-x-3">
+                {testimonials.map((t) => (
+                  <Image
+                    key={t.name}
+                    src={t.avatar}
+                    alt=""
+                    aria-hidden
+                    width={96}
+                    height={96}
+                    className="h-10 w-10 rounded-full object-cover ring-2 ring-white"
+                  />
+                ))}
+              </div>
+              <p className="text-sm leading-snug text-slate-500">
+                Loved by job seekers who
+                <br className="hidden sm:block" /> stopped copy-pasting resumes.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative mx-auto w-full max-w-md lg:max-w-lg">
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-indigo-900/10">
+              <Image
+                src="/hero/hero-professional.png"
+                alt="A young professional smiling at her laptop in a sunlit home office"
+                width={1024}
+                height={1280}
+                priority
+                sizes="(min-width: 1024px) 36rem, (min-width: 640px) 28rem, 100vw"
+                className="h-auto w-full object-cover"
+              />
+            </div>
+
+            <div className="absolute -right-3 top-8 rotate-1 rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-lg shadow-slate-900/10 backdrop-blur sm:-right-6">
+              <p className="text-xs font-medium text-slate-400">Match score</p>
+              <p className="text-sm font-bold text-slate-900">
+                <span className="text-emerald-600">87%</span> · Senior Engineer
+              </p>
+            </div>
+
+            <div className="absolute -left-3 bottom-12 -rotate-1 rounded-xl border border-slate-200 bg-white/95 px-4 py-3 shadow-lg shadow-slate-900/10 backdrop-blur sm:-left-6">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-8 w-8 place-items-center rounded-full bg-indigo-600 text-xs font-bold text-white">
+                  N
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Auto-pilot ran today
+                  </p>
+                  <p className="flex items-center gap-1.5 text-xs text-emerald-600">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                    2 applied · 3 ready to send
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

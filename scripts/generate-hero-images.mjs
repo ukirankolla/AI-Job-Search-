@@ -20,12 +20,12 @@ const HEADSHOT_STYLE =
 
 const IMAGES = [
   {
-    file: "boy.png",
+    file: "hero-professional.png",
     width: 1024,
-    height: 1024,
-    seed: "11",
+    height: 1280,
+    seed: "88",
     prompt:
-      "photorealistic full body photograph of a cheerful 10 year old boy with short dark hair, wearing a light blue button-up shirt, dark jeans and white sneakers, holding a closed brown leather briefcase in his right hand down at his side, standing upright facing the camera, full body visible from head to toe, natural soft studio lighting, plain light gray seamless background, sharp focus, high quality",
+      "photorealistic photograph of a happy young professional woman in a cream knit sweater sitting at a sunlit modern desk, smiling softly at her laptop which glows warmly but stays blurred with no readable text, ceramic coffee mug and small green plant beside her, bright airy apartment office with a large window and golden morning light, shallow depth of field, cinematic warm tones, high quality",
   },
   {
     file: "avatar-priya.png",

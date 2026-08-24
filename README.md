@@ -163,9 +163,11 @@ Auto-pilot branch (opt-in, /applications settings):
   panel; a **Run now** button triggers the same pipeline on demand.
 
 **Landing page & imagery**
-- Marketing page includes an animated briefcase hero (photoreal image with an
-  SVG fallback), a product mockup, how-it-works, agents, an auto-pilot
-  showcase, testimonials with generated headshots, and a photo-backed CTA.
+- Marketing page opens with a photographic SaaS hero — headline, CTAs, and
+  floating product cards (live match score, auto-pilot digest) over a real
+  generated photo — followed by a product mockup, how-it-works, agents, an
+  auto-pilot showcase, testimonials with generated headshots, and a
+  photo-backed CTA.
 - All photoreal imagery is AI-generated via Pollinations.ai (free, no API key)
   by `npm run generate:hero` → `public/hero/*.png`. Existing files are skipped;
   set `FORCE=1` to regenerate everything.
