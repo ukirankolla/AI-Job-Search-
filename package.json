@@ -11,7 +11,7 @@
     "test": "vitest run",
     "db:migrate": "supabase db push",
     "icons": "node scripts/generate-icons.mjs",
-    "generate:hero": "node scripts/generate-hero-images.mjs"
+    "fetch:hero": "node scripts/fetch-hero-images.mjs"
   },
   "dependencies": {
     "@langchain/core": "^0.3.0",

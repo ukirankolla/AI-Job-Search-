@@ -220,7 +220,7 @@ export default async function Home() {
             <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl shadow-indigo-900/10">
               <Image
                 src="/hero/hero-professional.png"
-                alt="A young professional smiling at her laptop in a sunlit home office"
+                alt="A professional working at a bright modern office desk"
                 width={1024}
                 height={1280}
                 priority

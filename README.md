@@ -165,12 +165,13 @@ Auto-pilot branch (opt-in, /applications settings):
 **Landing page & imagery**
 - Marketing page opens with a photographic SaaS hero — headline, CTAs, and
   floating product cards (live match score, auto-pilot digest) over a real
-  generated photo — followed by a product mockup, how-it-works, agents, an
-  auto-pilot showcase, testimonials with generated headshots, and a
-  photo-backed CTA.
-- All photoreal imagery is AI-generated via Pollinations.ai (free, no API key)
-  by `npm run generate:hero` → `public/hero/*.png`. Existing files are skipped;
-  set `FORCE=1` to regenerate everything.
+  photograph — followed by a product mockup, how-it-works, agents, an
+  auto-pilot showcase, testimonials with real headshots, and a photo-backed
+  CTA.
+- All photography is **real stock from Unsplash** (free license, commercial
+  use, no attribution required). `npm run fetch:hero` downloads the curated
+  set into `public/hero/`; each slot has fallback IDs, existing files are
+  skipped, and `FORCE=1` re-downloads everything.
 
 **Plans & admin**
 - Free / premium tiers with server-side quota enforcement (`usage_events`
@@ -266,7 +267,7 @@ src/
     subscription.ts  quota + tier helpers
   proxy.ts           auth route protection (Next.js proxy)
 scripts/
-  generate-hero-images.mjs   AI-generate landing-page imagery (Pollinations)
+  fetch-hero-images.mjs      Download real (Unsplash) landing-page photos
   generate-icons.mjs         PWA + native app icons (sharp)
 supabase/
   migrations/        SQL schema + pgvector match function (0001–0012)
@@ -283,7 +284,7 @@ supabase/
 - Optional: a [Resend](https://resend.com) API key. Without it, auto-pilot
   email submissions fall back to "ready" and digest emails are skipped.
 - Optional: `sharp` is needed only to regenerate icons/hero images
-  (`npm run icons`, `npm run generate:hero`); it ships as a dev dependency of
+  (`npm run icons`, `npm run fetch:hero`); it ships as a dev dependency of
   the image scripts' toolchain — plain `npm install` covers everything.
 
 ---
@@ -443,7 +444,7 @@ helpers.
 | `npm test` | Vitest |
 | `npm run db:migrate` | `supabase db push` |
 | `npm run icons` | Regenerate PWA icons (`public/icons/`) and native app assets (`mobile/assets/`) |
-| `npm run generate:hero` | AI-generate landing-page photos into `public/hero/` (skips existing files; `FORCE=1` regenerates all) |
+| `npm run fetch:hero` | Download the real (Unsplash) landing-page photos into `public/hero/` (skips existing; `FORCE=1` re-downloads) |
 
 ---
 
