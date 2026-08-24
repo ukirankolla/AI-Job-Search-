@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getSessionUser, isOnboarded } from "@/lib/auth";
 import { BriefcaseHero } from "@/components/BriefcaseHero";
 
@@ -76,6 +77,52 @@ const stats = [
   { value: "0–100", label: "Match score on every job" },
   { value: "15", label: "Free rewrites & applies per week" },
   { value: "1", label: "Resume upload to get started" },
+];
+
+const autopilotPoints = [
+  {
+    title: "Runs while you live your life",
+    desc: "Every day at 4 PM PT, the pilot scans everything posted in the last 24 hours and scores it against your resume.",
+  },
+  {
+    title: "Submits what it can, preps the rest",
+    desc: "Email-ready postings go out on your behalf with tailored documents attached. Portal postings are queued one-tap-ready.",
+  },
+  {
+    title: "A digest in your inbox",
+    desc: "One email tells you exactly what was applied for you and what just needs a click — nothing happens blind.",
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      "I uploaded my resume once and woke up to three tailored applications waiting for my review. The match scores are scary accurate.",
+    name: "Priya Sharma",
+    role: "Product Designer · Toronto",
+    avatar: "/hero/avatar-priya.png",
+  },
+  {
+    quote:
+      "The skill-gap breakdown told me exactly what to learn. Two months later I had an offer at 22% more than my old job.",
+    name: "Marcus Johnson",
+    role: "Frontend Engineer · Atlanta",
+    avatar: "/hero/avatar-marcus.png",
+  },
+  {
+    quote:
+      "Auto-pilot applied while I was at work and emailed me a digest every evening. I only clicked submit on the ones I actually liked.",
+    name: "Elena Ramirez",
+    role: "Senior Data Analyst · Austin",
+    avatar: "/hero/avatar-elena.png",
+  },
+  {
+    quote:
+      "The interview prep questions were almost word-for-word what they asked me on the day. That is not luck — that is preparation.",
+    name: "Daniel Park",
+    role: "Operations Manager · Seattle",
+    avatar: "/hero/avatar-daniel.png",
+  },
 ];
 
 export default async function Home() {
@@ -336,30 +383,183 @@ export default async function Home() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4 pb-20">
-        <div className="overflow-hidden rounded-3xl bg-slate-900 px-6 py-16 text-center sm:px-16">
-          <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Stop pasting the same resume into every application.
-          </h2>
-          <p className="mx-auto mt-4 max-w-xl text-slate-400">
-            Upload once, and let the agents match, tailor, and prep every role
-            for you.
+      <section className="border-y border-slate-200 bg-white">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-20 lg:grid-cols-2 lg:gap-16">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+              Auto-pilot
+            </p>
+            <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              Wake up to applications,
+              <span className="block bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
+                not a blank search page.
+              </span>
+            </h2>
+            <p className="mt-4 max-w-lg text-lg text-slate-500">
+              Turn on auto-pilot and the agents run on a schedule — matching,
+              tailoring, and submitting while you are at work, at the gym, or
+              asleep.
+            </p>
+
+            <div className="mt-8 space-y-5">
+              {autopilotPoints.map((p) => (
+                <div key={p.title} className="flex gap-4">
+                  <span className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-4 w-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                    </svg>
+                  </span>
+                  <div>
+                    <h3 className="font-semibold text-slate-900">{p.title}</h3>
+                    <p className="mt-1 text-sm leading-relaxed text-slate-500">
+                      {p.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="relative pb-14 pl-0 sm:pl-10">
+            <div className="overflow-hidden rounded-3xl border border-slate-200 shadow-xl shadow-slate-900/10">
+              <Image
+                src="/hero/desk.png"
+                alt="A tidy home-office desk at golden hour with an open laptop"
+                width={1600}
+                height={900}
+                sizes="(min-width: 1024px) 40rem, 100vw"
+                className="h-full w-full object-cover"
+              />
+            </div>
+
+            <div className="mt-6 max-w-sm rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-slate-900/10 sm:absolute sm:-bottom-2 sm:left-0 sm:mt-0">
+              <div className="flex items-center gap-3">
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                  N
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    Noventra Auto-pilot
+                  </p>
+                  <p className="text-xs text-slate-400">Today, 4:00 PM PT</p>
+                </div>
+              </div>
+              <p className="mt-3 rounded-lg bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700">
+                Auto-pilot: 2 applied, 3 ready to send
+              </p>
+              <ul className="mt-3 space-y-2 text-xs text-slate-600">
+                <li className="flex items-center justify-between gap-2">
+                  <span>Senior Full-Stack Eng · Stripe</span>
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
+                    Submitted
+                  </span>
+                </li>
+                <li className="flex items-center justify-between gap-2">
+                  <span>Product Engineer · Linear</span>
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-semibold text-emerald-700">
+                    Submitted
+                  </span>
+                </li>
+                <li className="flex items-center justify-between gap-2">
+                  <span>Frontend Eng · Figma</span>
+                  <span className="rounded-full bg-indigo-50 px-2 py-0.5 font-semibold text-indigo-700">
+                    Ready — one tap
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="stories" className="mx-auto max-w-6xl px-4 py-20">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="text-sm font-semibold uppercase tracking-wider text-indigo-600">
+            Success stories
           </p>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href={getStartedHref}
-              className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
+          <h2 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            Real people. Real interviews.
+          </h2>
+          <p className="mt-4 text-slate-500">
+            Job seekers who stopped copy-pasting resumes and let the agents do
+            the heavy lifting.
+          </p>
+        </div>
+
+        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {testimonials.map((t) => (
+            <figure
+              key={t.name}
+              className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:shadow-lg hover:shadow-slate-900/5"
             >
-              {ctaLabel}
-            </Link>
-            {!user && (
+              <div className="flex gap-0.5 text-amber-400" aria-label="5 out of 5 stars">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <svg key={i} viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                    <path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.29 3.96a1 1 0 0 0 .95.69h4.16c.97 0 1.37 1.24.59 1.81l-3.37 2.45a1 1 0 0 0-.36 1.12l1.28 3.96c.3.92-.75 1.69-1.54 1.12l-3.36-2.44a1 1 0 0 0-1.18 0l-3.36 2.44c-.79.57-1.84-.2-1.54-1.12l1.28-3.96a1 1 0 0 0-.36-1.12L2.06 9.39c-.78-.57-.38-1.81.6-1.81h4.15a1 1 0 0 0 .95-.69l1.29-3.96Z" />
+                  </svg>
+                ))}
+              </div>
+              <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-slate-600">
+                &ldquo;{t.quote}&rdquo;
+              </blockquote>
+              <figcaption className="mt-6 flex items-center gap-3 border-t border-slate-100 pt-4">
+                <Image
+                  src={t.avatar}
+                  alt={`Portrait of ${t.name}`}
+                  width={96}
+                  height={96}
+                  className="h-11 w-11 rounded-full object-cover ring-2 ring-slate-100"
+                />
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">
+                    {t.name}
+                  </p>
+                  <p className="text-xs text-slate-400">{t.role}</p>
+                </div>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pb-20">
+        <div className="relative overflow-hidden rounded-3xl bg-slate-900 px-6 py-16 text-center sm:px-16">
+          <Image
+            src="/hero/interview.png"
+            alt=""
+            aria-hidden
+            fill
+            sizes="(min-width: 1152px) 72rem, 100vw"
+            className="object-cover opacity-25"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/60 to-slate-900/80"
+          />
+          <div className="relative">
+            <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Stop pasting the same resume into every application.
+            </h2>
+            <p className="mx-auto mt-4 max-w-xl text-slate-400">
+              Upload once, and let the agents match, tailor, and prep every role
+              for you.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
               <Link
-                href={signInHref}
-                className="rounded-lg border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-400"
+                href={getStartedHref}
+                className="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
               >
-                Sign in
+                {ctaLabel}
               </Link>
-            )}
+              {!user && (
+                <Link
+                  href={signInHref}
+                  className="rounded-lg border border-slate-600 px-6 py-3 text-sm font-semibold text-slate-200 transition hover:border-slate-400"
+                >
+                  Sign in
+                </Link>
+              )}
+            </div>
           </div>
         </div>
       </section>

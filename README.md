@@ -6,7 +6,10 @@
 > job-search copilot: upload your resume **once**, and a team of collaborating
 > AI agents matches fresh job postings to your skills, shows a match percentage
 > for every job, rewrites an ATS-friendly resume and cover letter, and gets you
-> to the official application page — one click away from applying.
+> to the official application page — one click away from applying. Turn on
+> **Auto-pilot** and the whole loop runs on a schedule: every day at 4 PM PT it
+> matches, tailors, submits email-ready postings on your behalf, and emails you
+> a digest of everything it did.
 
 Built with **Next.js 16** (App Router), **Supabase** (Postgres + Auth +
 pgvector), and **LangChain / LangGraph**.
@@ -37,6 +40,10 @@ Anyone visiting the live link experiences this end-to-end flow:
 7. **Track** — applications land on the `/applications` kanban pipeline
    (Saved / Applied / Interviewing / Offer / Rejected) and the tracker agent
    schedules follow-up reminders.
+8. **Auto-pilot (optional)** — flip a switch on the applications page and a
+   daily scheduled run scores fresh postings against your resume, tailors
+   documents, submits email-ready postings on your behalf, queues the rest
+   one-tap-ready, and emails you a digest each day.
 
 Free accounts get **15 resume rewrites + 15 in-app applies** per rolling
 7 days; premium ($15/mo) and admin accounts are unlimited.
@@ -58,11 +65,16 @@ automated job-hunting workflow:
    cover letter to fit the posting (ATS-friendly).
 4. **Prep** — role-specific interview questions with model answers.
 5. **Apply** — one click opens the official application page with your tailored
-   documents ready (semi-automatic by design — no bot submissions).
-6. **Track** — pipeline activity generates follow-up tasks and reminders.
+   documents ready (semi-automatic by design — no bot form submissions).
+6. **Auto-pilot (optional)** — runs daily on a schedule: scores fresh postings
+   against your resume, tailors documents for every match above your threshold,
+   **submits email-based postings on your behalf** via Resend, queues portal
+   postings one-tap-ready, and emails you a digest of the run.
+7. **Track** — pipeline activity generates follow-up tasks and reminders.
 
 It includes auth, onboarding, a kanban pipeline, notifications, an AI-agent
-streaming pipeline, and a free/premium quota system.
+streaming pipeline, a free/premium quota system, and scheduled auto-apply with
+email digests.
 
 ---
 
@@ -79,6 +91,13 @@ Sign up → Onboarding (contact details)
    → Job appears in /applications pipeline
    → Tracker (daily cron) creates follow-up reminders
    → /upgrade shows weekly usage; admins grant premium manually
+
+Auto-pilot branch (opt-in, /applications settings):
+   Daily at 4 PM PT → fresh postings scored vs. resume
+   → match ≥ threshold → tailor resume + cover letter
+   → mailto: posting  → submitted on your behalf via Resend email
+   → portal posting   → queued "ready" with documents attached
+   → digest email: "2 applied, 3 ready to send"
 ```
 
 - **New users** must complete onboarding (email, name, phone, country, city,
@@ -124,6 +143,33 @@ Sign up → Onboarding (contact details)
 - **Apply now / Auto-apply** — one click opens the official company or LinkedIn
   application page (counts against the weekly apply quota).
 
+**Auto-pilot (scheduled auto-apply)**
+- Toggle it on from `/applications` and configure: minimum match score,
+  max applications per day (1–100), lookback window (1–168h), location
+  include-list, company exclude-list, and whether email submissions are
+  allowed.
+- A daily cron (`/api/cron/autoapply`, 00:00 UTC ≈ 4 PM PT) runs the pipeline
+  for every user with auto-pilot enabled: fresh postings → filters → Matcher →
+  Tailor → application row (`origin: auto`) with tailored documents stored.
+- **Email-based postings** (`mailto:` apply links) are genuinely submitted on
+  your behalf — Resend sends the cover letter body with the tailored resume
+  attached. **Portal postings are never bot-submitted**: they're queued as
+  *ready* so you just open the pre-filled page and click submit.
+- After every scheduled run you get a **digest email** ("Auto-pilot: 2 applied,
+  3 ready to send") listing what was submitted and what needs one click, with
+  apply links and match scores. No email provider configured? Submissions fall
+  back to *ready* and digests are skipped silently.
+- Every run is recorded in `auto_apply_log` and surfaced in a recent-activity
+  panel; a **Run now** button triggers the same pipeline on demand.
+
+**Landing page & imagery**
+- Marketing page includes an animated briefcase hero (photoreal image with an
+  SVG fallback), a product mockup, how-it-works, agents, an auto-pilot
+  showcase, testimonials with generated headshots, and a photo-backed CTA.
+- All photoreal imagery is AI-generated via Pollinations.ai (free, no API key)
+  by `npm run generate:hero` → `public/hero/*.png`. Existing files are skipped;
+  set `FORCE=1` to regenerate everything.
+
 **Plans & admin**
 - Free / premium tiers with server-side quota enforcement (`usage_events`
   table), weekly usage meter on `/upgrade`, and a **grant premium** form
@@ -164,6 +210,10 @@ runType: "prep"      matcher ──► tailor ──► prep ──► done
 | Prep | `prepNode` | `PrepResult`: summary, interview questions with model answers, tips |
 | Tracker | cron | Follow-up tasks/reminders from pipeline events |
 
+Auto-pilot (`src/lib/autoApply.ts`) orchestrates the same Matcher + Tailor
+workers on a schedule — no new agents, just an automated driver loop with
+per-user settings, quotas, and submission logic.
+
 Every agent falls back to **mock mode** when no `OPENAI_API_KEY` is set, so the
 full UX works without spending anything.
 
@@ -193,12 +243,13 @@ src/
     auth/            OAuth callback, sign-out, error page
     dashboard/       stats + recent applications + alerts
     jobs/            job feed + add-job form
-    applications/    pipeline board + application detail
+    applications/    pipeline board + application detail + auto-pilot settings
     profile/         profile form + resume upload
     onboarding/      first-sign-in contact-details flow
     upgrade/         plan + usage meter + admin premium grant
     api/             route handlers (see "API routes")
-  components/        LoginForm, AgentRunner, StatusBadge, ApplyKit, etc.
+  components/        LoginForm, AgentRunner, StatusBadge, ApplyKit,
+                     AutoApplySettings, BriefcaseHero, etc.
   lib/
     agents/          LangGraph workflow + workers
     rag/             chunk, embed, retrieve
@@ -206,11 +257,17 @@ src/
     supabase/        browser / server / admin clients
     services/        agent orchestration + job ingest
     jobs/            job source adapters + apply-URL classifier
+    autoApply.ts     scheduled auto-apply pipeline (settings, run, submission)
+    email.ts         Resend client: application emails + auto-pilot digests
+    cron.ts          shared cron-request authorization
     auth.ts          session helpers
     subscription.ts  quota + tier helpers
   proxy.ts           auth route protection (Next.js proxy)
+scripts/
+  generate-hero-images.mjs   AI-generate landing-page imagery (Pollinations)
+  generate-icons.mjs         PWA + native app icons (sharp)
 supabase/
-  migrations/        SQL schema + pgvector match function (0001–0007)
+  migrations/        SQL schema + pgvector match function (0001–0012)
 ```
 
 ---
@@ -221,6 +278,11 @@ supabase/
 - A [Supabase](https://supabase.com) project
 - Optional: an [OpenAI](https://platform.openai.com) API key. Without it the
   app runs in **mock mode**, so you can develop and demo for free.
+- Optional: a [Resend](https://resend.com) API key. Without it, auto-pilot
+  email submissions fall back to "ready" and digest emails are skipped.
+- Optional: `sharp` is needed only to regenerate icons/hero images
+  (`npm run icons`, `npm run generate:hero`); it ships as a dev dependency of
+  the image scripts' toolchain — plain `npm install` covers everything.
 
 ---
 
@@ -244,7 +306,14 @@ npm install
 The schema lives in `supabase/migrations/` and must be applied **in order**:
 
 `0001_init` → `0002_vector_match` → `0003_job_delete` → `0004_job_matches` →
-`0005_job_attributes` → `0006_onboarding` → `0007_subscriptions`
+`0005_job_attributes` → `0006_onboarding` → `0007_subscriptions` →
+`0008_resume_file` → `0009_resume_storage` → `0010_apply_url` →
+`0011_job_verification` → `0012_auto_apply`
+
+Migration `0012_auto_apply` adds the auto-pilot tables: `auto_apply_settings`
+(per-user preferences), `auto_apply_log` (one row per run), and the
+`tailored_documents` + application columns (`origin`, `auto_status`,
+`submitted_at`, `auto_error`) used by the pipeline.
 
 Via the Supabase CLI:
 
@@ -299,9 +368,13 @@ All variables are documented in [`.env.example`](.env.example):
 | `LEVER_COMPANY` | no | A company's public Lever company slug, e.g. `vercel` |
 | `WORKABLE_ACCOUNT` | no | A company's public Workable account slug, e.g. `huggingface` |
 | `ASHBY_JOB_BOARD` | no | A company's public Ashby job board slug, e.g. `linear` |
-| `CRON_SECRET` | yes | Guards `GET /api/cron/track` and `GET /api/cron/jobs` |
+| `ADZUNA_APP_ID` / `ADZUNA_APP_KEY` | no | Enables Adzuna for the feed's job search (free key: developer.adzuna.com) |
+| `CAREER_PAGES` | no | Comma-separated career-site URLs for the daily indexer; unset = built-in seed list |
+| `CRON_SECRET` | yes | Guards all cron routes: `/api/jobs/index`, `/api/cron/jobs`, `/api/cron/track`, `/api/cron/autoapply` |
+| `RESEND_API_KEY` | no | Enables application emails + auto-pilot digest emails via Resend |
+| `EMAIL_FROM` | no | Custom sender, e.g. `Noventra <apply@yourdomain.com>`; defaults to `onboarding@resend.dev` |
 | `ADMIN_EMAILS` | no | Comma-separated emails exempt from usage limits; can grant premium from `/upgrade` |
-| `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000` |
+| `NEXT_PUBLIC_SITE_URL` | no | Public origin; defaults to `http://localhost:3000`; used in digest email links |
 
 **Live job sources** (optional). Set `JOB_SOURCE` to a company board type and
 provide the matching token — e.g. `JOB_SOURCE=greenhouse` +
@@ -346,14 +419,15 @@ can build and demo the full UX before wiring up real AI.
 ## Testing
 
 ```bash
-npm test             # Vitest — 222 tests across 25 files
+npm test             # Vitest — 252 tests across 30 files
 npm run typecheck    # tsc --noEmit
 npm run lint         # ESLint
 npm run build        # production build (verifies routes compile)
 ```
 
 Tests cover the job source adapters, apply-URL classification, feed filters,
-the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
+the agent graph, quota helpers, cron auth, SSE parsing, RAG, and the email
+helpers.
 
 ### Scripts
 
@@ -367,6 +441,7 @@ the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 | `npm test` | Vitest |
 | `npm run db:migrate` | `supabase db push` |
 | `npm run icons` | Regenerate PWA icons (`public/icons/`) and native app assets (`mobile/assets/`) |
+| `npm run generate:hero` | AI-generate landing-page photos into `public/hero/` (skips existing files; `FORCE=1` regenerates all) |
 
 ---
 
@@ -375,12 +450,16 @@ the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 | Route | Purpose | Auth |
 | --- | --- | --- |
 | `POST /api/profile/vectorize` | Chunk + embed a resume | Session |
+| `POST /api/profile/resume` | Upload/replace resume file | Session |
 | `POST /api/jobs/ingest` | Bulk-insert jobs (manual/feed/CSV) | Session |
 | `POST /api/jobs/discover` | Fetch recent jobs from the configured source | Session |
 | `POST /api/jobs/match` | Score jobs against your resume (stores `job_matches`) | Session |
+| `POST /api/jobs/search` | Search LinkedIn + Adzuna for jobs | Session |
+| `GET /api/jobs/index` | Daily career-site indexer sweep | `CRON_SECRET` |
 | `POST /api/agents/run` | Run agents, streams progress (SSE) | Session |
+| `GET /api/cron/jobs` | Job discovery + ingest sweep | `CRON_SECRET` |
 | `GET /api/cron/track` | Tracker agent sweep | `CRON_SECRET` |
-| `GET /api/cron/jobs` | Hourly job discovery + ingest | `CRON_SECRET` |
+| `GET /api/cron/autoapply` | Auto-pilot run: match → tailor → submit → digest email | `CRON_SECRET` |
 
 ---
 
@@ -388,12 +467,20 @@ the agent graph, quota helpers, cron auth, SSE parsing, and RAG.
 
 The app runs anywhere Next.js runs. It's currently deployed on **Vercel** at
 <https://noventraresumehelp.vercel.app> (set `NEXT_PUBLIC_SITE_URL` to that URL
-in the Vercel environment so sitemap/robots/SEO metadata use the live origin).
-Cron jobs are wired for **Vercel Cron** via
-`vercel.json`. Both run **once per day** (06:00 UTC job discovery, 07:00 UTC
-tracker sweep) — this matches Vercel's free Hobby plan, which only allows daily
-cron execution. On a paid Pro plan you can change `schedule` back to hourly or
-finer.
+in the Vercel environment so sitemap/robots/SEO metadata and digest-email
+links use the live origin). Cron jobs are wired for **Vercel Cron** via
+`vercel.json`. Four schedules run **once per day**, matching Vercel's free
+Hobby plan (paid Pro plans allow finer schedules):
+
+| Schedule (UTC) | Route | What it does |
+| --- | --- | --- |
+| 05:00 | `/api/jobs/index` | Career-site indexer sweep |
+| 06:00 | `/api/cron/jobs` | Job discovery + ingest |
+| 07:00 | `/api/cron/track` | Tracker agent sweep |
+| 00:00 | `/api/cron/autoapply` | Auto-pilot: match, tailor, submit, digest |
+
+> The auto-apply schedule is 00:00 UTC ≈ **4 PM PT**. Vercel crons run in UTC
+> only, so the local time drifts by an hour across daylight saving.
 
 Vercel authenticates cron calls with `Authorization: Bearer $CRON_SECRET`; the
 routes also accept an `x-cron-secret` header for manual or self-hosted
@@ -410,8 +497,14 @@ triggers. Set `CRON_SECRET` (and all other vars) in your environment.
   was actually submitted.
 - **Rewrite credits are consumed at run start** — a failed LLM run still spends
   one of the 15 weekly resume-rewrite credits.
-- **No bot submissions** — the "Auto-apply" option opens the official page
-  rather than submitting forms programmatically, by design.
+- **No bot form submissions** — portal applications (Greenhouse, Lever,
+  Workday, LinkedIn pages) are never filled or submitted programmatically;
+  auto-pilot queues them *ready* with tailored documents attached. Only
+  email-based (`mailto:`) postings are genuinely submitted on your behalf,
+  via Resend, when you enable that option.
+- **Auto-pilot quota interplay** — each tailored auto-application spends a
+  `resume_rewrite` credit, so free-tier users may hit the weekly limit before
+  the daily application cap; the run reports state `quota` and stops cleanly.
 - **Not yet published to stores** — the Expo app in `mobile/` is built and
   validated but has not been submitted to the Apple App Store or Google Play.
   Submission requires paid developer accounts (Apple $99/year, Google $25
