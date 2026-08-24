@@ -1,6 +1,7 @@
 import { isCronRequestAuthorized } from "@/lib/cron";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { runAutoApplyForUser } from "@/lib/autoApply";
+import { sendAutoApplyDigestEmail } from "@/lib/email";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -22,14 +23,37 @@ export async function GET(request: Request) {
     .select("user_id")
     .eq("enabled", true);
 
+  const userIds = (rows ?? []).map((row) => row.user_id as string);
+  const { data: profiles } = await admin
+    .from("profiles")
+    .select("id, email, full_name")
+    .in("id", userIds);
+  const profileById = new Map(
+    (profiles ?? []).map((p) => [p.id as string, p]),
+  );
+
   const results: Array<Record<string, unknown>> = [];
   for (const row of rows ?? []) {
+    const userId = row.user_id as string;
     try {
-      const summary = await runAutoApplyForUser(row.user_id as string);
-      results.push({ userId: row.user_id, ...summary });
+      const summary = await runAutoApplyForUser(userId);
+
+      let digestSent = false;
+      if (summary.items.length > 0) {
+        const profile = profileById.get(userId);
+        if (profile?.email) {
+          digestSent = await sendAutoApplyDigestEmail({
+            to: profile.email,
+            name: (profile.full_name as string) || "",
+            items: summary.items,
+          });
+        }
+      }
+
+      results.push({ userId, digestSent, ...summary });
     } catch (err) {
       results.push({
-        userId: row.user_id,
+        userId,
         state: "error",
         error: err instanceof Error ? err.message : String(err),
       });

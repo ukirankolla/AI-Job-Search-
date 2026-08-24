@@ -24,6 +24,14 @@ export const DEFAULT_AUTO_APPLY_SETTINGS: AutoApplySettings = {
   email_submit: false,
 };
 
+export interface AutoApplyItem {
+  title: string;
+  company: string;
+  url: string;
+  score: number;
+  outcome: "submitted" | "ready";
+}
+
 export interface AutoApplySummary {
   state: "disabled" | "no_resume" | "quota" | "daily_limit" | "ran";
   considered: number;
@@ -32,6 +40,7 @@ export interface AutoApplySummary {
   ready: number;
   skipped: number;
   failed: number;
+  items: AutoApplyItem[];
   error?: string;
 }
 
@@ -43,6 +52,7 @@ const NO_RUN: AutoApplySummary = {
   ready: 0,
   skipped: 0,
   failed: 0,
+  items: [],
 };
 
 export async function getAutoApplySettings(
@@ -182,6 +192,7 @@ export async function runAutoApplyForUser(
     ready: 0,
     skipped: 0,
     failed: 0,
+    items: [],
   };
 
   for (const job of (candidates ?? []) as CandidateJob[]) {
@@ -265,6 +276,13 @@ export async function runAutoApplyForUser(
       );
       if (submitted) summary.submitted++;
       else summary.ready++;
+      summary.items.push({
+        title: job.title,
+        company,
+        url: job.apply_url,
+        score: match.score,
+        outcome: submitted ? "submitted" : "ready",
+      });
     } catch {
       summary.failed++;
     }

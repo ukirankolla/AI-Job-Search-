@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/track",
       "schedule": "0 7 * * *"
+    },
+    {
+      "path": "/api/cron/autoapply",
+      "schedule": "0 0 * * *"
     }
   ]
 }
