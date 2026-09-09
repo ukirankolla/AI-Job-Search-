@@ -16,15 +16,15 @@ export function AddToPipelineButton({ jobId }: { jobId: string }) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-md border border-slate-300 px-3 py-1.5 text-sm text-slate-700 transition hover:bg-slate-100 disabled:opacity-50"
+        className="rounded-lg border border-white/15 px-3 py-1.5 text-sm text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
       >
         {pending ? "Adding…" : "+ Pipeline"}
       </button>
       {state.ok && (
-        <span className="text-xs text-emerald-600">{state.message}</span>
+        <span className="text-xs text-emerald-300">{state.message}</span>
       )}
       {state.error && (
-        <span className="text-xs text-rose-600">{state.error}</span>
+        <span className="text-xs text-rose-400">{state.error}</span>
       )}
     </form>
   );

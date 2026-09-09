@@ -46,9 +46,9 @@ const SPONSORSHIP_OPTIONS = [
 ];
 
 function scoreTone(score: number) {
-  if (score >= 70) return "bg-emerald-50 text-emerald-700 border-emerald-300";
-  if (score >= 40) return "bg-amber-50 text-amber-700 border-amber-300";
-  return "bg-rose-50 text-rose-700 border-rose-300";
+  if (score >= 70) return "bg-emerald-500/10 text-emerald-300 border-emerald-400/30";
+  if (score >= 40) return "bg-amber-500/10 text-amber-300 border-amber-400/30";
+  return "bg-rose-500/10 text-rose-300 border-rose-400/30";
 }
 
 function isDirect(kind?: ApplySourceKind) {
@@ -243,20 +243,34 @@ export function JobFeed({
           className="flex w-full flex-col gap-2"
         >
           <div className="flex w-full items-center gap-2">
-            <input
-              type="search"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="Search by title, company, location, skills…"
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-              aria-label="Search jobs"
-            />
+            <div className="relative w-full">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                  <path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" />
+                </svg>
+              </span>
+              <input
+                type="search"
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Search by title, company, location, skills…"
+                className="w-full rounded-lg border border-white/10 bg-[#0b1120]/80 py-2 pl-9 pr-3 text-sm text-white placeholder:text-slate-500 focus:border-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                aria-label="Search jobs"
+              />
+            </div>
             <button
               type="submit"
               disabled={searching}
-              className="shrink-0 rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+              className="shrink-0 rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2 text-sm font-medium text-white shadow-lg shadow-indigo-600/25 transition hover:from-indigo-400 hover:to-violet-500 disabled:opacity-50"
             >
-              {searching ? "Searching jobs…" : "Search jobs"}
+              {searching ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  Searching…
+                </span>
+              ) : (
+                "Search jobs"
+              )}
             </button>
             {query && (
               <button
@@ -265,23 +279,30 @@ export function JobFeed({
                   setQuery("");
                   setDraft("");
                 }}
-                className="shrink-0 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className="shrink-0 rounded-lg border border-white/10 px-3 py-2 text-sm font-medium text-slate-300 transition hover:bg-white/5 hover:text-white"
               >
                 Clear
               </button>
             )}
           </div>
-          <input
-            type="text"
-            value={locationDraft}
-            onChange={(e) => setLocationDraft(e.target.value)}
-            placeholder="Location (e.g. United States, Austin TX)"
-            className="w-full rounded-md border border-slate-300 px-3 py-1.5 text-xs text-slate-600"
-            aria-label="Job location"
-          />
+          <div className="flex w-full items-center gap-2">
+            <span className="pointer-events-none text-slate-600">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
+                <path fillRule="evenodd" d="M9.69 18.933l.003.001C9.89 19.02 10 19 10 19s.11.02.308-.066l.002-.001.006-.003.018-.008a5.741 5.741 0 00.281-.14c.186-.096.446-.24.757-.433.62-.384 1.445-.966 2.274-1.765C15.302 14.988 17 12.493 17 9A7 7 0 103 9c0 3.492 1.698 5.988 3.355 7.584a13.731 13.731 0 002.273 1.765 11.842 11.842 0 00.976.544l.062.029.018.008.006.003zM10 11.25a2.25 2.25 0 100-4.5 2.25 2.25 0 000 4.5z" clipRule="evenodd" />
+              </svg>
+            </span>
+            <input
+              type="text"
+              value={locationDraft}
+              onChange={(e) => setLocationDraft(e.target.value)}
+              placeholder="Location (e.g. United States, Austin TX)"
+              className="w-full rounded-lg border border-white/10 bg-[#0b1120]/60 px-2.5 py-1.5 text-xs text-slate-300 placeholder:text-slate-600 focus:border-indigo-500/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              aria-label="Job location"
+            />
+          </div>
         </form>
         <div
-          className="flex shrink-0 items-center gap-1 rounded-md border border-slate-300 bg-white p-1 text-sm"
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-white/10 bg-[#0b1120]/80 p-1 text-sm"
           role="group"
           aria-label="Posted within"
         >
@@ -291,10 +312,10 @@ export function JobFeed({
               type="button"
               onClick={() => setHours(opt.hours)}
               aria-pressed={hours === opt.hours}
-              className={`rounded px-2.5 py-1 transition ${
+              className={`rounded-md px-2.5 py-1 transition ${
                 hours === opt.hours
-                  ? "bg-indigo-600 text-white"
-                  : "text-slate-600 hover:bg-slate-100"
+                  ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white shadow-md shadow-indigo-600/25"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
               }`}
             >
               {opt.label}
@@ -304,18 +325,18 @@ export function JobFeed({
       </div>
 
       {searchError && (
-        <p className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+        <p className="mt-3 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-300">
           {searchError}
         </p>
       )}
 
       {notice && (
-        <p className="mt-2 rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500">
+        <p className="mt-3 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
           {notice}
         </p>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-600">
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-400">
         <fieldset className="flex items-center gap-1.5">
           <legend className="mr-1 font-medium text-slate-500">Type</legend>
           {TYPE_OPTIONS.map((opt) => (
@@ -323,8 +344,8 @@ export function JobFeed({
               key={opt.value}
               className={`flex cursor-pointer items-center gap-1 rounded-md border px-2 py-1 transition ${
                 types.includes(opt.value)
-                  ? "border-indigo-600 bg-indigo-600 text-white"
-                  : "border-slate-300 bg-white hover:bg-slate-50"
+                  ? "border-indigo-400/40 bg-indigo-500/15 text-white"
+                  : "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
               }`}
             >
               <input
@@ -352,8 +373,8 @@ export function JobFeed({
               aria-pressed={sponsorship === opt.value}
               className={`rounded-md border px-2 py-1 transition ${
                 sponsorship === opt.value
-                  ? "border-indigo-600 bg-indigo-600 text-white"
-                  : "border-slate-300 bg-white hover:bg-slate-50"
+                  ? "border-indigo-400/40 bg-indigo-500/15 text-white"
+                  : "border-white/10 bg-white/5 text-slate-300 hover:bg-white/10"
               }`}
             >
               {opt.label}
@@ -366,37 +387,44 @@ export function JobFeed({
             type="checkbox"
             checked={directOnly}
             onChange={(e) => setDirectOnly(e.target.checked)}
-            className="h-3.5 w-3.5 accent-slate-900"
+            className="h-3.5 w-3.5 accent-indigo-500"
           />
-          <span className="font-medium text-slate-500">
+          <span className="font-medium text-slate-300">
             Company / LinkedIn only
           </span>
         </label>
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-3">
+      <div className="mt-4 flex flex-wrap items-center gap-3">
         {hasResume && unmatchable && (
           <button
             type="button"
             onClick={matchAll}
             disabled={matching}
-            className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 px-3 py-1.5 text-xs font-medium text-white shadow-lg shadow-indigo-600/25 transition hover:from-indigo-400 hover:to-violet-500 disabled:opacity-50"
           >
-            {matching ? "Matching with your resume…" : "Match all with my resume"}
+            {matching ? (
+              <span className="flex items-center gap-2">
+                <span className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                Matching with your resume…
+              </span>
+            ) : (
+              "Match all with my resume"
+            )}
           </button>
         )}
         <button
           type="button"
           onClick={refreshIndex}
           disabled={indexing}
-          className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+          className="rounded-lg border border-white/10 bg-[#0b1120]/60 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/5 hover:text-white disabled:opacity-50"
         >
           {indexing ? "Updating company index…" : "Update company index"}
         </button>
         {!hasResume && (
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500">
             Upload your resume in{" "}
-            <a href="/profile" className="underline hover:text-slate-600">
+            <a href="/profile" className="text-indigo-400 underline hover:text-indigo-300">
               Profile
             </a>{" "}
             to see your match % for every job.
@@ -404,39 +432,55 @@ export function JobFeed({
         )}
       </div>
 
-      <ul className="mt-4 space-y-3">
+      {jobs.length > 0 && (
+        <p className="mt-5 flex items-center gap-2 text-xs text-slate-500">
+          <span className="flex items-center gap-1.5">
+            <span className="relative flex h-1.5 w-1.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+              <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            </span>
+            Live
+          </span>
+          <span className="text-slate-700">·</span>
+          <span>
+            Showing {filtered.length} of {jobs.length} agent-verified postings
+          </span>
+        </p>
+      )}
+
+      <ul className="mt-3 space-y-3">
         {filtered.map((job) => {
           const score = scores?.[job.id];
           return (
-            <li key={job.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md">
+            <li key={job.id} className="rounded-2xl border border-white/10 bg-[#0b1120]/60 p-5 backdrop-blur transition hover:border-white/20">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <Link
                     href={`/jobs/${job.id}`}
-                    className="text-lg font-semibold text-slate-900 hover:underline"
+                    className="text-lg font-semibold text-white hover:text-indigo-300"
                   >
                     {job.title}
                   </Link>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-slate-400">
                     {job.company}
                     {job.location ? ` · ${job.location}` : ""}
                     {isRecentlyPosted(job.posted_at, 8) && (
-                      <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+                      <span className="ml-2 rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-300">
                         New
                       </span>
                     )}
                   </p>
-                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                  <p className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500">
                     {job.posted_at && (
                       <span>Posted {formatRelativeTime(job.posted_at)}</span>
                     )}
                     {job.employment_type && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 capitalize text-slate-600">
+                      <span className="rounded-full bg-white/5 px-2 py-0.5 capitalize text-slate-300">
                         {job.employment_type.replace("_", "-")}
                       </span>
                     )}
                     {job.sponsorship && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                      <span className="rounded-full bg-white/5 px-2 py-0.5 text-slate-300">
                         {job.sponsorship === "yes"
                           ? "Sponsorship available"
                           : "No sponsorship"}
@@ -449,7 +493,7 @@ export function JobFeed({
                             ? `Confirmed on ${job.verified_source_url}`
                             : "Confirmed on the company career site"
                         }
-                        className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700"
+                        className="rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-300"
                       >
                         Verified
                       </span>
@@ -457,7 +501,7 @@ export function JobFeed({
                     {job.verified_status === "likely" && (
                       <span
                         title="Company career site found; exact posting not confirmed"
-                        className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700"
+                        className="rounded-full bg-amber-500/10 px-2 py-0.5 font-medium text-amber-300"
                       >
                         Likely genuine
                       </span>
@@ -465,19 +509,19 @@ export function JobFeed({
                     {job.verified_status === "unverified" && (
                       <span
                         title="No company-owned posting found"
-                        className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500"
+                        className="rounded-full bg-white/5 px-2 py-0.5 text-slate-500"
                       >
                         Unverified
                       </span>
                     )}
                     <SourceBadge source={job.source ?? "search"} />
                     {job.applyKind === "linkedin" && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
+                      <span className="rounded-full bg-white/5 px-2 py-0.5 text-slate-400">
                         Search result
                       </span>
                     )}
                     {job.applyKind === "company" && (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-600">
+                      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 font-medium text-emerald-300">
                         Company site
                       </span>
                     )}
@@ -495,7 +539,7 @@ export function JobFeed({
                   {saved.has(job.id) ? (
                     <Link
                       href="/applications"
-                      className="rounded-md border border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700"
+                      className="rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1.5 text-sm text-emerald-300 transition hover:bg-emerald-500/20"
                     >
                       In pipeline
                     </Link>
@@ -504,7 +548,7 @@ export function JobFeed({
                   )}
                 </div>
               </div>
-              <p className="mt-3 line-clamp-2 text-sm text-slate-600">
+              <p className="mt-3 line-clamp-2 text-sm text-slate-400">
                 {job.description}
               </p>
             </li>
@@ -513,14 +557,14 @@ export function JobFeed({
       </ul>
 
       {jobs.length === 0 && (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        <p className="rounded-xl border border-dashed border-white/10 bg-[#0b1120]/40 p-8 text-center text-sm text-slate-500">
           No jobs yet. Click Search jobs to pull live postings from LinkedIn and
           company career sites, or add one manually, load the sample jobs, or
           bulk-import a feed.
         </p>
       )}
       {jobs.length > 0 && filtered.length === 0 && (
-        <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
+        <p className="rounded-xl border border-dashed border-white/10 bg-[#0b1120]/40 p-8 text-center text-sm text-slate-500">
           No jobs match the current filters. Try widening the time window or
           clearing a filter.
         </p>

@@ -25,8 +25,8 @@ export function NavLinks() {
             href={l.href}
             className={`rounded-md px-3 py-1.5 font-medium transition ${
               active
-                ? "bg-indigo-50 text-indigo-700"
-                : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                ? "bg-white/10 text-white"
+                : "text-slate-400 hover:bg-white/5 hover:text-white"
             }`}
           >
             {l.label}
@@ -35,7 +35,7 @@ export function NavLinks() {
       })}
       <a
         href="/auth/signout"
-        className="ml-2 rounded-md px-3 py-1.5 font-medium text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
+        className="ml-2 rounded-md px-3 py-1.5 font-medium text-slate-500 transition hover:bg-rose-500/10 hover:text-rose-400"
       >
         Sign out
       </a>

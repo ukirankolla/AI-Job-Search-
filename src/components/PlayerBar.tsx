@@ -10,20 +10,20 @@ export async function PlayerBar() {
 
   return (
     <div
-      className="flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50/60 py-1 pl-2 pr-3"
+      className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 py-1 pl-2 pr-3"
       title={`${state.xp} XP total`}
     >
-      <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-indigo-600 to-violet-600 text-xs font-bold text-white">
+      <span className="grid h-7 w-7 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-xs font-bold text-white">
         {state.level}
       </span>
       <div className="w-20">
-        <div className="h-1.5 overflow-hidden rounded-full bg-indigo-100">
+        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500"
             style={{ width: `${Math.max(4, pct)}%` }}
           />
         </div>
-        <p className="mt-0.5 text-[10px] font-medium text-indigo-600">
+        <p className="mt-0.5 text-[10px] font-medium text-indigo-300">
           Level {state.level}
         </p>
       </div>
