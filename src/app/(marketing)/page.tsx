@@ -8,9 +8,6 @@ export const metadata = {
     "Upload your resume once. Noventra's AI agents scan fresh job postings, score each one 0–100 against your skills, rewrite an ATS-friendly resume and cover letter, and submit applications on a schedule — you just review and send.",
 };
 
-const RING_R = 36;
-const RING_C = 2 * Math.PI * RING_R;
-
 const companies = [
   "Stripe",
   "Vercel",
@@ -109,25 +106,6 @@ const agents = [
   },
 ];
 
-const features = [
-  {
-    title: "Match intelligence",
-    desc: "A clear 0–100 score on every posting, with the skills that earned it and the gaps that didn't.",
-  },
-  {
-    title: "ATS-friendly rewrites",
-    desc: "Your resume reformatted and reworded for each job description, keyword-complete.",
-  },
-  {
-    title: "Cover letters that close",
-    desc: "A short, specific cover letter drafted from your real experience — not a template.",
-  },
-  {
-    title: "Interview prep built-in",
-    desc: "Likely questions and model answers generated from the actual posting.",
-  },
-];
-
 const testimonials = [
   {
     quote:
@@ -166,25 +144,6 @@ const stats = [
   { value: "1", label: "Resume upload to get started" },
 ];
 
-const trustPoints = [
-  {
-    title: "Officially sourced postings",
-    desc: "Only company career portals and LinkedIn. No aggregator spam, no dead links.",
-  },
-  {
-    title: "You stay in control",
-    desc: "Nothing sends without your review. Auto-pilot only touches what you've allowed.",
-  },
-  {
-    title: "Private by default",
-    desc: "Your resume is encrypted at rest, used only to match and tailor, and deleted with your account.",
-  },
-  {
-    title: "Start free, no card",
-    desc: "15 rewrites and applies every week on the free plan. Upgrade only when it pays off.",
-  },
-];
-
 const footerColumns = [
   {
     title: "Product",
@@ -199,9 +158,9 @@ const footerColumns = [
     title: "Resources",
     links: [
       { label: "Success stories", href: "#stories" },
-      { label: "Match score guide", href: "#product" },
-      { label: "Skill gap analysis", href: "#product" },
-      { label: "Interview prep", href: "#product" },
+      { label: "Match score guide", href: "#how-it-works" },
+      { label: "Skill gap analysis", href: "#how-it-works" },
+      { label: "Interview prep", href: "#agents" },
     ],
   },
   {
@@ -251,45 +210,9 @@ function SectionTitle({
       <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
         {title}
       </h2>
-      {sub && <p className="mt-4 text-base leading-relaxed text-slate-400">{sub}</p>}
-    </div>
-  );
-}
-
-function MatchRing() {
-  return (
-    <div className="relative grid h-28 w-28 place-items-center">
-      <svg viewBox="0 0 84 84" className="h-28 w-28 -rotate-90">
-        <circle
-          cx="42"
-          cy="42"
-          r={RING_R}
-          fill="none"
-          stroke="rgb(255 255 255 / 0.08)"
-          strokeWidth="7"
-        />
-        <circle
-          cx="42"
-          cy="42"
-          r={RING_R}
-          fill="none"
-          stroke="url(#ringGrad)"
-          strokeWidth="7"
-          strokeLinecap="round"
-          strokeDasharray={RING_C}
-          strokeDashoffset={RING_C * (1 - 0.87)}
-        />
-        <defs>
-          <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#6366f1" />
-            <stop offset="100%" stopColor="#a855f7" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div className="absolute text-center">
-        <p className="text-3xl font-bold text-white">87</p>
-        <p className="text-[10px] font-medium text-slate-400">/ 100 match</p>
-      </div>
+      {sub && (
+        <p className="mt-4 text-base leading-relaxed text-slate-400">{sub}</p>
+      )}
     </div>
   );
 }
@@ -334,7 +257,7 @@ export default async function Home() {
           className="pointer-events-none absolute right-0 top-40 h-96 w-96 rounded-full bg-violet-600/15 blur-3xl"
         />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-4 pb-24 pt-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pb-32 lg:pt-24">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-4 pb-24 pt-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pb-28 lg:pt-20">
           <div>
             <a
               href="#auto-pilot"
@@ -562,253 +485,26 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ PRODUCT DEEP-DIVE (bento) ============ */}
-      <section id="product" className="relative scroll-mt-24">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 h-96 w-[50rem] -translate-x-1/2 rounded-full bg-violet-600/10 blur-3xl"
-        />
-        <div className="relative mx-auto max-w-7xl px-4 py-24 sm:px-6">
-          <SectionTitle
-            tag="See it in action"
-            title={
-              <>
-                One resume.{" "}
-                <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                  A pipeline that works for you.
-                </span>
-              </>
-            }
-            sub="Every run streams live in your browser and saves straight to your pipeline — no clicks between 'discover' and 'applied'."
-          />
-
-          <div className="mx-auto mt-14 grid max-w-5xl gap-5 lg:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 lg:col-span-2">
-              <div className="flex flex-wrap items-start justify-between gap-6">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                    Match intelligence
-                  </p>
-                  <h3 className="mt-2 text-xl font-semibold text-white">
-                    Know where you stand before you apply
-                  </h3>
-                  <p className="mt-2 max-w-md text-sm leading-relaxed text-slate-400">
-                    Every posting is scored against your exact resume. See the
-                    skills that got you there and the ones still missing.
-                  </p>
-                </div>
-                <MatchRing />
-              </div>
-
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/[0.06] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-emerald-400">
-                    Matched skills
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {["React", "TypeScript", "PostgreSQL", "System design", "CI/CD"].map(
-                      (s) => (
-                        <span
-                          key={s}
-                          className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-2.5 py-1 text-xs text-emerald-200"
-                        >
-                          {s}
-                        </span>
-                      ),
-                    )}
-                  </div>
-                </div>
-                <div className="rounded-xl border border-amber-400/20 bg-amber-500/[0.06] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-amber-400">
-                    Gaps to close
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1.5">
-                    {["GraphQL", "Terraform", "gRPC"].map((s) => (
-                      <span
-                        key={s}
-                        className="rounded-full border border-amber-400/20 bg-amber-500/10 px-2.5 py-1 text-xs text-amber-200"
-                      >
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-5 space-y-3">
-                {[
-                  { skill: "React", level: 9 },
-                  { skill: "TypeScript", level: 9 },
-                  { skill: "PostgreSQL", level: 8 },
-                  { skill: "GraphQL", level: 3 },
-                  { skill: "Terraform", level: 2 },
-                ].map((s) => (
-                  <div key={s.skill} className="flex items-center gap-3">
-                    <span className="w-24 shrink-0 text-xs text-slate-400">{s.skill}</span>
-                    <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/10">
-                      <div
-                        className={`h-full rounded-full ${
-                          s.level >= 8
-                            ? "bg-gradient-to-r from-emerald-500 to-emerald-400"
-                            : s.level >= 6
-                              ? "bg-gradient-to-r from-indigo-500 to-violet-500"
-                              : "bg-gradient-to-r from-amber-500 to-amber-400"
-                        }`}
-                        style={{ width: `${s.level * 10}%` }}
-                      />
-                    </div>
-                    <span className="w-8 text-right text-xs tabular-nums text-slate-500">
-                      {s.level}/10
-                    </span>
-                  </div>
-                ))}
-              </div>
+      {/* ============ STATS ============ */}
+      <section className="border-b border-white/5">
+        <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-4 py-16 sm:px-6 lg:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center">
+              <dd className="bg-gradient-to-br from-white to-slate-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
+                {s.value}
+              </dd>
+              <dt className="mt-2 text-sm text-slate-400">{s.label}</dt>
             </div>
-
-            <div className="flex flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Agent run
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-white">
-                Streams live, saved automatically
-              </h3>
-              <div className="mt-5 flex-1 space-y-3">
-                {agentRun.slice(0, 4).map((s, i) => (
-                  <div key={s.label} className="flex items-start gap-2.5">
-                    <span
-                      className={`mt-0.5 grid h-5 w-5 shrink-0 place-items-center rounded-full text-[10px] ${
-                        s.state === "done"
-                          ? "bg-emerald-500/20 text-emerald-400"
-                          : "bg-indigo-500/20 text-indigo-300"
-                      }`}
-                    >
-                      {s.state === "done" ? "✓" : "…"}
-                    </span>
-                    <span className="text-xs leading-tight text-slate-300">{s.label}</span>
-                    {i === agentRun.length - 2 && (
-                      <span className="ml-auto shrink-0 rounded bg-white/5 px-1.5 py-0.5 text-[10px] text-slate-500">
-                        just now
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="mt-5 rounded-lg border border-white/10 bg-white/[0.03] p-3">
-                <p className="text-xs text-slate-400">Pipeline updated</p>
-                <p className="mt-1 text-sm font-semibold text-white">
-                  +3 matches · +2 drafts ready
-                </p>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Tailored rewrite
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-white">
-                ATS-friendly, per role
-              </h3>
-              <div className="mt-5 space-y-4">
-                <div className="rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-                    Original
-                  </p>
-                  <p className="mt-2 line-through decoration-rose-400/50 text-xs leading-relaxed text-slate-500">
-                    Built full-stack features and improved site reliability.
-                  </p>
-                </div>
-                <div className="rounded-xl border border-emerald-400/20 bg-emerald-500/[0.05] p-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400">
-                    Tailored for the posting
-                  </p>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-300">
-                    <span className="text-emerald-300">Designed and shipped</span>{" "}
-                    full-stack features{" "}
-                    <span className="text-emerald-300">with a 99.9% uptime</span>{" "}
-                    target, matching the{" "}
-                    <span className="text-emerald-300">senior engineer</span>{" "}
-                    scope in the job description.
-                  </p>
-                </div>
-              </div>
-              <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-indigo-300">
-                <span className="h-1.5 w-1.5 rounded-full bg-indigo-400" />
-                Keywords matched against the JD
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Interview prep
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-white">
-                Walk in ready
-              </h3>
-              <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.02] p-4">
-                <p className="text-xs font-medium text-slate-200">
-                  &ldquo;Tell me about a time you shipped under a tight deadline.&rdquo;
-                </p>
-                <div className="mt-4 border-t border-white/10 pt-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-violet-400">
-                    Model answer
-                  </p>
-                  <p className="mt-2 text-xs leading-relaxed text-slate-400">
-                    Structured as STAR, grounded in the achievements on your
-                    resume, and the exact keywords the interviewer will listen for.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-indigo-600/20 to-violet-600/10 p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-indigo-300">
-                What you get every day
-              </p>
-              <h3 className="mt-2 text-xl font-semibold text-white">
-                A digest, not a search bar
-              </h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-400">
-                Wake up to an email: what was applied for you, what just needs a
-                tap, and the best ~3 matches of the day with reasons.
-              </p>
-              <div className="mt-5 space-y-2.5">
-                {[
-                  { label: "2 applications submitted", tone: "text-emerald-300" },
-                  { label: "3 ready — one tap", tone: "text-indigo-300" },
-                  { label: "1 interview invite detected", tone: "text-violet-300" },
-                ].map((row) => (
-                  <div
-                    key={row.label}
-                    className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs"
-                  >
-                    <span className={row.tone}>{row.label}</span>
-                    <span className="text-slate-500">→</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-white/20"
-              >
-                <h4 className="text-sm font-semibold text-white">{f.title}</h4>
-                <p className="mt-1.5 text-xs leading-relaxed text-slate-400">{f.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+          ))}
+        </dl>
       </section>
 
       {/* ============ HOW IT WORKS ============ */}
       <section
         id="how-it-works"
-        className="scroll-mt-24 border-y border-white/5 bg-white/[0.02]"
+        className="scroll-mt-24 border-b border-white/5 bg-white/[0.02]"
       >
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
           <SectionTitle
             tag="How it works"
             title={
@@ -822,7 +518,7 @@ export default async function Home() {
             sub="Four steps, zero copy-pasting. The agents do the matching work so you only ever review and send."
           />
 
-          <div className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {steps.map((s, i) => (
               <div
                 key={s.num}
@@ -865,7 +561,7 @@ export default async function Home() {
 
       {/* ============ AGENTS ============ */}
       <section id="agents" className="scroll-mt-24">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
           <SectionTitle
             tag="The agents"
             title={
@@ -879,7 +575,7 @@ export default async function Home() {
             sub="Each agent owns one job. Together they turn one resume upload into a pipeline of applied, tailored applications."
           />
 
-          <div className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {agents.map((a) => (
               <div
                 key={a.name}
@@ -902,11 +598,6 @@ export default async function Home() {
               </div>
             ))}
           </div>
-
-          <p className="mt-10 text-center text-sm text-slate-500">
-            Each run streams live in your browser and results save to your
-            pipeline automatically.
-          </p>
         </div>
       </section>
 
@@ -915,7 +606,7 @@ export default async function Home() {
         id="auto-pilot"
         className="scroll-mt-24 border-y border-white/5 bg-white/[0.02]"
       >
-        <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-24 sm:px-6 lg:grid-cols-2 lg:gap-16">
+        <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:gap-16">
           <div>
             <SectionTag>Auto-pilot</SectionTag>
             <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
@@ -930,7 +621,7 @@ export default async function Home() {
               asleep.
             </p>
 
-            <div className="mt-9 space-y-6">
+            <div className="mt-8 space-y-5">
               {[
                 {
                   title: "Runs while you live your life",
@@ -959,7 +650,7 @@ export default async function Home() {
               ))}
             </div>
 
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <Link
                 href={getStartedHref}
                 className="rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/40 transition hover:from-indigo-400 hover:to-violet-500"
@@ -987,7 +678,7 @@ export default async function Home() {
                 width={1600}
                 height={900}
                 sizes="(min-width: 1024px) 36rem, 100vw"
-                className="h-[26rem] w-full object-cover opacity-70"
+                className="h-[24rem] w-full object-cover opacity-70"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#070b17] via-[#070b17]/40 to-transparent" />
 
@@ -1037,23 +728,9 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ STATS ============ */}
-      <section className="border-b border-white/5">
-        <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-4 py-20 sm:px-6 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <dd className="bg-gradient-to-br from-white to-slate-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
-                {s.value}
-              </dd>
-              <dt className="mt-2 text-sm text-slate-400">{s.label}</dt>
-            </div>
-          ))}
-        </dl>
-      </section>
-
       {/* ============ TESTIMONIALS ============ */}
-      <section id="stories" className="scroll-mt-24 bg-white/[0.02]">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
+      <section id="stories" className="scroll-mt-24">
+        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
           <SectionTitle
             tag="Success stories"
             title={
@@ -1067,7 +744,7 @@ export default async function Home() {
             sub="Job seekers who stopped copy-pasting resumes and let the agents do the heavy lifting."
           />
 
-          <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {testimonials.map((t) => (
               <figure
                 key={t.name}
@@ -1102,45 +779,9 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ TRUST / SECURITY ============ */}
-      <section className="border-y border-white/5">
-        <div className="mx-auto max-w-7xl px-4 py-24 sm:px-6">
-          <SectionTitle
-            tag="Trusted by design"
-            title={
-              <>
-                Serious about your job search,{" "}
-                <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                  serious about your data.
-                </span>
-              </>
-            }
-          />
-
-          <div className="mx-auto mt-14 grid max-w-5xl gap-5 sm:grid-cols-2">
-            {trustPoints.map((t) => (
-              <div
-                key={t.title}
-                className="flex gap-4 rounded-2xl border border-white/10 bg-white/[0.03] p-6"
-              >
-                <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 text-indigo-300">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                  </svg>
-                </span>
-                <div>
-                  <h3 className="font-semibold text-white">{t.title}</h3>
-                  <p className="mt-1 text-sm leading-relaxed text-slate-400">{t.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ============ FINAL CTA ============ */}
-      <section className="px-4 py-24 sm:px-6">
-        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl px-6 py-20 text-center sm:px-16">
+      <section className="border-t border-white/5 bg-white/[0.02] px-4 py-20 sm:px-6">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl px-6 py-16 text-center sm:px-16">
           <Image
             src="/hero/interview.png"
             alt=""
@@ -1159,8 +800,7 @@ export default async function Home() {
           />
 
           <div className="relative">
-            <SectionTag>Join them</SectionTag>
-            <h2 className="mx-auto mt-6 max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
+            <h2 className="mx-auto max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-5xl">
               Stop pasting the same resume into{" "}
               <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
                 every application.
