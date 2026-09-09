@@ -67,24 +67,29 @@ export default async function JobsPage() {
   }));
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-8">
-      <div className="flex items-center gap-2">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
-        </span>
-        <p className="text-sm font-semibold uppercase tracking-wider text-emerald-400">
-          Live feed
-        </p>
+    <main className="mx-auto min-h-screen max-w-6xl bg-slate-50 px-4 py-8">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+            Open roles
+          </h1>
+          <p className="mt-1 max-w-2xl text-sm text-slate-500">
+            Agents pull live postings from LinkedIn and company career sites across
+            the US, filtered by your time window. Every job shows its match %
+            against your resume. Run the agents on any role to tailor documents
+            and prep.
+          </p>
+        </div>
+        <div className="hidden shrink-0 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:flex">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          <span className="text-xs font-semibold uppercase tracking-wider text-emerald-700">
+            Live
+          </span>
+        </div>
       </div>
-      <h1 className="mt-2 bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-3xl font-bold tracking-tight text-transparent">
-        Job feed
-      </h1>
-      <p className="mt-2 max-w-2xl text-sm text-slate-400">
-        Agents pull live postings from LinkedIn and company career sites across
-        the US, filtered by your time window. Every job shows its match % against
-        your resume. Run the agents on any role to tailor documents and prep.
-      </p>
 
       <div className="mt-6">
         <JobFeed jobs={feedJobs} savedIds={savedIds} scores={scores} hasResume={hasResume} />
