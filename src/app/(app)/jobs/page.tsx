@@ -74,10 +74,9 @@ export default async function JobsPage() {
             Open roles
           </h1>
           <p className="mt-1 max-w-2xl text-sm text-slate-500">
-            Agents pull live postings from LinkedIn and company career sites across
-            the US, filtered by your time window. Every job shows its match %
-            against your resume. Run the agents on any role to tailor documents
-            and prep.
+            Fresh roles across the US, filtered by your time window. Every job
+            shows its match % against your resume, and you can deep-dive any role
+            to tailor your documents and prep for the interview.
           </p>
         </div>
         <div className="hidden shrink-0 items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 sm:flex">

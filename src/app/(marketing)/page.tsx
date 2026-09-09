@@ -5,7 +5,7 @@ import { getSessionUser, isOnboarded } from "@/lib/auth";
 export const metadata = {
   title: "Noventra — Your Job Search, on Autopilot",
   description:
-    "Upload your resume once. Noventra's AI agents scan fresh job postings, score each one 0–100 against your skills, rewrite an ATS-friendly resume and cover letter, and submit applications on a schedule — you just review and send.",
+    "Upload your resume once. Noventra scores every role 0–100 against your skills, rewrites an ATS-friendly resume and cover letter, and submits applications on a schedule — you just review and send.",
 };
 
 const liveJobs = [
@@ -123,9 +123,9 @@ export default async function Home() {
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-400">
-            Upload your resume once. Noventra&apos;s agents scan fresh postings,
-            score every role against your skills, rewrite your application, and
-            submit it while you live your life. You just review and send.
+            Upload your resume once. Noventra scores every role against your
+            skills, rewrites your application, and submits it while you live your
+            life. You just review and send.
           </p>
 
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -255,8 +255,8 @@ export default async function Home() {
               </span>
             </h2>
             <p className="mt-3 max-w-md text-slate-400">
-              Every day at 4 PM PT the agents scan, score, and prepare
-              applications while you live your life. Nothing happens blind.
+              Every day at 4 PM PT your shortlist is scored, tailored, and queued
+              up while you live your life. Nothing happens blind.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link
@@ -393,7 +393,7 @@ export default async function Home() {
                 </span>
               </Link>
               <p className="mt-3 max-w-xs text-sm leading-relaxed text-slate-500">
-                Resume-first AI job search. Upload once and let the agents do the rest.
+                Resume-first AI job search. Upload once and leave the rest to us.
               </p>
             </div>
 

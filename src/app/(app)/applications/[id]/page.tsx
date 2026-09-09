@@ -108,7 +108,8 @@ export default async function ApplicationDetailPage({
           </>
         ) : (
           <p className="text-sm text-slate-500">
-            This application has no linked job posting, so agents can&apos;t run on it.
+            This application has no linked job posting, so it can&apos;t be
+            scored or tailored.
           </p>
         )}
       </div>

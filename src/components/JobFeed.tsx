@@ -7,7 +7,6 @@ import { filterJobs } from "@/lib/jobFilter";
 import { formatRelativeTime, isRecentlyPosted } from "@/lib/jobTime";
 import type { ApplySourceKind } from "@/lib/jobs/applySource";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
-import { SourceBadge } from "@/components/SourceBadge";
 
 export interface JobFeedItem {
   id: string;
@@ -235,7 +234,7 @@ export function JobFeed({
       }
       if (data?.errors?.length) {
         setNotice(
-          `Indexed ${data.found ?? 0} jobs. ${data.errors.length} career site(s) couldn't be reached.`,
+          `Refresh complete — ${data.found ?? 0} new listings.`,
         );
       }
       router.refresh();
@@ -401,7 +400,7 @@ export function JobFeed({
             className="h-3.5 w-3.5 accent-indigo-600"
           />
           <span className="font-medium text-slate-600">
-            Company / LinkedIn only
+            Direct apply only
           </span>
         </label>
       </div>
@@ -454,7 +453,7 @@ export function JobFeed({
           </span>
           <span className="text-slate-300">·</span>
           <span>
-            Showing {filtered.length} of {jobs.length} agent-verified postings
+            Showing {filtered.length} of {jobs.length} postings
           </span>
         </p>
       )}
@@ -505,11 +504,7 @@ export function JobFeed({
                     )}
                     {job.verified_status === "verified" && (
                       <span
-                        title={
-                          job.verified_source_url
-                            ? `Confirmed on ${job.verified_source_url}`
-                            : "Confirmed on the company career site"
-                        }
+                        title="Confirmed against the original posting"
                         className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700"
                       >
                         Verified
@@ -517,7 +512,7 @@ export function JobFeed({
                     )}
                     {job.verified_status === "likely" && (
                       <span
-                        title="Company career site found; exact posting not confirmed"
+                        title="Reviewed; exact posting not yet confirmed"
                         className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700"
                       >
                         Likely genuine
@@ -525,21 +520,10 @@ export function JobFeed({
                     )}
                     {job.verified_status === "unverified" && (
                       <span
-                        title="No company-owned posting found"
+                        title="Reviewed; not yet confirmed"
                         className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-500"
                       >
                         Unverified
-                      </span>
-                    )}
-                    <SourceBadge source={job.source ?? "search"} />
-                    {job.applyKind === "linkedin" && (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
-                        Search result
-                      </span>
-                    )}
-                    {job.applyKind === "company" && (
-                      <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-600">
-                        Company site
                       </span>
                     )}
                   </p>
@@ -575,9 +559,8 @@ export function JobFeed({
 
       {jobs.length === 0 && (
         <p className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-          No jobs yet. Click Search jobs to pull live postings from LinkedIn and
-          company career sites, or add one manually, load the sample jobs, or
-          bulk-import a feed.
+          No jobs yet. Run a search to bring in fresh listings, add one manually,
+          load the sample jobs, or bulk-import a feed.
         </p>
       )}
       {jobs.length > 0 && filtered.length === 0 && (

@@ -63,7 +63,7 @@ export function AgentRunner({
 
       if (!res.ok || !res.body) {
         const body = await res.json().catch(() => ({}));
-        setError(body.error ?? "Failed to start agents.");
+        setError(body.error ?? "Failed to start.");
         setLimitReached(Boolean(body.limitReached));
         setStatus("error");
         setRunning(false);
@@ -147,10 +147,10 @@ export function AgentRunner({
         {running ? (
           <>
             <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-            Agents working…
+            Working…
           </>
         ) : (
-          <>▶ {label ?? "Run agents"}</>
+          <>▶ {label ?? "Run"}</>
         )}
       </button>
 
@@ -183,7 +183,7 @@ export function AgentRunner({
           )}
           {status === "done" && (
             <p className="pt-1 font-medium text-emerald-600">
-              All agents finished.
+              All done.
             </p>
           )}
           {status === "error" && (

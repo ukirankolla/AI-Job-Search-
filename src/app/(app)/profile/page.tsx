@@ -33,7 +33,7 @@ export default async function ProfilePage() {
         Profile
       </h1>
       <p className="mt-1 text-sm text-slate-500">
-        Your profile powers the matcher, tailor, and prep agents.
+        Your profile powers match scoring, tailored applications, and interview prep.
       </p>
       <div className="mt-6">
         <ProfileForm profile={profile} />

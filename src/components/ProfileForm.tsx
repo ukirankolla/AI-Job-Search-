@@ -163,8 +163,8 @@ export function ProfileForm({ profile }: { profile: Profile }) {
           </p>
           <p className="text-xs text-slate-500">
             PDF, Word (.doc/.docx), or plain text (.txt). The text is extracted
-            and indexed automatically — it powers your match % and the tailor
-            and prep agents for every job.
+            and indexed automatically — it powers your match % and tailored
+            applications and interview prep for every job.
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <button

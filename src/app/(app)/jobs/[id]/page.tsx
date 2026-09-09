@@ -15,7 +15,6 @@ import { AgentRunner } from "@/components/AgentRunner";
 import { AddToPipelineButton } from "@/components/AddToPipelineButton";
 import { DeleteJobButton } from "@/components/DeleteJobButton";
 import { ApplyKit } from "@/components/ApplyKit";
-import { getJobSourceLabel } from "@/lib/jobs/pipelineEligibility";
 
 export const metadata = { title: "Job | Noventra" };
 
@@ -115,31 +114,20 @@ export default async function JobDetailPage({
               : ""}
           </p>
           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
-            <span className="rounded-full bg-blue-50 px-2 py-0.5 font-medium text-blue-700">
-              Source: {getJobSourceLabel(job.source)}
-            </span>
-            {job.source === "linkedin" && (
-              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-slate-600">
-                Search-generated result
+            {job.verified_status === "verified" && (
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 font-medium text-emerald-700">
+                Verified
+              </span>
+            )}
+            {job.verified_status === "likely" && (
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 font-medium text-amber-700">
+                Likely genuine
               </span>
             )}
           </div>
-          {job.verified_status === "verified" && (
-            <p
-              className="mt-1 text-xs font-medium text-emerald-600"
-              title={job.verified_source_url ?? undefined}
-            >
-              Verified — posted on the company career site
-            </p>
-          )}
-          {job.verified_status === "likely" && (
-            <p className="mt-1 text-xs font-medium text-amber-600">
-              Likely genuine — company career site found
-            </p>
-          )}
           {job.verified_status === "unverified" && (
             <p className="mt-1 text-xs text-slate-400">
-              Unverified — this LinkedIn search result has not been matched to a direct company-owned apply link yet.
+              Not yet verified — we&apos;re still confirming this posting.
             </p>
           )}
           <p className="mt-1 text-sm text-slate-400">
@@ -158,7 +146,7 @@ export default async function JobDetailPage({
 
       <div className="mt-6 space-y-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="mb-2 font-semibold text-slate-900">Agents</h2>
+          <h2 className="mb-2 font-semibold text-slate-900">Analyze &amp; prep</h2>
           <p className="mb-3 text-sm text-slate-500">
             Deep-dive the role: analyze your fit, tailor your documents, and
             prep for the interview.
