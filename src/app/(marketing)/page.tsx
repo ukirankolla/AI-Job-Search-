@@ -8,19 +8,6 @@ export const metadata = {
     "Upload your resume once. Noventra's AI agents scan fresh job postings, score each one 0–100 against your skills, rewrite an ATS-friendly resume and cover letter, and submit applications on a schedule — you just review and send.",
 };
 
-const companies = [
-  "Stripe",
-  "Vercel",
-  "Linear",
-  "Figma",
-  "Notion",
-  "Shopify",
-  "Airbnb",
-  "Coinbase",
-  "Datadog",
-  "Rippling",
-];
-
 const jobFeed = [
   {
     role: "Senior Full-Stack Engineer",
@@ -56,60 +43,40 @@ const agentRun = [
   { label: "Prepping interview questions", state: "active" },
 ];
 
-const steps = [
+const benefits = [
   {
-    num: "01",
-    title: "Discover",
-    desc: "Fresh postings are pulled from company career portals and LinkedIn every hour. Official sources only — no aggregator spam.",
+    title: "Matched to the right roles",
+    desc: "Every fresh posting is scored 0–100 against your resume, with matched and missing skills called out before you apply.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5 7.5 9l3.5 3.5L18 5m0 0h-4m4 0v4M5 21h14" />
+      </svg>
+    ),
   },
   {
-    num: "02",
-    title: "Match",
-    desc: "Every job is scored 0–100 against your resume with matched and missing skills called out before you apply.",
+    title: "Tailored to each posting",
+    desc: "Agents rewrite an ATS-friendly resume and draft a cover letter that closes the gap to the exact job description.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m16.5 7.5 2 2M5 21l3.5-1 11-11a1.414 1.414 0 0 0-2-2l-11 11L5 21Z" />
+      </svg>
+    ),
   },
   {
-    num: "03",
-    title: "Tailor",
-    desc: "Agents rewrite an ATS-friendly resume and draft a cover letter that closes the gap to the exact posting.",
-  },
-  {
-    num: "04",
-    title: "Apply",
-    desc: "Email-ready postings go out on your behalf; portal postings queue up one-tap-ready with your documents attached.",
-  },
-];
-
-const agents = [
-  {
-    name: "Matcher",
-    role: "Scoring & skill gaps",
-    desc: "Scores fresh job postings against your resume and surfaces the exact skills you're missing.",
-    accent: "from-indigo-500 to-indigo-600",
-  },
-  {
-    name: "Tailor",
-    role: "Documents",
-    desc: "Rewrites your resume and cover letter for each specific role, ATS-optimized.",
-    accent: "from-violet-500 to-violet-600",
-  },
-  {
-    name: "Prep",
-    role: "Interview readiness",
-    desc: "Generates role-specific interview questions with model answers so you walk in ready.",
-    accent: "from-fuchsia-500 to-fuchsia-600",
-  },
-  {
-    name: "Tracker",
-    role: "Follow-up timing",
-    desc: "Watches deadlines and nudges you to follow up at exactly the right moment.",
-    accent: "from-emerald-500 to-emerald-600",
+    title: "Applied while you sleep",
+    desc: "Auto-pilot submits email-ready applications on a schedule and queues the rest one-tap-ready. You get a digest, not a search bar.",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
+      </svg>
+    ),
   },
 ];
 
 const testimonials = [
   {
     quote:
-      "I uploaded my resume once and woke up to three tailored applications waiting for my review. The match scores are scary accurate.",
+      "The match scores are scary accurate. I uploaded my resume once and woke up to three tailored applications waiting for my review.",
     name: "Priya Sharma",
     role: "Product Designer · Toronto",
     avatar: "/hero/avatar-priya.png",
@@ -123,25 +90,11 @@ const testimonials = [
   },
   {
     quote:
-      "Auto-pilot applied while I was at work and emailed me a digest every evening. I only clicked submit on the ones I actually liked.",
+      "Auto-pilot applied while I was at work and emailed me a digest every evening. I clicked submit on the ones I actually liked.",
     name: "Elena Ramirez",
     role: "Senior Data Analyst · Austin",
     avatar: "/hero/avatar-elena.png",
   },
-  {
-    quote:
-      "The interview prep questions were almost word-for-word what they asked me on the day. That is not luck — that is preparation.",
-    name: "Daniel Park",
-    role: "Operations Manager · Seattle",
-    avatar: "/hero/avatar-daniel.png",
-  },
-];
-
-const stats = [
-  { value: "4", label: "AI agents work your search" },
-  { value: "0–100", label: "Match score on every job" },
-  { value: "15", label: "Free rewrites & applies per week" },
-  { value: "1", label: "Resume upload to get started" },
 ];
 
 const footerColumns = [
@@ -149,18 +102,18 @@ const footerColumns = [
     title: "Product",
     links: [
       { label: "How it works", href: "#how-it-works" },
-      { label: "Agents", href: "#agents" },
       { label: "Auto-pilot", href: "#auto-pilot" },
+      { label: "Success stories", href: "#stories" },
       { label: "Pricing", href: "/upgrade" },
     ],
   },
   {
     title: "Resources",
     links: [
-      { label: "Success stories", href: "#stories" },
       { label: "Match score guide", href: "#how-it-works" },
       { label: "Skill gap analysis", href: "#how-it-works" },
-      { label: "Interview prep", href: "#agents" },
+      { label: "Interview prep", href: "#how-it-works" },
+      { label: "Digest emails", href: "#auto-pilot" },
     ],
   },
   {
@@ -183,16 +136,7 @@ const footerColumns = [
   },
 ];
 
-function SectionTag({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3.5 py-1 text-xs font-medium tracking-wide text-indigo-200 backdrop-blur">
-      <span className="h-1.5 w-1.5 animate-pulse-soft rounded-full bg-emerald-400" />
-      {children}
-    </span>
-  );
-}
-
-function SectionTitle({
+function SectionHeading({
   tag,
   title,
   sub,
@@ -257,7 +201,7 @@ export default async function Home() {
           className="pointer-events-none absolute right-0 top-40 h-96 w-96 rounded-full bg-violet-600/15 blur-3xl"
         />
 
-        <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-4 pb-24 pt-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pb-28 lg:pt-20">
+        <div className="relative mx-auto grid max-w-7xl items-center gap-16 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:pb-24 lg:pt-20">
           <div>
             <a
               href="#auto-pilot"
@@ -464,137 +408,40 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* ============ LOGO / TRUST BAR ============ */}
-      <section className="border-y border-white/5 bg-white/[0.02] py-12">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
-          Scoring and tailoring against fresh postings from
-        </p>
-        <div className="relative mx-auto mt-8 max-w-5xl overflow-hidden px-4">
-          <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-24 bg-gradient-to-r from-[#070b17] to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-24 bg-gradient-to-l from-[#070b17] to-transparent" />
-          <div className="flex w-max animate-marquee gap-14 pr-14">
-            {[...companies, ...companies].map((c, i) => (
-              <span
-                key={`${c}-${i}`}
-                className="whitespace-nowrap text-lg font-semibold tracking-tight text-slate-500 transition hover:text-slate-300"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ STATS ============ */}
-      <section className="border-b border-white/5">
-        <dl className="mx-auto grid max-w-7xl grid-cols-2 gap-x-6 gap-y-10 px-4 py-16 sm:px-6 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="text-center">
-              <dd className="bg-gradient-to-br from-white to-slate-400 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl">
-                {s.value}
-              </dd>
-              <dt className="mt-2 text-sm text-slate-400">{s.label}</dt>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* ============ HOW IT WORKS ============ */}
+      {/* ============ HOW IT WORKS / BENEFITS ============ */}
       <section
         id="how-it-works"
-        className="scroll-mt-24 border-b border-white/5 bg-white/[0.02]"
+        className="scroll-mt-24 border-y border-white/5 bg-white/[0.02] py-16"
       >
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <SectionTitle
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <SectionHeading
             tag="How it works"
             title={
               <>
-                From resume to application,{" "}
+                Upload once.{" "}
                 <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                  end to end.
+                  Match, tailor, apply.
                 </span>
               </>
             }
-            sub="Four steps, zero copy-pasting. The agents do the matching work so you only ever review and send."
           />
 
-          <div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map((s, i) => (
+          <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:grid-cols-3">
+            {benefits.map((b, i) => (
               <div
-                key={s.num}
-                className="group relative rounded-2xl border border-white/10 bg-[#0b1120]/60 p-6 transition hover:border-indigo-400/30 hover:bg-[#0b1120]"
+                key={b.title}
+                className="group rounded-2xl border border-white/10 bg-[#0b1120]/60 p-6 transition hover:border-indigo-400/30 hover:bg-[#0b1120]"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-sm font-semibold text-indigo-400">
-                    Step {s.num}
+                  <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-indigo-500/20 to-violet-500/20 text-indigo-300 transition group-hover:from-indigo-500 group-hover:to-violet-600 group-hover:text-white">
+                    {b.icon}
                   </span>
-                  <span className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-indigo-500/20 to-violet-500/20 text-sm text-indigo-300 transition group-hover:from-indigo-500 group-hover:to-violet-600 group-hover:text-white">
-                    {i === 0 && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0Z" />
-                      </svg>
-                    )}
-                    {i === 1 && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.5 7.5 9l3.5 3.5L18 5m0 0h-4m4 0v4M5 21h14" />
-                      </svg>
-                    )}
-                    {i === 2 && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m16.5 7.5 2 2M5 21l3.5-1 11-11a1.414 1.414 0 0 0-2-2l-11 11L5 21Z" />
-                      </svg>
-                    )}
-                    {i === 3 && (
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />
-                      </svg>
-                    )}
+                  <span className="font-mono text-xs font-semibold text-slate-600">
+                    0{i + 1}
                   </span>
                 </div>
-                <h3 className="mt-5 text-lg font-semibold text-white">{s.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-400">{s.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ============ AGENTS ============ */}
-      <section id="agents" className="scroll-mt-24">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <SectionTitle
-            tag="The agents"
-            title={
-              <>
-                A team of agents,{" "}
-                <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">
-                  working your search.
-                </span>
-              </>
-            }
-            sub="Each agent owns one job. Together they turn one resume upload into a pipeline of applied, tailored applications."
-          />
-
-          <div className="mx-auto mt-12 grid max-w-5xl gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {agents.map((a) => (
-              <div
-                key={a.name}
-                className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#0b1120]/60 p-6 transition hover:border-white/20"
-              >
-                <div
-                  aria-hidden
-                  className={`absolute -right-10 -top-10 h-32 w-32 rounded-full bg-gradient-to-br ${a.accent} opacity-0 blur-3xl transition duration-500 group-hover:opacity-25`}
-                />
-                <span
-                  className={`relative grid h-11 w-11 place-items-center rounded-xl bg-gradient-to-br ${a.accent} text-white shadow-lg`}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-5 w-5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 0 1-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.3 24.3 0 0 1 4.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0 1 12 15a9.065 9.065 0 0 0-6.23-.693L5 14.5m14.8.8 1.402 1.402c1.232 1.232.65 3.318-1.067 3.611A48.309 48.309 0 0 1 12 21c-2.773 0-5.491-.235-8.135-1.687C2.05 18.02 1.57 16.008 2.598 14.7L5 14.5" />
-                  </svg>
-                </span>
-                <h3 className="relative mt-5 text-lg font-semibold text-white">{a.name}</h3>
-                <p className="relative text-xs font-medium text-slate-500">{a.role}</p>
-                <p className="relative mt-2 text-sm leading-relaxed text-slate-400">{a.desc}</p>
+                <h3 className="mt-5 text-lg font-semibold text-white">{b.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-400">{b.desc}</p>
               </div>
             ))}
           </div>
@@ -602,55 +449,25 @@ export default async function Home() {
       </section>
 
       {/* ============ AUTO-PILOT ============ */}
-      <section
-        id="auto-pilot"
-        className="scroll-mt-24 border-y border-white/5 bg-white/[0.02]"
-      >
-        <div className="mx-auto grid max-w-7xl items-center gap-14 px-4 py-20 sm:px-6 lg:grid-cols-2 lg:gap-16">
+      <section id="auto-pilot" className="scroll-mt-24 py-16">
+        <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 sm:px-6 lg:grid-cols-2 lg:gap-14">
           <div>
-            <SectionTag>Auto-pilot</SectionTag>
-            <h2 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Wake up to applications,{" "}
-              <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
-                not a blank search page.
-              </span>
-            </h2>
-            <p className="mt-5 max-w-lg text-lg leading-relaxed text-slate-400">
-              Turn on auto-pilot and the agents run on a schedule — matching,
-              tailoring, and submitting while you are at work, at the gym, or
-              asleep.
-            </p>
-
-            <div className="mt-8 space-y-5">
-              {[
-                {
-                  title: "Runs while you live your life",
-                  desc: "Every day at 4 PM PT, the pilot scans everything posted in the last 24 hours and scores it against your resume.",
-                },
-                {
-                  title: "Submits what it can, preps the rest",
-                  desc: "Email-ready postings go out on your behalf with tailored documents attached. Portal postings queue one-tap-ready.",
-                },
-                {
-                  title: "A digest in your inbox",
-                  desc: "One email tells you exactly what was applied for you and what just needs a click — nothing happens blind.",
-                },
-              ].map((p) => (
-                <div key={p.title} className="flex gap-4">
-                  <span className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-500/15 text-emerald-400">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-4 w-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                    </svg>
+            <SectionHeading
+              tag="Auto-pilot"
+              title={
+                <>
+                  Wake up to a digest,{" "}
+                  <span className="bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400 bg-clip-text text-transparent">
+                    not a blank search page.
                   </span>
-                  <div>
-                    <h3 className="text-base font-semibold text-white">{p.title}</h3>
-                    <p className="mt-1.5 text-sm leading-relaxed text-slate-400">{p.desc}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-9 flex flex-wrap gap-3">
+                </>
+              }
+            />
+            <p className="mx-auto mt-5 max-w-md text-center text-lg leading-relaxed text-slate-400 lg:mx-0 lg:text-left">
+              Every day at 4 PM PT the agents scan, score, and prepare
+              applications while you live your life. Nothing happens blind.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3 lg:justify-start">
               <Link
                 href={getStartedHref}
                 className="rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/40 transition hover:from-indigo-400 hover:to-violet-500"
@@ -666,72 +483,61 @@ export default async function Home() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative mx-auto w-full max-w-md">
             <div
               aria-hidden
-              className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-br from-indigo-600/20 to-violet-600/10 blur-2xl"
+              className="pointer-events-none absolute -inset-4 rounded-3xl bg-gradient-to-br from-indigo-600/20 to-violet-600/10 blur-2xl"
             />
-            <div className="relative overflow-hidden rounded-3xl border border-white/10 shadow-2xl shadow-indigo-950/50">
-              <Image
-                src="/hero/desk.png"
-                alt="A tidy home-office desk at golden hour with an open laptop running Noventra"
-                width={1600}
-                height={900}
-                sizes="(min-width: 1024px) 36rem, 100vw"
-                className="h-[24rem] w-full object-cover opacity-70"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#070b17] via-[#070b17]/40 to-transparent" />
-
-              <div className="absolute inset-x-5 bottom-5 rounded-2xl border border-white/10 bg-[#0b1120]/90 p-5 shadow-xl backdrop-blur">
-                <div className="flex items-center gap-3">
-                  <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white">
-                    N
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-white">
-                      Noventra Auto-pilot
-                    </p>
-                    <p className="text-xs text-slate-400">Today, 4:00 PM PT</p>
-                  </div>
-                  <span className="ml-auto rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
-                    ● On
-                  </span>
+            <div className="relative rounded-2xl border border-white/10 bg-[#0b1120]/90 p-5 shadow-2xl shadow-indigo-950/50 backdrop-blur">
+              <div className="flex items-center gap-3">
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white">
+                  N
+                </span>
+                <div>
+                  <p className="text-sm font-semibold text-white">Noventra Auto-pilot</p>
+                  <p className="text-xs text-slate-400">Today, 4:00 PM PT</p>
                 </div>
-
-                <p className="mt-3 rounded-lg bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200">
-                  Auto-pilot: 2 applied, 3 ready to send
-                </p>
-
-                <ul className="mt-3 space-y-2 text-xs">
-                  <li className="flex items-center justify-between gap-2 text-slate-300">
-                    <span>Senior Full-Stack Eng · Stripe</span>
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">
-                      Submitted
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between gap-2 text-slate-300">
-                    <span>Product Engineer · Linear</span>
-                    <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">
-                      Submitted
-                    </span>
-                  </li>
-                  <li className="flex items-center justify-between gap-2 text-slate-300">
-                    <span>Frontend Eng · Figma</span>
-                    <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 font-semibold text-indigo-300">
-                      Ready — one tap
-                    </span>
-                  </li>
-                </ul>
+                <span className="ml-auto rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">
+                  ● On
+                </span>
               </div>
+
+              <p className="mt-3 rounded-lg bg-white/[0.04] px-3 py-2 text-xs font-semibold text-slate-200">
+                Auto-pilot: 2 applied, 3 ready to send
+              </p>
+
+              <ul className="mt-3 space-y-2 text-xs">
+                <li className="flex items-center justify-between gap-2 text-slate-300">
+                  <span>Senior Full-Stack Eng · Stripe</span>
+                  <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">
+                    Submitted
+                  </span>
+                </li>
+                <li className="flex items-center justify-between gap-2 text-slate-300">
+                  <span>Product Engineer · Linear</span>
+                  <span className="rounded-full bg-emerald-500/15 px-2 py-0.5 font-semibold text-emerald-300">
+                    Submitted
+                  </span>
+                </li>
+                <li className="flex items-center justify-between gap-2 text-slate-300">
+                  <span>Frontend Eng · Figma</span>
+                  <span className="rounded-full bg-indigo-500/15 px-2 py-0.5 font-semibold text-indigo-300">
+                    Ready — one tap
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
       </section>
 
       {/* ============ TESTIMONIALS ============ */}
-      <section id="stories" className="scroll-mt-24">
-        <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-          <SectionTitle
+      <section
+        id="stories"
+        className="scroll-mt-24 border-y border-white/5 bg-white/[0.02] py-16"
+      >
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <SectionHeading
             tag="Success stories"
             title={
               <>
@@ -741,18 +547,17 @@ export default async function Home() {
                 </span>
               </>
             }
-            sub="Job seekers who stopped copy-pasting resumes and let the agents do the heavy lifting."
           />
 
-          <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mx-auto mt-10 grid max-w-5xl gap-5 sm:grid-cols-3">
             {testimonials.map((t) => (
               <figure
                 key={t.name}
                 className="flex h-full flex-col rounded-2xl border border-white/10 bg-[#0b1120]/60 p-6 transition hover:border-white/20 hover:bg-[#0b1120]"
               >
                 <div className="flex gap-0.5 text-amber-400" aria-label="5 out of 5 stars">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <svg key={i} viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+                  {Array.from({ length: 5 }).map((_, s) => (
+                    <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
                       <path d="M9.05 2.93c.3-.92 1.6-.92 1.9 0l1.29 3.96a1 1 0 0 0 .95.69h4.16c.97 0 1.37 1.24.59 1.81l-3.37 2.45a1 1 0 0 0-.36 1.12l1.28 3.96c.3.92-.75 1.69-1.54 1.12l-3.36-2.44a1 1 0 0 0-1.18 0l-3.36 2.44c-.79.57-1.84-.2-1.54-1.12l1.28-3.96a1 1 0 0 0-.36-1.12L2.06 9.39c-.78-.57-.38-1.81.6-1.81h4.15a1 1 0 0 0 .95-.69l1.29-3.96Z" />
                     </svg>
                   ))}
@@ -760,13 +565,13 @@ export default async function Home() {
                 <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-slate-300">
                   &ldquo;{t.quote}&rdquo;
                 </blockquote>
-                <figcaption className="mt-6 flex items-center gap-3 border-t border-white/10 pt-4">
+                <figcaption className="mt-5 flex items-center gap-3 border-t border-white/10 pt-4">
                   <Image
                     src={t.avatar}
                     alt={`Portrait of ${t.name}`}
                     width={96}
                     height={96}
-                    className="h-11 w-11 rounded-full object-cover ring-2 ring-white/10"
+                    className="h-10 w-10 rounded-full object-cover ring-2 ring-white/10"
                   />
                   <div>
                     <p className="text-sm font-semibold text-white">{t.name}</p>
@@ -780,7 +585,7 @@ export default async function Home() {
       </section>
 
       {/* ============ FINAL CTA ============ */}
-      <section className="border-t border-white/5 bg-white/[0.02] px-4 py-20 sm:px-6">
+      <section className="px-4 py-16 sm:px-6">
         <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl px-6 py-16 text-center sm:px-16">
           <Image
             src="/hero/interview.png"
@@ -835,7 +640,7 @@ export default async function Home() {
 
       {/* ============ FOOTER ============ */}
       <footer className="border-t border-white/5 bg-[#05070f]">
-        <div className="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 pb-10 pt-14 sm:px-6">
           <div className="grid gap-10 lg:grid-cols-[1.5fr_repeat(2,1fr)_1fr]">
             <div>
               <Link href="/" className="flex items-center gap-2.5">
@@ -883,7 +688,7 @@ export default async function Home() {
             ))}
           </div>
 
-          <div className="mt-14 flex flex-col items-center justify-between gap-3 border-t border-white/5 pt-8 sm:flex-row">
+          <div className="mt-12 flex flex-col items-center justify-between gap-3 border-t border-white/5 pt-8 sm:flex-row">
             <p className="text-sm text-slate-500">
               © {new Date().getFullYear()} Noventra. Resume-first AI job search.
             </p>

@@ -3,7 +3,6 @@ import { getSessionUser, isOnboarded } from "@/lib/auth";
 
 const links = [
   { href: "#how-it-works", label: "How it works" },
-  { href: "#agents", label: "Agents" },
   { href: "#auto-pilot", label: "Auto-pilot" },
   { href: "#stories", label: "Stories" },
 ];
